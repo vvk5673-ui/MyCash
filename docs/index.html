@@ -443,21 +443,65 @@
         </div>
     </div>
 
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
+        // === TELEGRAM WEB APP ===
+        const tg = window.Telegram && window.Telegram.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+        }
+
+        // === ХРАНИЛИЩЕ (CloudStorage → localStorage фоллбек) ===
+        const Storage = {
+            isCloud: !!(tg && tg.CloudStorage),
+
+            save(key, data) {
+                const json = JSON.stringify(data);
+                if (this.isCloud) {
+                    tg.CloudStorage.setItem(key, json, (err) => {
+                        if (err) localStorage.setItem(key, json);
+                    });
+                } else {
+                    localStorage.setItem(key, json);
+                }
+            },
+
+            load(key, callback) {
+                if (this.isCloud) {
+                    tg.CloudStorage.getItem(key, (err, value) => {
+                        if (err || !value) {
+                            // Попробовать localStorage как фоллбек
+                            const local = localStorage.getItem(key);
+                            callback(local ? JSON.parse(local) : null);
+                        } else {
+                            callback(JSON.parse(value));
+                        }
+                    });
+                } else {
+                    const local = localStorage.getItem(key);
+                    callback(local ? JSON.parse(local) : null);
+                }
+            }
+        };
+
         // === ДАННЫЕ ===
         const expenseCategories = ['Продукты', 'Аренда', 'Зарплата', 'Реклама', 'Транспорт', 'Связь', 'Налоги', 'Прочее'];
         const incomeCategories = ['Продажи', 'Услуги', 'Аренда', 'Инвестиции', 'Возврат', 'Прочее'];
 
-        let operations = JSON.parse(localStorage.getItem('mycash_ops') || '[]');
+        let operations = [];
         let currentType = 'expense';
         let selectedCategory = '';
         let currentPeriod = 'today';
         let voiceParsedData = null;
 
         // === ИНИЦИАЛИЗАЦИЯ ===
-        renderCategories();
-        renderOperations();
-        updateSummary();
+        Storage.load('mycash_ops', (data) => {
+            operations = data || [];
+            renderCategories();
+            renderOperations();
+            updateSummary();
+        });
 
         // === ТИП ОПЕРАЦИИ ===
         function setType(type) {
@@ -514,7 +558,7 @@
             };
 
             operations.unshift(op);
-            localStorage.setItem('mycash_ops', JSON.stringify(operations));
+            Storage.save('mycash_ops', operations);
 
             document.getElementById('modalOverlay').classList.remove('active');
             renderOperations();
@@ -541,7 +585,7 @@
                 const sign = op.type === 'income' ? '+' : '-';
                 const formatted = op.amount.toLocaleString('ru-RU');
                 return `
-                    <div class="op-item">
+                    <div class="op-item" onclick="deleteOperation(${op.id})">
                         <div class="op-icon ${iconClass}">${icon}</div>
                         <div class="op-info">
                             <div class="op-category">${op.category}</div>
@@ -591,6 +635,15 @@
                 }
                 return true;
             });
+        }
+
+        // === УДАЛЕНИЕ ===
+        function deleteOperation(id) {
+            if (!confirm('Удалить эту операцию?')) return;
+            operations = operations.filter(op => op.id !== id);
+            Storage.save('mycash_ops', operations);
+            renderOperations();
+            updateSummary();
         }
 
         function formatDate(dateStr) {
@@ -666,7 +719,7 @@
                 date: new Date().toISOString()
             };
             operations.unshift(op);
-            localStorage.setItem('mycash_ops', JSON.stringify(operations));
+            Storage.save('mycash_ops', operations);
             document.getElementById('voiceConfirm').classList.remove('active');
             voiceParsedData = null;
             renderOperations();
