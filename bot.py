@@ -19,7 +19,7 @@ load_dotenv()
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 # Адрес Mini App (пока GitHub Pages). ?v= для сброса кеша Telegram
-WEBAPP_URL = "https://vvk5673-ui.github.io/MyCash/?v=2"
+WEBAPP_URL = "https://vvk5673-ui.github.io/MyCash/?v=3"
 
 # Логирование
 logging.basicConfig(
