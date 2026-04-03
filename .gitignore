@@ -1,0 +1,28 @@
+# Секреты
+.env
+.env.local
+.env.production
+
+# Зависимости
+node_modules/
+
+# Сборки
+dist/
+build/
+.next/
+out/
+
+# Кеш
+.cache/
+.turbo/
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# Логи
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
