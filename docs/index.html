@@ -2,229 +2,686 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyCash — Тест голосового ввода</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>МойКэш</title>
     <style>
+        :root {
+            --bg: #F2F2F7;
+            --card: #FFFFFF;
+            --text: #1C1C1E;
+            --text2: #8E8E93;
+            --accent: #007AFF;
+            --green: #34C759;
+            --red: #FF3B30;
+            --border: #E5E5EA;
+            --shadow: 0 2px 12px rgba(0,0,0,0.06);
+            --radius: 16px;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #1a1a2e;
-            color: #eee;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding-bottom: 100px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Шапка */
+        .header {
+            background: var(--card);
+            padding: 16px 20px 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        /* Карточка итогов */
+        .summary {
+            margin: 16px;
+            background: var(--card);
+            border-radius: var(--radius);
             padding: 20px;
+            box-shadow: var(--shadow);
         }
-        h1 { font-size: 24px; margin-bottom: 10px; text-align: center; }
-        .subtitle { color: #888; font-size: 14px; margin-bottom: 30px; text-align: center; }
-
-        .mic-btn {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: none;
-            background: #2d2d44;
-            color: #fff;
-            font-size: 48px;
+        .summary-period {
+            font-size: 13px;
+            color: var(--text2);
+            margin-bottom: 16px;
+            display: flex;
+            gap: 8px;
+        }
+        .period-btn {
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            font-size: 13px;
+            color: var(--text2);
             cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 20px;
         }
-        .mic-btn:active { transform: scale(0.95); }
-        .mic-btn.recording {
-            background: #e74c3c;
-            animation: pulse 1.5s infinite;
+        .period-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
         }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.5); }
-            70% { box-shadow: 0 0 0 20px rgba(231, 76, 60, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        .summary-balance {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
         }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .summary-label { font-size: 15px; color: var(--text2); }
+        .summary-income { font-size: 15px; font-weight: 600; color: var(--green); }
+        .summary-expense { font-size: 15px; font-weight: 600; color: var(--red); }
 
-        .status {
-            font-size: 16px;
-            color: #888;
+        /* Список операций */
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 20px 20px 8px;
+        }
+        .operations {
+            margin: 0 16px;
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .op-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .op-item:last-child { border-bottom: none; }
+        .op-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .op-icon.income { background: #E8F5E9; }
+        .op-icon.expense { background: #FFEBEE; }
+        .op-info { flex: 1; }
+        .op-category { font-size: 15px; font-weight: 500; }
+        .op-comment { font-size: 13px; color: var(--text2); margin-top: 2px; }
+        .op-amount { font-size: 15px; font-weight: 600; text-align: right; }
+        .op-amount.income { color: var(--green); }
+        .op-amount.expense { color: var(--red); }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text2);
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+        .empty-state p { font-size: 15px; }
+
+        /* Форма ввода (модальное окно) */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active { display: flex; align-items: flex-end; }
+        .modal {
+            background: var(--card);
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            padding: 20px;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .modal-handle {
+            width: 36px;
+            height: 5px;
+            background: var(--border);
+            border-radius: 3px;
+            margin: 0 auto 16px;
+        }
+        .modal h2 {
+            font-size: 20px;
+            font-weight: 700;
             margin-bottom: 20px;
             text-align: center;
         }
-        .status.active { color: #e74c3c; }
-        .status.success { color: #2ecc71; }
-        .status.error { color: #e74c3c; }
 
-        .result-box {
-            width: 100%;
-            max-width: 400px;
-            background: #2d2d44;
+        /* Переключатель доход/расход */
+        .type-switch {
+            display: flex;
+            background: var(--bg);
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            min-height: 80px;
+            padding: 4px;
+            margin-bottom: 20px;
         }
-        .result-label { font-size: 12px; color: #888; margin-bottom: 8px; }
-        .result-text { font-size: 18px; line-height: 1.4; }
+        .type-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text2);
+            transition: all 0.2s;
+        }
+        .type-btn.active.expense-btn { background: var(--red); color: white; }
+        .type-btn.active.income-btn { background: var(--green); color: white; }
 
-        .info {
-            width: 100%;
-            max-width: 400px;
-            background: #2d2d44;
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 10px;
+        /* Поля формы */
+        .form-group { margin-bottom: 16px; }
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text2);
+            margin-bottom: 6px;
+            display: block;
         }
-        .info-title { font-size: 14px; color: #888; margin-bottom: 8px; }
-        .info-item { font-size: 13px; color: #aaa; margin-bottom: 4px; }
-        .info-item span { color: #2ecc71; }
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 17px;
+            background: var(--bg);
+            color: var(--text);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .form-input:focus { border-color: var(--accent); }
+        .form-input.amount {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: -0.5px;
+        }
 
-        .test-phrases {
-            width: 100%;
-            max-width: 400px;
-            background: #2d2d44;
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 10px;
+        /* Категории */
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
         }
-        .test-phrases h3 { font-size: 14px; color: #888; margin-bottom: 10px; }
-        .phrase { font-size: 13px; color: #aaa; margin-bottom: 6px; padding-left: 10px; }
+        .cat-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .cat-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* Кнопка сохранить */
+        .save-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            color: white;
+            background: var(--accent);
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .save-btn:active { opacity: 0.8; }
+
+        /* Плавающие кнопки внизу */
+        .fab-container {
+            position: fixed;
+            bottom: 20px;
+            left: 0; right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 0 16px;
+            z-index: 50;
+        }
+        .fab {
+            height: 56px;
+            border: none;
+            border-radius: 28px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 0 24px;
+        }
+        .fab.primary { background: var(--accent); flex: 1; }
+        .fab.voice {
+            background: var(--card);
+            color: var(--accent);
+            width: 56px;
+            padding: 0;
+            flex: none;
+            font-size: 24px;
+        }
+
+        /* Подтверждение голосового ввода */
+        .voice-confirm {
+            display: none;
+            position: fixed;
+            bottom: 90px;
+            left: 16px; right: 16px;
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            z-index: 60;
+            animation: slideUp 0.3s ease;
+        }
+        .voice-confirm.active { display: block; }
+        .voice-confirm-text { font-size: 15px; margin-bottom: 12px; }
+        .voice-confirm-parsed { font-size: 17px; font-weight: 600; margin-bottom: 16px; }
+        .voice-confirm-buttons { display: flex; gap: 8px; }
+        .voice-confirm-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-confirm { background: var(--green); color: white; }
+        .btn-edit { background: var(--bg); color: var(--text); }
+
+        /* Запись голоса */
+        .recording-indicator {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 200;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .recording-indicator.active { display: flex; }
+        .rec-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            animation: pulse 1.5s infinite;
+            cursor: pointer;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255,59,48,0.4); }
+            70% { box-shadow: 0 0 0 30px rgba(255,59,48,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,59,48,0); }
+        }
+        .rec-text { color: white; font-size: 17px; margin-top: 20px; font-weight: 500; }
     </style>
 </head>
 <body>
-    <h1>MyCash</h1>
-    <p class="subtitle">Тест голосового ввода</p>
 
-    <button class="mic-btn" id="micBtn" onclick="toggleRecording()">🎤</button>
-    <p class="status" id="status">Нажми на микрофон и говори</p>
-
-    <div class="result-box">
-        <div class="result-label">Распознанный текст:</div>
-        <div class="result-text" id="resultText">—</div>
+    <!-- Шапка -->
+    <div class="header">
+        <h1>МойКэш</h1>
     </div>
 
-    <div class="result-box">
-        <div class="result-label">Разбор команды:</div>
-        <div class="result-text" id="parsedResult">—</div>
+    <!-- Итоги -->
+    <div class="summary">
+        <div class="summary-period">
+            <button class="period-btn active" onclick="setPeriod('today')">Сегодня</button>
+            <button class="period-btn" onclick="setPeriod('week')">Неделя</button>
+            <button class="period-btn" onclick="setPeriod('month')">Месяц</button>
+        </div>
+        <div class="summary-balance" id="balance">0 ₽</div>
+        <div class="summary-row">
+            <span class="summary-label">Доходы</span>
+            <span class="summary-income" id="totalIncome">+0 ₽</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">Расходы</span>
+            <span class="summary-expense" id="totalExpense">-0 ₽</span>
+        </div>
     </div>
 
-    <div class="info">
-        <div class="info-title">Статус проверки:</div>
-        <div class="info-item" id="checkApi">Web Speech API: проверяем...</div>
-        <div class="info-item" id="checkMic">Микрофон: проверяем...</div>
-        <div class="info-item" id="checkTg">Telegram: проверяем...</div>
+    <!-- Список операций -->
+    <div class="section-title">Операции</div>
+    <div class="operations" id="operationsList">
+        <div class="empty-state">
+            <div class="icon">📝</div>
+            <p>Пока нет операций.<br>Нажми + чтобы добавить первую</p>
+        </div>
     </div>
 
-    <div class="test-phrases">
-        <h3>Попробуй сказать:</h3>
-        <div class="phrase">- "Расход пять тысяч продукты"</div>
-        <div class="phrase">- "Доход сто тысяч зарплата"</div>
-        <div class="phrase">- "Расход три тысячи такси"</div>
-        <div class="phrase">- "Доход пятьдесят тысяч аренда"</div>
+    <!-- Кнопки внизу -->
+    <div class="fab-container">
+        <button class="fab voice" onclick="startVoice()">🎤</button>
+        <button class="fab primary" onclick="openModal()">+ Новая операция</button>
+    </div>
+
+    <!-- Индикатор записи -->
+    <div class="recording-indicator" id="recordingIndicator">
+        <div class="rec-circle" onclick="stopVoice()">🎤</div>
+        <div class="rec-text">Слушаю... Говори!</div>
+    </div>
+
+    <!-- Подтверждение голоса -->
+    <div class="voice-confirm" id="voiceConfirm">
+        <div class="voice-confirm-text">Я правильно понял?</div>
+        <div class="voice-confirm-parsed" id="voiceParsed"></div>
+        <div class="voice-confirm-buttons">
+            <button class="btn-edit" onclick="closeVoiceConfirm()">✏️ Изменить</button>
+            <button class="btn-confirm" onclick="confirmVoice()">✅ Да, записать</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно ввода -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-handle"></div>
+            <h2>Новая операция</h2>
+
+            <div class="type-switch">
+                <button class="type-btn expense-btn active" onclick="setType('expense')">Расход</button>
+                <button class="type-btn income-btn" onclick="setType('income')">Доход</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Сумма</label>
+                <input class="form-input amount" type="number" id="amountInput" placeholder="0" inputmode="numeric">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Категория</label>
+                <div class="categories" id="categoriesContainer"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Комментарий</label>
+                <input class="form-input" type="text" id="commentInput" placeholder="Необязательно">
+            </div>
+
+            <button class="save-btn" onclick="saveOperation()">Сохранить</button>
+        </div>
     </div>
 
     <script>
-        let recognition = null;
-        let isRecording = false;
+        // === ДАННЫЕ ===
+        const expenseCategories = ['Продукты', 'Аренда', 'Зарплата', 'Реклама', 'Транспорт', 'Связь', 'Налоги', 'Прочее'];
+        const incomeCategories = ['Продажи', 'Услуги', 'Аренда', 'Инвестиции', 'Возврат', 'Прочее'];
 
-        // Проверка Web Speech API
-        const checkApi = document.getElementById('checkApi');
-        const checkMic = document.getElementById('checkMic');
-        const checkTg = document.getElementById('checkTg');
+        let operations = JSON.parse(localStorage.getItem('mycash_ops') || '[]');
+        let currentType = 'expense';
+        let selectedCategory = '';
+        let currentPeriod = 'today';
+        let voiceParsedData = null;
 
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            checkApi.innerHTML = 'Web Speech API: <span>поддерживается</span>';
+        // === ИНИЦИАЛИЗАЦИЯ ===
+        renderCategories();
+        renderOperations();
+        updateSummary();
 
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.lang = 'ru-RU';
-            recognition.interimResults = true;
-            recognition.continuous = false;
-
-            recognition.onresult = function(event) {
-                let finalText = '';
-                let interimText = '';
-
-                for (let i = 0; i < event.results.length; i++) {
-                    if (event.results[i].isFinal) {
-                        finalText += event.results[i][0].transcript;
-                    } else {
-                        interimText += event.results[i][0].transcript;
-                    }
-                }
-
-                const text = finalText || interimText;
-                document.getElementById('resultText').textContent = text;
-
-                if (finalText) {
-                    parseCommand(finalText);
-                }
-            };
-
-            recognition.onend = function() {
-                isRecording = false;
-                document.getElementById('micBtn').classList.remove('recording');
-                document.getElementById('status').textContent = 'Готово! Нажми снова для нового ввода';
-                document.getElementById('status').className = 'status success';
-            };
-
-            recognition.onerror = function(event) {
-                isRecording = false;
-                document.getElementById('micBtn').classList.remove('recording');
-                document.getElementById('status').textContent = 'Ошибка: ' + event.error;
-                document.getElementById('status').className = 'status error';
-                checkMic.innerHTML = 'Микрофон: <span style="color:#e74c3c">' + event.error + '</span>';
-            };
-
-            recognition.onstart = function() {
-                checkMic.innerHTML = 'Микрофон: <span>работает</span>';
-            };
-
-        } else {
-            checkApi.innerHTML = 'Web Speech API: <span style="color:#e74c3c">НЕ поддерживается</span>';
+        // === ТИП ОПЕРАЦИИ ===
+        function setType(type) {
+            currentType = type;
+            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(type === 'expense' ? '.expense-btn' : '.income-btn').classList.add('active');
+            selectedCategory = '';
+            renderCategories();
         }
 
-        // Проверка Telegram
-        if (window.Telegram && window.Telegram.WebApp) {
-            checkTg.innerHTML = 'Telegram: <span>Mini App режим</span>';
-        } else {
-            checkTg.innerHTML = 'Telegram: <span style="color:#f39c12">обычный браузер</span>';
+        // === КАТЕГОРИИ ===
+        function renderCategories() {
+            const cats = currentType === 'expense' ? expenseCategories : incomeCategories;
+            const container = document.getElementById('categoriesContainer');
+            container.innerHTML = cats.map(c =>
+                `<button class="cat-btn ${c === selectedCategory ? 'active' : ''}" onclick="selectCategory('${c}')">${c}</button>`
+            ).join('');
         }
 
-        function toggleRecording() {
-            if (!recognition) {
-                document.getElementById('status').textContent = 'Web Speech API не поддерживается в этом браузере';
-                document.getElementById('status').className = 'status error';
+        function selectCategory(cat) {
+            selectedCategory = cat;
+            renderCategories();
+        }
+
+        // === МОДАЛЬНОЕ ОКНО ===
+        function openModal() {
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById('amountInput').value = '';
+            document.getElementById('commentInput').value = '';
+            selectedCategory = '';
+            renderCategories();
+        }
+
+        function closeModal(e) {
+            if (e && e.target !== e.currentTarget) return;
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // === СОХРАНЕНИЕ ===
+        function saveOperation() {
+            const amount = parseFloat(document.getElementById('amountInput').value);
+            if (!amount || !selectedCategory) {
+                if (!amount) document.getElementById('amountInput').style.borderColor = 'var(--red)';
                 return;
             }
 
-            if (isRecording) {
-                recognition.stop();
-                isRecording = false;
-            } else {
-                document.getElementById('resultText').textContent = '...';
-                document.getElementById('parsedResult').textContent = '...';
-                document.getElementById('status').textContent = 'Слушаю... Говори!';
-                document.getElementById('status').className = 'status active';
-                document.getElementById('micBtn').classList.add('recording');
-                isRecording = true;
-                recognition.start();
+            const op = {
+                id: Date.now(),
+                type: currentType,
+                amount: amount,
+                category: selectedCategory,
+                comment: document.getElementById('commentInput').value || '',
+                date: new Date().toISOString()
+            };
+
+            operations.unshift(op);
+            localStorage.setItem('mycash_ops', JSON.stringify(operations));
+
+            document.getElementById('modalOverlay').classList.remove('active');
+            renderOperations();
+            updateSummary();
+        }
+
+        // === ОТОБРАЖЕНИЕ ОПЕРАЦИЙ ===
+        function renderOperations() {
+            const container = document.getElementById('operationsList');
+            const filtered = filterByPeriod(operations);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📝</div>
+                        <p>Пока нет операций.<br>Нажми + чтобы добавить первую</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(op => {
+                const icon = op.type === 'income' ? '📈' : '📉';
+                const iconClass = op.type === 'income' ? 'income' : 'expense';
+                const sign = op.type === 'income' ? '+' : '-';
+                const formatted = op.amount.toLocaleString('ru-RU');
+                return `
+                    <div class="op-item">
+                        <div class="op-icon ${iconClass}">${icon}</div>
+                        <div class="op-info">
+                            <div class="op-category">${op.category}</div>
+                            <div class="op-comment">${op.comment || formatDate(op.date)}</div>
+                        </div>
+                        <div class="op-amount ${iconClass}">${sign}${formatted} ₽</div>
+                    </div>`;
+            }).join('');
+        }
+
+        // === ИТОГИ ===
+        function updateSummary() {
+            const filtered = filterByPeriod(operations);
+            let income = 0, expense = 0;
+            filtered.forEach(op => {
+                if (op.type === 'income') income += op.amount;
+                else expense += op.amount;
+            });
+            const balance = income - expense;
+
+            document.getElementById('balance').textContent = balance.toLocaleString('ru-RU') + ' ₽';
+            document.getElementById('totalIncome').textContent = '+' + income.toLocaleString('ru-RU') + ' ₽';
+            document.getElementById('totalExpense').textContent = '-' + expense.toLocaleString('ru-RU') + ' ₽';
+        }
+
+        // === ПЕРИОД ===
+        function setPeriod(period) {
+            currentPeriod = period;
+            document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderOperations();
+            updateSummary();
+        }
+
+        function filterByPeriod(ops) {
+            const now = new Date();
+            return ops.filter(op => {
+                const d = new Date(op.date);
+                if (currentPeriod === 'today') return d.toDateString() === now.toDateString();
+                if (currentPeriod === 'week') {
+                    const week = new Date(now);
+                    week.setDate(week.getDate() - 7);
+                    return d >= week;
+                }
+                if (currentPeriod === 'month') {
+                    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+                }
+                return true;
+            });
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        }
+
+        // === ГОЛОСОВОЙ ВВОД ===
+        let recognition = null;
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ru-RU';
+            recognition.interimResults = false;
+            recognition.continuous = false;
+
+            recognition.onresult = function(event) {
+                const text = event.results[0][0].transcript;
+                stopVoice();
+                const parsed = parseCommand(text);
+                if (parsed) {
+                    voiceParsedData = parsed;
+                    showVoiceConfirm(parsed);
+                }
+            };
+
+            recognition.onerror = function(event) {
+                stopVoice();
+            };
+
+            recognition.onend = function() {
+                document.getElementById('recordingIndicator').classList.remove('active');
+            };
+        }
+
+        function startVoice() {
+            if (!recognition) return;
+            document.getElementById('recordingIndicator').classList.add('active');
+            recognition.start();
+        }
+
+        function stopVoice() {
+            if (recognition) recognition.stop();
+            document.getElementById('recordingIndicator').classList.remove('active');
+        }
+
+        function showVoiceConfirm(data) {
+            const sign = data.type === 'income' ? 'Доход' : 'Расход';
+            const formatted = data.amount.toLocaleString('ru-RU');
+            document.getElementById('voiceParsed').textContent = `${sign} ${formatted} ₽ — ${data.category}`;
+            document.getElementById('voiceConfirm').classList.add('active');
+        }
+
+        function closeVoiceConfirm() {
+            document.getElementById('voiceConfirm').classList.remove('active');
+            if (voiceParsedData) {
+                openModal();
+                document.getElementById('amountInput').value = voiceParsedData.amount;
+                setType(voiceParsedData.type);
+                selectCategory(voiceParsedData.category);
             }
         }
 
-        // Парсер голосовых команд
+        function confirmVoice() {
+            if (!voiceParsedData) return;
+            const op = {
+                id: Date.now(),
+                type: voiceParsedData.type,
+                amount: voiceParsedData.amount,
+                category: voiceParsedData.category,
+                comment: 'Голосовой ввод',
+                date: new Date().toISOString()
+            };
+            operations.unshift(op);
+            localStorage.setItem('mycash_ops', JSON.stringify(operations));
+            document.getElementById('voiceConfirm').classList.remove('active');
+            voiceParsedData = null;
+            renderOperations();
+            updateSummary();
+        }
+
+        // === ПАРСЕР ГОЛОСОВЫХ КОМАНД ===
         function parseCommand(text) {
             text = text.toLowerCase().trim();
 
-            // Определяем тип
             let type = null;
-            if (text.includes('расход') || text.includes('потратил') || text.includes('заплатил')) {
-                type = 'Расход';
-            } else if (text.includes('доход') || text.includes('получил') || text.includes('заработал')) {
-                type = 'Доход';
-            }
+            if (text.includes('расход') || text.includes('потратил') || text.includes('заплатил')) type = 'expense';
+            else if (text.includes('доход') || text.includes('получил') || text.includes('заработал')) type = 'income';
 
-            // Извлекаем сумму (числа)
             let amount = null;
-
-            // Словесные числа
             const wordNumbers = {
                 'тысяч': 1000, 'тысячу': 1000, 'тысячи': 1000,
                 'сто': 100, 'двести': 200, 'триста': 300, 'четыреста': 400, 'пятьсот': 500,
@@ -238,17 +695,12 @@
                 'девяносто': 90, 'миллион': 1000000, 'миллиона': 1000000
             };
 
-            // Сначала ищем цифры
             const digitMatch = text.match(/(\d[\d\s]*\d|\d+)/);
             if (digitMatch) {
                 amount = parseInt(digitMatch[0].replace(/\s/g, ''));
             } else {
-                // Ищем словесные числа
                 const words = text.split(/\s+/);
-                let total = 0;
-                let current = 0;
-                let hasNumber = false;
-
+                let total = 0, current = 0, hasNumber = false;
                 for (const word of words) {
                     if (wordNumbers[word] !== undefined) {
                         hasNumber = true;
@@ -268,7 +720,7 @@
                 if (hasNumber) amount = total;
             }
 
-            // Определяем категорию (последнее слово, не являющееся числом или типом)
+            // Категория
             const skipWords = ['расход', 'доход', 'потратил', 'получил', 'заплатил', 'заработал',
                 'рублей', 'рубль', 'руб', 'тысяч', 'тысячу', 'тысячи', 'миллион', 'миллиона',
                 'сто', 'двести', 'триста', 'четыреста', 'пятьсот', 'шестьсот', 'семьсот',
@@ -278,25 +730,31 @@
 
             const words = text.split(/\s+/);
             let category = null;
-            for (let i = words.length - 1; i >= 0; i--) {
-                if (!skipWords.includes(words[i]) && isNaN(words[i])) {
-                    category = words[i].charAt(0).toUpperCase() + words[i].slice(1);
+            const allCats = [...expenseCategories, ...incomeCategories].map(c => c.toLowerCase());
+
+            // Сначала ищем точное совпадение с категорией
+            for (const word of words) {
+                const idx = allCats.indexOf(word);
+                if (idx !== -1) {
+                    category = [...expenseCategories, ...incomeCategories][idx];
                     break;
                 }
             }
 
-            // Формируем результат
-            let result = '';
-            if (type && amount && category) {
-                result = `${type} ${amount.toLocaleString('ru-RU')} руб. — ${category}\n\nЗаписать? [Да] [Изменить]`;
-            } else {
-                result = 'Не удалось разобрать:\n';
-                result += `Тип: ${type || '?'}\n`;
-                result += `Сумма: ${amount ? amount.toLocaleString('ru-RU') + ' руб.' : '?'}\n`;
-                result += `Категория: ${category || '?'}`;
+            // Если не нашли — берём последнее значимое слово
+            if (!category) {
+                for (let i = words.length - 1; i >= 0; i--) {
+                    if (!skipWords.includes(words[i]) && isNaN(words[i]) && words[i].length > 2) {
+                        category = words[i].charAt(0).toUpperCase() + words[i].slice(1);
+                        break;
+                    }
+                }
             }
 
-            document.getElementById('parsedResult').textContent = result;
+            if (type && amount) {
+                return { type, amount, category: category || 'Прочее' };
+            }
+            return null;
         }
     </script>
 </body>
