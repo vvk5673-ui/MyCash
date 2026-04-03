@@ -11,8 +11,8 @@
 - [x] Создать project.md, CLAUDE.md, PLAN.md
 - [x] Исследование рынка и конкурентов (market_research.md)
 - [x] Анализ цен и каналов продаж
-- [ ] Тестируем Web Speech API в Telegram Mini App — работает ли голос?
-- [ ] Если Web Speech не работает — тестируем Deepgram через WebSocket
+- [x] Тестируем Web Speech API в Telegram Mini App — РАБОТАЕТ! (03.04.2026, iPhone, Telegram)
+- [x] Движок выбран: Web Speech API (бесплатный, качество отличное на русском)
 - [ ] Анализируем таблицу "Барсетка" от Нескучных Финансов — какие поля, логика
 - [ ] Определяем список функций для MVP
 - [ ] Обновляем project.md и CLAUDE.md по результатам
