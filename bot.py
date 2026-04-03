@@ -18,8 +18,8 @@ from aiogram.types import (
 load_dotenv()
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-# Адрес Mini App (пока GitHub Pages)
-WEBAPP_URL = "https://vvk5673-ui.github.io/MyCash/"
+# Адрес Mini App (пока GitHub Pages). ?v= для сброса кеша Telegram
+WEBAPP_URL = "https://vvk5673-ui.github.io/MyCash/?v=2"
 
 # Логирование
 logging.basicConfig(
