@@ -366,10 +366,11 @@
         }
         .dash-chart-row {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
-        .dash-legend { flex: 1; }
+        .dash-legend { width: 100%; }
         .dash-legend-item {
             display: flex;
             align-items: center;
@@ -422,7 +423,7 @@
         <div class="section-title">Аналитика расходов</div>
         <div class="dash-card">
             <div class="dash-chart-row">
-                <canvas id="pieChart" width="160" height="160"></canvas>
+                <canvas id="pieChart" width="140" height="140" style="max-width:140px"></canvas>
                 <div class="dash-legend" id="dashLegend"></div>
             </div>
         </div>
@@ -728,14 +729,14 @@
             const canvas = document.getElementById('pieChart');
             const ctx = canvas.getContext('2d');
             const dpr = window.devicePixelRatio || 1;
-            canvas.width = 160 * dpr;
-            canvas.height = 160 * dpr;
+            canvas.width = 140 * dpr;
+            canvas.height = 140 * dpr;
             ctx.scale(dpr, dpr);
 
-            const cx = 80, cy = 80, r = 65;
+            const cx = 70, cy = 70, r = 55;
             let startAngle = -Math.PI / 2;
 
-            ctx.clearRect(0, 0, 160, 160);
+            ctx.clearRect(0, 0, 140, 140);
 
             sorted.forEach(([cat, amount], i) => {
                 const slice = (amount / total) * Math.PI * 2;
@@ -750,19 +751,19 @@
 
             // Белый круг по центру (donut)
             ctx.beginPath();
-            ctx.arc(cx, cy, 40, 0, Math.PI * 2);
+            ctx.arc(cx, cy, 32, 0, Math.PI * 2);
             ctx.fillStyle = '#FFFFFF';
             ctx.fill();
 
             // Текст в центре
             ctx.fillStyle = '#1C1C1E';
-            ctx.font = 'bold 16px -apple-system, sans-serif';
+            ctx.font = 'bold 14px -apple-system, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(total.toLocaleString('ru-RU'), cx, cy - 6);
-            ctx.font = '11px -apple-system, sans-serif';
+            ctx.fillText(total.toLocaleString('ru-RU'), cx, cy - 5);
+            ctx.font = '10px -apple-system, sans-serif';
             ctx.fillStyle = '#8E8E93';
-            ctx.fillText('руб.', cx, cy + 12);
+            ctx.fillText('руб.', cx, cy + 10);
 
             // Легенда
             const legend = document.getElementById('dashLegend');
