@@ -510,35 +510,26 @@
         }
 
         // === ХРАНИЛИЩЕ (CloudStorage → localStorage фоллбек) ===
-        const Storage = {
-            isCloud: !!(tg && tg.CloudStorage),
+        // Проверяем поддержку CloudStorage безопасно
+        let cloudStorageAvailable = false;
+        try {
+            if (tg && tg.CloudStorage && typeof tg.CloudStorage.setItem === 'function') {
+                cloudStorageAvailable = true;
+            }
+        } catch(e) { cloudStorageAvailable = false; }
 
+        const Storage = {
             save(key, data) {
                 const json = JSON.stringify(data);
-                if (this.isCloud) {
-                    tg.CloudStorage.setItem(key, json, (err) => {
-                        if (err) localStorage.setItem(key, json);
-                    });
-                } else {
-                    localStorage.setItem(key, json);
+                localStorage.setItem(key, json);
+                if (cloudStorageAvailable) {
+                    try { tg.CloudStorage.setItem(key, json); } catch(e) {}
                 }
             },
 
             load(key, callback) {
-                if (this.isCloud) {
-                    tg.CloudStorage.getItem(key, (err, value) => {
-                        if (err || !value) {
-                            // Попробовать localStorage как фоллбек
-                            const local = localStorage.getItem(key);
-                            callback(local ? JSON.parse(local) : null);
-                        } else {
-                            callback(JSON.parse(value));
-                        }
-                    });
-                } else {
-                    const local = localStorage.getItem(key);
-                    callback(local ? JSON.parse(local) : null);
-                }
+                const local = localStorage.getItem(key);
+                callback(local ? JSON.parse(local) : null);
             }
         };
 
