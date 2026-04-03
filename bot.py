@@ -19,7 +19,7 @@ load_dotenv()
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 # Адрес Mini App (пока GitHub Pages). ?v= для сброса кеша Telegram
-WEBAPP_URL = "https://vvk5673-ui.github.io/MyCash/?v=3"
+WEBAPP_URL = "https://vvk5673-ui.github.io/MyCash/?v=4"
 
 # Логирование
 logging.basicConfig(
@@ -39,7 +39,7 @@ async def cmd_start(message: types.Message):
     # Кнопка открытия Mini App
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text="📊 Открыть МойКэш",
+            text="📊 Открыть MyCash",
             web_app=WebAppInfo(url=WEBAPP_URL)
         )],
         [InlineKeyboardButton(
@@ -49,7 +49,7 @@ async def cmd_start(message: types.Message):
     ])
 
     await message.answer(
-        "👋 Привет! Я **МойКэш** — твой финансовый помощник.\n\n"
+        "👋 Привет! Я **MyCash** — твой финансовый помощник.\n\n"
         "📊 Веди учёт доходов и расходов\n"
         "🎤 Записывай голосом — просто скажи сумму\n"
         "📈 Смотри итоги за любой период\n\n"
@@ -65,7 +65,7 @@ async def setup_menu_button():
     try:
         await bot.set_chat_menu_button(
             menu_button=MenuButtonWebApp(
-                text="📊 МойКэш",
+                text="📊 MyCash",
                 web_app=WebAppInfo(url=WEBAPP_URL)
             )
         )
@@ -76,7 +76,7 @@ async def setup_menu_button():
 
 async def main():
     """Запуск бота"""
-    log.info("Бот МойКэш запускается...")
+    log.info("Бот MyCash запускается...")
     await setup_menu_button()
     await dp.start_polling(bot)
 
