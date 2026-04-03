@@ -355,6 +355,41 @@
             100% { box-shadow: 0 0 0 0 rgba(255,59,48,0); }
         }
         .rec-text { color: white; font-size: 17px; margin-top: 20px; font-weight: 500; }
+
+        /* Дашборд */
+        .dash-card {
+            margin: 8px 16px 0;
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+        .dash-chart-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .dash-legend { flex: 1; }
+        .dash-legend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .dash-legend-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dash-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .dash-legend-name { font-size: 13px; color: var(--text); }
+        .dash-legend-amount { font-size: 13px; font-weight: 600; color: var(--text); }
+        .dash-legend-percent { font-size: 11px; color: var(--text2); margin-left: 4px; }
     </style>
 </head>
 <body>
@@ -379,6 +414,17 @@
         <div class="summary-row">
             <span class="summary-label">Расходы</span>
             <span class="summary-expense" id="totalExpense">-0 ₽</span>
+        </div>
+    </div>
+
+    <!-- Дашборд -->
+    <div class="dashboard" id="dashboard" style="display:none">
+        <div class="section-title">Аналитика расходов</div>
+        <div class="dash-card">
+            <div class="dash-chart-row">
+                <canvas id="pieChart" width="160" height="160"></canvas>
+                <div class="dash-legend" id="dashLegend"></div>
+            </div>
         </div>
     </div>
 
@@ -501,6 +547,7 @@
             renderCategories();
             renderOperations();
             updateSummary();
+            updateDashboard();
         });
 
         // === ТИП ОПЕРАЦИИ ===
@@ -563,6 +610,7 @@
             document.getElementById('modalOverlay').classList.remove('active');
             renderOperations();
             updateSummary();
+            updateDashboard();
         }
 
         // === ОТОБРАЖЕНИЕ ОПЕРАЦИЙ ===
@@ -618,6 +666,7 @@
             event.target.classList.add('active');
             renderOperations();
             updateSummary();
+            updateDashboard();
         }
 
         function filterByPeriod(ops) {
@@ -644,11 +693,90 @@
             Storage.save('mycash_ops', operations);
             renderOperations();
             updateSummary();
+            updateDashboard();
         }
 
         function formatDate(dateStr) {
             const d = new Date(dateStr);
             return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        }
+
+        // === ДАШБОРД ===
+        const chartColors = ['#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55'];
+
+        function updateDashboard() {
+            const filtered = filterByPeriod(operations);
+            const expenses = filtered.filter(op => op.type === 'expense');
+
+            if (expenses.length === 0) {
+                document.getElementById('dashboard').style.display = 'none';
+                return;
+            }
+            document.getElementById('dashboard').style.display = 'block';
+
+            // Группируем по категориям
+            const cats = {};
+            expenses.forEach(op => {
+                cats[op.category] = (cats[op.category] || 0) + op.amount;
+            });
+
+            // Сортируем по сумме
+            const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+            const total = sorted.reduce((s, [_, v]) => s + v, 0);
+
+            // Рисуем круговую диаграмму
+            const canvas = document.getElementById('pieChart');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = 160 * dpr;
+            canvas.height = 160 * dpr;
+            ctx.scale(dpr, dpr);
+
+            const cx = 80, cy = 80, r = 65;
+            let startAngle = -Math.PI / 2;
+
+            ctx.clearRect(0, 0, 160, 160);
+
+            sorted.forEach(([cat, amount], i) => {
+                const slice = (amount / total) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, r, startAngle, startAngle + slice);
+                ctx.closePath();
+                ctx.fillStyle = chartColors[i % chartColors.length];
+                ctx.fill();
+                startAngle += slice;
+            });
+
+            // Белый круг по центру (donut)
+            ctx.beginPath();
+            ctx.arc(cx, cy, 40, 0, Math.PI * 2);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fill();
+
+            // Текст в центре
+            ctx.fillStyle = '#1C1C1E';
+            ctx.font = 'bold 16px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(total.toLocaleString('ru-RU'), cx, cy - 6);
+            ctx.font = '11px -apple-system, sans-serif';
+            ctx.fillStyle = '#8E8E93';
+            ctx.fillText('руб.', cx, cy + 12);
+
+            // Легенда
+            const legend = document.getElementById('dashLegend');
+            legend.innerHTML = sorted.slice(0, 5).map(([cat, amount], i) => {
+                const pct = Math.round(amount / total * 100);
+                return `
+                    <div class="dash-legend-item">
+                        <div class="dash-legend-left">
+                            <div class="dash-legend-dot" style="background:${chartColors[i % chartColors.length]}"></div>
+                            <span class="dash-legend-name">${cat}</span>
+                        </div>
+                        <span class="dash-legend-amount">${amount.toLocaleString('ru-RU')} ₽<span class="dash-legend-percent">${pct}%</span></span>
+                    </div>`;
+            }).join('');
         }
 
         // === ГОЛОСОВОЙ ВВОД ===
@@ -724,6 +852,7 @@
             voiceParsedData = null;
             renderOperations();
             updateSummary();
+            updateDashboard();
         }
 
         // === ПАРСЕР ГОЛОСОВЫХ КОМАНД ===
