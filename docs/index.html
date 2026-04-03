@@ -403,9 +403,9 @@
     <!-- Итоги -->
     <div class="summary">
         <div class="summary-period">
-            <button class="period-btn active" onclick="setPeriod('today')">Сегодня</button>
+            <button class="period-btn" onclick="setPeriod('today')">Сегодня</button>
             <button class="period-btn" onclick="setPeriod('week')">Неделя</button>
-            <button class="period-btn" onclick="setPeriod('month')">Месяц</button>
+            <button class="period-btn active" onclick="setPeriod('month')">Месяц</button>
         </div>
         <div class="summary-balance" id="balance">0 ₽</div>
         <div class="summary-row">
@@ -477,8 +477,18 @@
             </div>
 
             <div class="form-group">
+                <label class="form-label">Кошелёк</label>
+                <div class="categories" id="walletContainer"></div>
+            </div>
+
+            <div class="form-group">
                 <label class="form-label">Категория</label>
                 <div class="categories" id="categoriesContainer"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Дата</label>
+                <input class="form-input" type="date" id="dateInput">
             </div>
 
             <div class="form-group">
@@ -533,18 +543,60 @@
         };
 
         // === ДАННЫЕ ===
-        const expenseCategories = ['Продукты', 'Аренда', 'Зарплата', 'Реклама', 'Транспорт', 'Связь', 'Налоги', 'Прочее'];
-        const incomeCategories = ['Продажи', 'Услуги', 'Аренда', 'Инвестиции', 'Возврат', 'Прочее'];
+        const wallets = ['💳 Карта', '💵 Наличка'];
+        const expenseCategories = ['Продукты', 'Кафе', 'Транспорт', 'ЖКХ', 'Связь', 'Одежда', 'Здоровье', 'Развлечения', 'Подписки', 'Прочее'];
+        const incomeCategories = ['Зарплата', 'Подработка', 'Кэшбек', 'Подарок', 'Возврат', 'Прочее'];
 
         let operations = [];
         let currentType = 'expense';
         let selectedCategory = '';
-        let currentPeriod = 'today';
+        let selectedWallet = wallets[0];
+        let currentPeriod = 'month';
         let voiceParsedData = null;
+
+        // === ДЕМО-ДАННЫЕ ===
+        function generateDemoData() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = now.getMonth();
+            const demo = [
+                { type: 'income', amount: 80000, category: 'Зарплата', wallet: '💳 Карта', comment: '', day: 1 },
+                { type: 'expense', amount: 25000, category: 'ЖКХ', wallet: '💳 Карта', comment: 'Аренда квартиры', day: 2 },
+                { type: 'expense', amount: 5600, category: 'ЖКХ', wallet: '💳 Карта', comment: 'Коммуналка', day: 3 },
+                { type: 'expense', amount: 1200, category: 'Связь', wallet: '💳 Карта', comment: 'Телефон + интернет', day: 3 },
+                { type: 'expense', amount: 8500, category: 'Продукты', wallet: '💳 Карта', comment: 'Пятёрочка', day: 4 },
+                { type: 'expense', amount: 3200, category: 'Продукты', wallet: '💵 Наличка', comment: 'Рынок', day: 5 },
+                { type: 'expense', amount: 2500, category: 'Транспорт', wallet: '💳 Карта', comment: 'Метро + автобус', day: 5 },
+                { type: 'expense', amount: 3500, category: 'Транспорт', wallet: '💳 Карта', comment: 'Бензин', day: 7 },
+                { type: 'expense', amount: 1800, category: 'Кафе', wallet: '💵 Наличка', comment: 'Обед с другом', day: 8 },
+                { type: 'expense', amount: 4500, category: 'Одежда', wallet: '💳 Карта', comment: 'Кроссовки', day: 10 },
+                { type: 'expense', amount: 950, category: 'Здоровье', wallet: '💵 Наличка', comment: 'Аптека', day: 12 },
+                { type: 'expense', amount: 799, category: 'Подписки', wallet: '💳 Карта', comment: 'Кинопоиск', day: 15 },
+                { type: 'expense', amount: 2000, category: 'Развлечения', wallet: '💵 Наличка', comment: 'Кино', day: 18 },
+                { type: 'expense', amount: 1500, category: 'Продукты', wallet: '💳 Карта', comment: 'Магнит', day: 20 },
+                { type: 'income', amount: 1200, category: 'Кэшбек', wallet: '💳 Карта', comment: 'Кэшбек за март', day: 22 },
+                { type: 'expense', amount: 2000, category: 'Прочее', wallet: '💵 Наличка', comment: 'Подарок маме', day: 25 },
+                { type: 'income', amount: 15000, category: 'Подработка', wallet: '💵 Наличка', comment: 'Фриланс', day: 28 },
+            ];
+            return demo.map((d, i) => ({
+                id: Date.now() - (demo.length - i) * 100000,
+                type: d.type,
+                amount: d.amount,
+                category: d.category,
+                wallet: d.wallet,
+                comment: d.comment,
+                date: new Date(y, m, d.day, 10 + i % 12, i * 7 % 60).toISOString()
+            }));
+        }
 
         // === ИНИЦИАЛИЗАЦИЯ ===
         Storage.load('mycash_ops', (data) => {
-            operations = data || [];
+            if (!data || data.length === 0) {
+                operations = generateDemoData();
+                Storage.save('mycash_ops', operations);
+            } else {
+                operations = data;
+            }
             renderCategories();
             renderOperations();
             updateSummary();
@@ -574,13 +626,29 @@
             renderCategories();
         }
 
+        // === КОШЕЛЬКИ ===
+        function renderWallets() {
+            const container = document.getElementById('walletContainer');
+            container.innerHTML = wallets.map(w =>
+                `<button class="cat-btn ${w === selectedWallet ? 'active' : ''}" onclick="selectWallet('${w}')">${w}</button>`
+            ).join('');
+        }
+
+        function selectWallet(w) {
+            selectedWallet = w;
+            renderWallets();
+        }
+
         // === МОДАЛЬНОЕ ОКНО ===
         function openModal() {
             document.getElementById('modalOverlay').classList.add('active');
             document.getElementById('amountInput').value = '';
             document.getElementById('commentInput').value = '';
+            document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
             selectedCategory = '';
+            selectedWallet = wallets[0];
             renderCategories();
+            renderWallets();
         }
 
         function closeModal(e) {
@@ -596,13 +664,17 @@
                 return;
             }
 
+            const dateVal = document.getElementById('dateInput').value;
+            const opDate = dateVal ? new Date(dateVal + 'T12:00:00') : new Date();
+
             const op = {
                 id: Date.now(),
                 type: currentType,
                 amount: amount,
                 category: selectedCategory,
+                wallet: selectedWallet,
                 comment: document.getElementById('commentInput').value || '',
-                date: new Date().toISOString()
+                date: opDate.toISOString()
             };
 
             operations.unshift(op);
@@ -633,12 +705,14 @@
                 const iconClass = op.type === 'income' ? 'income' : 'expense';
                 const sign = op.type === 'income' ? '+' : '-';
                 const formatted = op.amount.toLocaleString('ru-RU');
+                const wallet = op.wallet || '💳 Карта';
+                const subtitle = op.comment ? `${op.comment} · ${wallet}` : `${formatDate(op.date)} · ${wallet}`;
                 return `
                     <div class="op-item" onclick="deleteOperation(${op.id})">
                         <div class="op-icon ${iconClass}">${icon}</div>
                         <div class="op-info">
                             <div class="op-category">${op.category}</div>
-                            <div class="op-comment">${op.comment || formatDate(op.date)}</div>
+                            <div class="op-comment">${subtitle}</div>
                         </div>
                         <div class="op-amount ${iconClass}">${sign}${formatted} ₽</div>
                     </div>`;
@@ -844,6 +918,7 @@
                 type: voiceParsedData.type,
                 amount: voiceParsedData.amount,
                 category: voiceParsedData.category,
+                wallet: voiceParsedData.wallet || wallets[0],
                 comment: 'Голосовой ввод',
                 date: new Date().toISOString()
             };

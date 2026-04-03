@@ -19,7 +19,7 @@ load_dotenv()
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 # Адрес Mini App (пока GitHub Pages). ?v= для сброса кеша Telegram
-WEBAPP_URL = "https://vvk5673-ui.github.io/MyCash/?v=6"
+WEBAPP_URL = "https://vvk5673-ui.github.io/MyCash/?v=7"
 
 # Логирование
 logging.basicConfig(
@@ -77,8 +77,11 @@ async def setup_menu_button():
 async def main():
     """Запуск бота"""
     log.info("Бот MyCash запускается...")
+    # Сброс старой сессии перед запуском
+    await bot.delete_webhook(drop_pending_updates=True)
+    log.info("Старая сессия сброшена")
     await setup_menu_button()
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, drop_pending_updates=True)
 
 
 if __name__ == "__main__":
