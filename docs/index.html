@@ -61,7 +61,7 @@
         }
         .wallets-row {
             display: flex;
-            gap: 12px;
+            gap: 10px;
         }
         .wallet-badge {
             flex: 1;
@@ -73,6 +73,71 @@
         .wallet-badge-icon { font-size: 20px; margin-bottom: 4px; }
         .wallet-badge-name { font-size: 12px; color: var(--text2); }
         .wallet-badge-amount { font-size: 16px; font-weight: 600; margin-top: 2px; }
+        /* Кнопка "До 10 кошельков" */
+        .wallet-add-btn {
+            flex: none;
+            width: 56px;
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 8px 4px;
+            text-align: center;
+            border: 2px dashed var(--border);
+            cursor: pointer;
+            opacity: 0.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+        .wallet-add-btn:active { opacity: 0.4; }
+        /* Модалка "Обновить тариф" */
+        .upgrade-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 300;
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+        .upgrade-overlay.active { display: flex; }
+        .upgrade-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 28px 24px;
+            margin: 16px;
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+            animation: slideUp 0.3s ease;
+        }
+        .upgrade-emoji { font-size: 48px; margin-bottom: 12px; }
+        .upgrade-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .upgrade-text { font-size: 14px; color: var(--text2); line-height: 1.5; margin-bottom: 20px; }
+        .upgrade-price { font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 16px; }
+        .upgrade-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: var(--accent);
+            cursor: pointer;
+            min-height: 48px;
+            margin-bottom: 8px;
+        }
+        .upgrade-close {
+            background: none;
+            border: none;
+            color: var(--text2);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 8px;
+        }
 
         /* === ПЕРИОД + ДОХОДЫ/РАСХОДЫ === */
         .period-card {
@@ -84,11 +149,12 @@
         }
         .period-tabs {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             margin-bottom: 14px;
         }
         .period-btn {
-            padding: 6px 14px;
+            flex: 1;
+            padding: 6px 4px;
             border-radius: 20px;
             border: 1px solid var(--border);
             background: var(--card);
@@ -97,6 +163,7 @@
             cursor: pointer;
             transition: all 0.2s;
             min-height: 32px;
+            text-align: center;
         }
         .period-btn.active {
             background: var(--accent);
@@ -112,7 +179,6 @@
         .ie-expense { font-size: 16px; font-weight: 600; color: var(--red); }
 
         /* === ДАШБОРД === */
-        .dashboard { margin: 0 16px 16px; display: none; }
         .section-title {
             font-size: 13px;
             font-weight: 600;
@@ -709,12 +775,17 @@
 <body>
 
     <!-- Шапка -->
-    <div class="header">
-        <h1>MyCash</h1>
+    <div class="header" style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+            <div id="headerGreeting" style="font-size:16px;font-weight:700">Привет! 👋</div>
+            <div id="headerDate" style="font-size:12px;color:var(--text2);margin-top:2px"></div>
+        </div>
+        <div style="font-size:14px;font-weight:600;color:var(--text2)">MyCash</div>
     </div>
 
     <!-- Блок 1: Баланс с кошельками -->
-    <div class="balance-card">
+    <div class="section-title" style="margin:16px 20px 8px">Мои финансы</div>
+    <div class="balance-card" style="margin-top:0">
         <div class="balance-total" id="balanceTotal">0 ₽</div>
         <div class="wallets-row">
             <div class="wallet-badge">
@@ -727,25 +798,60 @@
                 <div class="wallet-badge-name">Наличка</div>
                 <div class="wallet-badge-amount" id="walletCash">0 ₽</div>
             </div>
+            <div class="wallet-add-btn" onclick="showUpgrade()">
+                <span style="font-size:18px">＋</span>
+                <span style="font-size:9px;color:var(--text2);line-height:1.2">до 10<br>карт</span>
+                <span style="font-size:9px;color:var(--accent);font-weight:600">Pro</span>
+            </div>
         </div>
     </div>
 
-    <!-- Блок 2: Период + доходы/расходы -->
-    <div class="period-card">
-        <div class="period-tabs">
-            <button class="period-btn" onclick="setPeriod('today', this)">Сегодня</button>
-            <button class="period-btn" onclick="setPeriod('week', this)">Неделя</button>
-            <button class="period-btn active" onclick="setPeriod('month', this)">Месяц</button>
+    <!-- Модалка "Обновить тариф" -->
+    <div class="upgrade-overlay" id="upgradeOverlay" onclick="closeUpgrade(event)">
+        <div class="upgrade-card" onclick="event.stopPropagation()">
+            <div class="upgrade-emoji">⭐</div>
+            <div class="upgrade-title">Обновить тариф</div>
+            <div class="upgrade-text">Добавляйте новые кошельки, используйте голосовой ввод, дашборд и другие Pro-функции</div>
+            <div class="upgrade-price">149 ₽/мес</div>
+            <button class="upgrade-btn" onclick="closeUpgrade()">Попробовать бесплатно</button>
+            <button class="upgrade-close" onclick="closeUpgrade()">Не сейчас</button>
         </div>
-        <div class="income-expense-row">
-            <div>
-                <div class="ie-label">Доходы</div>
-                <div class="ie-income" id="totalIncome">+0 ₽</div>
+    </div>
+
+    <!-- Блок 2: Аналитика (период + доходы/расходы + категории) -->
+    <div class="section-title" style="margin:16px 20px 8px">Аналитика</div>
+    <div class="period-card">
+        <!-- Переключатель расходы/доходы + суммы -->
+        <div id="dashboardInline" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                <div style="display:flex;background:var(--bg);border-radius:10px;padding:3px;gap:2px">
+                    <button id="dashTabExpense" onclick="setDashTab('expense')" style="padding:6px 14px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:var(--red);color:white;transition:all 0.2s">Расходы</button>
+                    <button id="dashTabIncome" onclick="setDashTab('income')" style="padding:6px 14px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all 0.2s">Доходы</button>
+                </div>
+                <span id="dashTotalLabel" style="font-size:14px;font-weight:700;color:var(--red)"></span>
             </div>
-            <div style="text-align:right">
-                <div class="ie-label">Расходы</div>
-                <div class="ie-expense" id="totalExpense">-0 ₽</div>
+            <div class="period-tabs">
+                <button class="period-btn" onclick="setPeriod('today', this)">Сегодня</button>
+                <button class="period-btn" onclick="setPeriod('week', this)">Неделя</button>
+                <button class="period-btn active" onclick="setPeriod('month', this)">Месяц</button>
+                <button class="period-btn" onclick="setPeriod('year', this)">Год</button>
+                <button class="period-btn" onclick="openCustomPeriod()" style="border-style:dashed;flex:none;padding:6px 12px">📅</button>
             </div>
+            <!-- Произвольный период -->
+            <div id="customPeriodRow" style="display:none;margin-bottom:14px">
+                <div style="display:flex;gap:8px;align-items:center">
+                    <input type="date" id="periodFrom" class="form-input" style="flex:1;font-size:13px;padding:8px 10px;min-height:36px">
+                    <span style="color:var(--text2);font-size:13px">—</span>
+                    <input type="date" id="periodTo" class="form-input" style="flex:1;font-size:13px;padding:8px 10px;min-height:36px">
+                    <button onclick="applyCustomPeriod()" style="padding:8px 12px;border:none;border-radius:10px;background:var(--accent);color:white;font-size:13px;font-weight:600;cursor:pointer;min-height:36px">OK</button>
+                </div>
+            </div>
+            <!-- Скрытые элементы для совместимости -->
+            <span id="totalIncome" style="display:none"></span>
+            <span id="totalExpense" style="display:none"></span>
+            <canvas id="pieChart" width="220" height="220" style="max-width:220px;display:none"></canvas>
+            <div id="dashBars"></div>
+            <div id="dashLegend"></div>
         </div>
     </div>
 
@@ -756,16 +862,6 @@
         <button class="demo-banner-btn" onclick="clearDemoData()">🗑 Очистить и начать</button>
     </div>
 
-    <!-- Блок 3: Дашборд -->
-    <div class="dashboard" id="dashboard">
-        <div class="section-title">Аналитика расходов</div>
-        <div class="dash-card">
-            <div class="dash-chart-row">
-                <canvas id="pieChart" width="220" height="220" style="max-width:220px"></canvas>
-                <div class="dash-legend" id="dashLegend"></div>
-            </div>
-        </div>
-    </div>
 
     <!-- Блок 4: Список операций -->
     <div class="ops-section">
@@ -931,6 +1027,20 @@
             tg.ready();
             tg.expand();
         }
+
+        // Имя пользователя из Telegram
+        const userName = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user)
+            ? tg.initDataUnsafe.user.first_name
+            : '';
+        if (userName) {
+            document.getElementById('headerGreeting').textContent = 'Привет, ' + userName + '! 👋';
+        }
+
+        // Текущая дата
+        const now = new Date();
+        const dateOpts = { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' };
+        const dateStr = now.toLocaleDateString('ru-RU', dateOpts);
+        document.getElementById('headerDate').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
 
         // Вибрация (HapticFeedback)
         function haptic(type) {
@@ -1101,13 +1211,61 @@
             document.getElementById('totalExpense').textContent = '-' + fmt(expense) + ' ₽';
         }
 
+        let customFrom = null;
+        let customTo = null;
+        let dashTab = 'expense'; // 'expense' или 'income'
+
         function setPeriod(period, btn) {
             currentPeriod = period;
+            customFrom = null;
+            customTo = null;
             document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            document.getElementById('customPeriodRow').style.display = 'none';
             haptic('light');
             updateSummary();
             renderOperations();
+            updateDashboard();
+        }
+
+        // Произвольный период
+        function openCustomPeriod() {
+            haptic('light');
+            const row = document.getElementById('customPeriodRow');
+            const isOpen = row.style.display !== 'none';
+            row.style.display = isOpen ? 'none' : 'block';
+            if (!isOpen) {
+                // Установить текущий месяц по умолчанию
+                const now = new Date();
+                const y = now.getFullYear();
+                const m = String(now.getMonth() + 1).padStart(2, '0');
+                document.getElementById('periodFrom').value = `${y}-${m}-01`;
+                document.getElementById('periodTo').value = now.toISOString().split('T')[0];
+            }
+        }
+
+        function applyCustomPeriod() {
+            const from = document.getElementById('periodFrom').value;
+            const to = document.getElementById('periodTo').value;
+            if (!from || !to) return;
+            customFrom = new Date(from + 'T00:00:00');
+            customTo = new Date(to + 'T23:59:59');
+            currentPeriod = 'custom';
+            document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+            haptic('success');
+            updateSummary();
+            renderOperations();
+            updateDashboard();
+        }
+
+        // Переключатель расходы/доходы
+        function setDashTab(tab) {
+            dashTab = tab;
+            haptic('light');
+            document.getElementById('dashTabExpense').style.background = tab === 'expense' ? 'var(--red)' : 'transparent';
+            document.getElementById('dashTabExpense').style.color = tab === 'expense' ? 'white' : 'var(--text2)';
+            document.getElementById('dashTabIncome').style.background = tab === 'income' ? 'var(--green)' : 'transparent';
+            document.getElementById('dashTabIncome').style.color = tab === 'income' ? 'white' : 'var(--text2)';
             updateDashboard();
         }
 
@@ -1115,6 +1273,9 @@
             const now = new Date();
             return ops.filter(op => {
                 const d = new Date(op.date);
+                if (currentPeriod === 'custom' && customFrom && customTo) {
+                    return d >= customFrom && d <= customTo;
+                }
                 if (currentPeriod === 'today') return d.toDateString() === now.toDateString();
                 if (currentPeriod === 'week') {
                     const week = new Date(now); week.setDate(week.getDate() - 7);
@@ -1122,6 +1283,9 @@
                 }
                 if (currentPeriod === 'month') {
                     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+                }
+                if (currentPeriod === 'year') {
+                    return d.getFullYear() === now.getFullYear();
                 }
                 return true;
             });
@@ -1428,18 +1592,24 @@
 
         function updateDashboard() {
             const filtered = filterByPeriod(operations);
-            dashExpenses = filtered.filter(op => op.type === 'expense');
+            const isExpense = dashTab === 'expense';
+            dashExpenses = filtered.filter(op => op.type === (isExpense ? 'expense' : 'income'));
 
             if (dashExpenses.length === 0) {
-                document.getElementById('dashboard').style.display = 'none';
+                document.getElementById('dashboardInline').style.display = 'none';
                 return;
             }
-            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('dashboardInline').style.display = 'block';
 
             const cats = {};
             dashExpenses.forEach(op => { cats[op.category] = (cats[op.category] || 0) + op.amount; });
             const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
             const total = sorted.reduce((s, [_, v]) => s + v, 0);
+
+            // Обновить итого справа от табов
+            const totalLabel = document.getElementById('dashTotalLabel');
+            totalLabel.textContent = fmt(total) + ' ₽';
+            totalLabel.style.color = isExpense ? 'var(--red)' : 'var(--green)';
 
             // Вариант 4 — Горизонтальные полоски
             const canvas = document.getElementById('pieChart');
@@ -1461,7 +1631,7 @@
                 const pct = Math.round(amount / total * 100);
                 const barWidth = Math.round((amount / maxAmount) * 100);
                 const color = chartColors[i % chartColors.length];
-                const catObj = EXPENSE_CATS.find(c => c.name === cat);
+                const catObj = (isExpense ? EXPENSE_CATS : INCOME_CATS).find(c => c.name === cat);
                 const icon = catObj ? catObj.icon : '📦';
 
                 return `<div style="margin-bottom:12px;cursor:pointer" onclick="toggleCatOps(${i})">
@@ -1488,7 +1658,7 @@
                         return `<div class="dash-cat-op" onclick="event.stopPropagation(); openEdit(${op.id})" style="cursor:pointer">
                             <span class="dash-cat-op-left">${comment}${dateStr} · ${wallet}</span>
                             <div style="display:flex;align-items:center;gap:8px">
-                                <span class="dash-cat-op-amount">-${fmt(op.amount)} ₽</span>
+                                <span class="dash-cat-op-amount" style="color:${isExpense ? 'var(--red)' : 'var(--green)'}">${isExpense ? '-' : '+'}${fmt(op.amount)} ₽</span>
                                 <span style="font-size:14px">✏️</span>
                             </div>
                         </div>`;
@@ -1502,8 +1672,8 @@
             // Итого внизу
             document.getElementById('dashLegend').innerHTML = `
                 <div style="display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border);margin-top:4px">
-                    <span style="font-size:14px;font-weight:600;color:var(--text2)">Итого расходы</span>
-                    <span style="font-size:14px;font-weight:700;color:var(--red)">${fmt(total)} ₽</span>
+                    <span style="font-size:14px;font-weight:600;color:var(--text2)">Итого ${isExpense ? 'расходы' : 'доходы'}</span>
+                    <span style="font-size:14px;font-weight:700;color:${isExpense ? 'var(--red)' : 'var(--green)'}">${fmt(total)} ₽</span>
                 </div>`;
         }
 
@@ -1826,6 +1996,17 @@
 
             if (type && amount) return { type, amount, category: category || 'Прочее' };
             return null;
+        }
+
+        // === МОДАЛКА "ОБНОВИТЬ ТАРИФ" ===
+        function showUpgrade() {
+            haptic();
+            document.getElementById('upgradeOverlay').classList.add('active');
+        }
+
+        function closeUpgrade(e) {
+            if (e && e.target && e.target !== e.currentTarget) return;
+            document.getElementById('upgradeOverlay').classList.remove('active');
         }
 
         // === РЕДАКТИРОВАНИЕ ОПЕРАЦИИ ===
