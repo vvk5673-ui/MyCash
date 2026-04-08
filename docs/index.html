@@ -90,9 +90,7 @@
             gap: 2px;
         }
         .wallet-add-btn:active { opacity: 0.4; }
-        /* Редактирование кошелька */
-        .wallet-badge { cursor: pointer; transition: transform 0.1s; }
-        .wallet-badge:active { transform: scale(0.96); }
+        /* Редактирование кошелька (только из профиля) */
         .wallet-edit-overlay {
             display: none;
             position: fixed;
@@ -465,44 +463,61 @@
         .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
         .empty-state p { font-size: 15px; line-height: 1.5; }
 
-        /* === ПЛАВАЮЩИЕ КНОПКИ === */
-        .fab-container {
+        /* === ТАБ-БАР (нижнее меню) === */
+        .tab-bar {
             position: fixed;
-            bottom: 20px;
+            bottom: 0;
             left: 0; right: 0;
+            background: var(--card);
             display: flex;
-            justify-content: center;
-            gap: 12px;
-            padding: 0 16px;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 6px 0 env(safe-area-inset-bottom, 8px);
+            box-shadow: 0 -1px 12px rgba(0,0,0,0.06);
             z-index: 50;
+            min-height: 56px;
         }
-        .fab {
-            height: 56px;
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 4px 0;
+            cursor: pointer;
             border: none;
-            border-radius: 28px;
-            font-size: 16px;
-            font-weight: 600;
+            background: none;
+            color: var(--text2);
+            font-size: 10px;
+            font-weight: 500;
+            transition: color 0.2s;
+            min-height: 44px;
+            justify-content: center;
+        }
+        .tab-item.active { color: var(--accent); }
+        .tab-item .tab-icon { font-size: 22px; line-height: 1; }
+        /* Центральная кнопка "+" */
+        .tab-add {
+            flex: none;
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: none;
             color: white;
+            font-size: 28px;
+            font-weight: 300;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            padding: 0 24px;
+            box-shadow: 0 4px 16px rgba(0,122,255,0.35);
+            margin-top: -20px;
             transition: transform 0.1s;
-            min-height: 56px;
         }
-        .fab:active { transform: scale(0.95); }
-        .fab.primary { background: var(--accent); flex: 1; }
-        .fab.voice {
-            background: var(--card);
-            color: var(--accent);
-            width: 56px;
-            padding: 0;
-            flex: none;
-            font-size: 24px;
-        }
+        .tab-add:active { transform: scale(0.9); }
+        /* Страницы вкладок */
+        .tab-page { display: none; }
+        .tab-page.active { display: block; }
 
         /* === МОДАЛЬНОЕ ОКНО: БЫСТРЫЙ ВВОД === */
         .modal-overlay {
@@ -869,17 +884,20 @@
         </div>
     </div>
 
+    <!-- ========== ВКЛАДКА: ГЛАВНАЯ ========== -->
+    <div class="tab-page active" id="pageHome">
+
     <!-- Блок 1: Баланс с кошельками -->
     <div class="section-title" style="margin:16px 20px 8px">Мои финансы</div>
     <div class="balance-card" style="margin-top:0">
         <div class="balance-total" id="balanceTotal">0 ₽</div>
         <div class="wallets-row" id="walletsRow">
-            <div class="wallet-badge" id="walletBadge0" onclick="openWalletEdit(0)">
+            <div class="wallet-badge" id="walletBadge0">
                 <div class="wallet-badge-icon" id="walletIcon0">💳</div>
                 <div class="wallet-badge-name" id="walletName0">Карта</div>
                 <div class="wallet-badge-amount" id="walletCard">0 ₽</div>
             </div>
-            <div class="wallet-badge" id="walletBadge1" onclick="openWalletEdit(1)">
+            <div class="wallet-badge" id="walletBadge1">
                 <div class="wallet-badge-icon" id="walletIcon1">💵</div>
                 <div class="wallet-badge-name" id="walletName1">Наличка</div>
                 <div class="wallet-badge-amount" id="walletCash">0 ₽</div>
@@ -892,50 +910,21 @@
         </div>
     </div>
 
-    <!-- Модалка редактирования кошелька -->
-    <div class="wallet-edit-overlay" id="walletEditOverlay" onclick="closeWalletEdit(event)">
-        <div class="wallet-edit-modal" onclick="event.stopPropagation()">
-            <div class="modal-handle"></div>
-            <div class="wallet-edit-title">
-                <div style="width:32px"></div>
-                <span>Настройки кошелька</span>
-                <button onclick="closeWalletEdit()" style="width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">✕</button>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Название</label>
-                <input class="form-input" type="text" id="walletEditName" placeholder="Например: Сбер, Тинькофф">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Начальный остаток</label>
-                <input class="form-input" type="number" id="walletEditBalance" inputmode="numeric" placeholder="0" style="font-size:20px;font-weight:600;text-align:center">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Цвет карточки</label>
-                <div class="wallet-color-grid" id="walletColorGrid"></div>
-            </div>
-
-            <div class="edit-buttons" style="margin-top:20px">
-                <button onclick="deleteWallet()" style="padding:16px 20px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:white;background:var(--red);cursor:pointer;min-height:52px;opacity:0.6" id="walletDeleteBtn">🗑</button>
-                <button onclick="closeWalletEdit()" style="padding:16px 20px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:var(--text);background:var(--bg);cursor:pointer;min-height:52px">← Назад</button>
-                <button onclick="saveWalletEdit()" style="flex:1;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:white;background:var(--accent);cursor:pointer;min-height:52px">💾 Сохранить</button>
+    <!-- Блок: Список операций (на главной) -->
+    <div class="ops-section">
+        <div class="section-title">Операции</div>
+        <div class="operations" id="operationsList">
+            <div class="empty-state">
+                <div class="icon">📝</div>
+                <p>Пока нет операций.<br>Нажмите + чтобы добавить первую</p>
             </div>
         </div>
     </div>
 
-    <!-- Модалка "Обновить тариф" -->
-    <div class="upgrade-overlay" id="upgradeOverlay" onclick="closeUpgrade(event)">
-        <div class="upgrade-card" onclick="event.stopPropagation()">
-            <div class="upgrade-emoji">⭐</div>
-            <div class="upgrade-title">Обновить тариф</div>
-            <div class="upgrade-text">Добавляйте новые кошельки, используйте голосовой ввод, дашборд и другие Pro-функции</div>
-            <div class="upgrade-price">149 ₽/мес</div>
-            <button class="upgrade-btn" onclick="closeUpgrade()">Попробовать бесплатно</button>
-            <button class="upgrade-close" onclick="closeUpgrade()">Не сейчас</button>
-        </div>
-    </div>
+    </div><!-- /pageHome -->
+
+    <!-- ========== ВКЛАДКА: АНАЛИТИКА ========== -->
+    <div class="tab-page" id="pageAnalytics">
 
     <!-- Блок 2: Аналитика (период + доходы/расходы + категории) -->
     <div class="section-title" style="margin:16px 20px 8px">Аналитика</div>
@@ -1005,29 +994,163 @@
         </div>
     </div>
 
-    <!-- Онбординг-баннер -->
+    </div><!-- /pageAnalytics -->
+
+    <!-- ========== ВКЛАДКА: ЕЩЁ (Pro) ========== -->
+    <div class="tab-page" id="pagePro">
+        <div class="section-title" style="margin:16px 20px 8px">Возможности Pro</div>
+        <div style="margin:0 16px">
+            <div style="background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);text-align:center;margin-bottom:12px">
+                <div style="font-size:48px;margin-bottom:12px">⭐</div>
+                <div style="font-size:20px;font-weight:700;margin-bottom:6px">MyCash Pro</div>
+                <div style="font-size:14px;color:var(--text2);margin-bottom:16px;line-height:1.5">Получите полный доступ ко всем функциям</div>
+                <div style="font-size:28px;font-weight:700;color:var(--accent);margin-bottom:16px">149 ₽/мес</div>
+                <button onclick="showUpgrade()" style="width:100%;padding:14px;border:none;border-radius:14px;background:var(--accent);color:white;font-size:16px;font-weight:600;cursor:pointer;min-height:48px">Попробовать 14 дней бесплатно</button>
+            </div>
+
+            <div style="background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)">
+                <div style="font-size:14px;font-weight:600;margin-bottom:12px">Что входит в Pro:</div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="font-size:18px">📊</span> Таблица расходов по дням и месяцам</div>
+                    <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="font-size:18px">🏦</span> До 10 кошельков</div>
+                    <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="font-size:18px">⚡</span> Быстрые шаблоны операций</div>
+                    <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="font-size:18px">📋</span> Еженедельный отчёт в чат</div>
+                    <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="font-size:18px">📤</span> Экспорт данных (CSV/Excel)</div>
+                    <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="font-size:18px">🗑</span> Удаление кошельков</div>
+                </div>
+            </div>
+        </div>
+    </div><!-- /pagePro -->
+
+    <!-- ========== ВКЛАДКА: ПРОФИЛЬ ========== -->
+    <div class="tab-page" id="pageProfile">
+        <div class="section-title" style="margin:16px 20px 8px">Профиль</div>
+        <div style="margin:0 16px">
+            <!-- Карточка пользователя -->
+            <div style="background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;margin-bottom:12px">
+                <div style="width:48px;height:48px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;color:white;font-weight:700" id="profileAvatar">В</div>
+                <div>
+                    <div style="font-size:16px;font-weight:600" id="profileName">Пользователь</div>
+                    <div style="font-size:13px;color:var(--text2)">Бесплатный тариф</div>
+                </div>
+            </div>
+
+            <!-- Мои кошельки -->
+            <div style="font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:16px 4px 8px">Мои кошельки</div>
+            <div style="background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px">
+                <div onclick="openWalletEdit(0)" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer">
+                    <span style="font-size:18px" id="profileWalletIcon0">💳</span>
+                    <span style="flex:1;font-size:14px" id="profileWalletName0">Карта</span>
+                    <span style="font-size:13px;color:var(--text2)" id="profileWalletAmount0">0 ₽</span>
+                    <span style="color:var(--text2)">›</span>
+                </div>
+                <div onclick="openWalletEdit(1)" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer">
+                    <span style="font-size:18px" id="profileWalletIcon1">💵</span>
+                    <span style="flex:1;font-size:14px" id="profileWalletName1">Наличка</span>
+                    <span style="font-size:13px;color:var(--text2)" id="profileWalletAmount1">0 ₽</span>
+                    <span style="color:var(--text2)">›</span>
+                </div>
+                <div onclick="showUpgrade()" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;opacity:0.6">
+                    <span style="font-size:18px">＋</span>
+                    <span style="flex:1;font-size:14px;color:var(--text2)">Добавить кошелёк</span>
+                    <span style="font-size:11px;color:var(--accent);font-weight:600;background:var(--bg);padding:3px 8px;border-radius:8px">до 10 · Pro</span>
+                </div>
+            </div>
+
+            <!-- Настройки -->
+            <div style="font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:0 4px 8px">Настройки</div>
+            <div style="background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden">
+                <div onclick="showUpgrade()" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer">
+                    <span style="font-size:18px">⭐</span>
+                    <span style="flex:1;font-size:14px">Тариф Pro</span>
+                    <span style="color:var(--text2)">›</span>
+                </div>
+                <div onclick="shareApp()" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer">
+                    <span style="font-size:18px">💬</span>
+                    <span style="flex:1;font-size:14px">Поделиться с другом</span>
+                    <span style="color:var(--text2)">›</span>
+                </div>
+                <div onclick="clearAllData()" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer">
+                    <span style="font-size:18px">🗑</span>
+                    <span style="flex:1;font-size:14px;color:var(--red)">Очистить все данные</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:default">
+                    <span style="font-size:18px">📖</span>
+                    <span style="flex:1;font-size:14px;color:var(--text2)">MyCash v1.0</span>
+                </div>
+            </div>
+        </div>
+    </div><!-- /pageProfile -->
+
+    <!-- Онбординг-баннер (на главной) -->
     <div class="demo-banner" id="demoBanner">
         <div class="demo-banner-title">👋 Это примеры</div>
         <div class="demo-banner-text">Мы добавили демо-данные, чтобы вы увидели как работает приложение. Очистите их и начните свой учёт!</div>
         <button class="demo-banner-btn" onclick="clearDemoData()">🗑 Очистить и начать</button>
     </div>
 
+    <!-- ========== ТАБ-БАР ========== -->
+    <div class="tab-bar">
+        <button class="tab-item active" onclick="switchTab('home', this)">
+            <span class="tab-icon">🏠</span>
+            Главная
+        </button>
+        <button class="tab-item" onclick="switchTab('analytics', this)">
+            <span class="tab-icon">📊</span>
+            Аналитика
+        </button>
+        <button class="tab-add" onclick="openModal()">+</button>
+        <button class="tab-item" onclick="switchTab('pro', this)">
+            <span class="tab-icon">⭐</span>
+            Ещё
+        </button>
+        <button class="tab-item" onclick="switchTab('profile', this)">
+            <span class="tab-icon">👤</span>
+            Профиль
+        </button>
+    </div>
 
-    <!-- Блок 4: Список операций -->
-    <div class="ops-section">
-        <div class="section-title">Операции</div>
-        <div class="operations" id="operationsList">
-            <div class="empty-state">
-                <div class="icon">📝</div>
-                <p>Пока нет операций.<br>Нажмите + чтобы добавить первую</p>
+    <!-- ========== ГЛОБАЛЬНЫЕ МОДАЛКИ (вне вкладок) ========== -->
+
+    <!-- Модалка редактирования кошелька -->
+    <div class="wallet-edit-overlay" id="walletEditOverlay" onclick="closeWalletEdit(event)">
+        <div class="wallet-edit-modal" onclick="event.stopPropagation()">
+            <div class="modal-handle"></div>
+            <div class="wallet-edit-title">
+                <div style="width:32px"></div>
+                <span>Настройки кошелька</span>
+                <button onclick="closeWalletEdit()" style="width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">✕</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Название</label>
+                <input class="form-input" type="text" id="walletEditName" placeholder="Например: Сбер, Тинькофф">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Начальный остаток</label>
+                <input class="form-input" type="number" id="walletEditBalance" inputmode="numeric" placeholder="0" style="font-size:20px;font-weight:600;text-align:center">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Цвет карточки</label>
+                <div class="wallet-color-grid" id="walletColorGrid"></div>
+            </div>
+            <div class="edit-buttons" style="margin-top:20px">
+                <button onclick="deleteWallet()" style="padding:16px 20px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:white;background:var(--red);cursor:pointer;min-height:52px;opacity:0.6" id="walletDeleteBtn">🗑</button>
+                <button onclick="closeWalletEdit()" style="padding:16px 20px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:var(--text);background:var(--bg);cursor:pointer;min-height:52px">← Назад</button>
+                <button onclick="saveWalletEdit()" style="flex:1;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:white;background:var(--accent);cursor:pointer;min-height:52px">💾 Сохранить</button>
             </div>
         </div>
     </div>
 
-    <!-- Блок 5: Плавающие кнопки -->
-    <div class="fab-container">
-        <button class="fab voice" onclick="startVoice()">🎤</button>
-        <button class="fab primary" onclick="openModal()">+ Новая операция</button>
+    <!-- Модалка "Обновить тариф" -->
+    <div class="upgrade-overlay" id="upgradeOverlay" onclick="closeUpgrade(event)">
+        <div class="upgrade-card" onclick="event.stopPropagation()">
+            <div class="upgrade-emoji">⭐</div>
+            <div class="upgrade-title">Обновить тариф</div>
+            <div class="upgrade-text">Добавляйте новые кошельки, используйте голосовой ввод, дашборд и другие Pro-функции</div>
+            <div class="upgrade-price">149 ₽/мес</div>
+            <button class="upgrade-btn" onclick="closeUpgrade()">Попробовать бесплатно</button>
+            <button class="upgrade-close" onclick="closeUpgrade()">Не сейчас</button>
+        </div>
     </div>
 
     <!-- Индикатор записи голоса -->
@@ -2507,6 +2630,78 @@
             const g = Math.min(255, ((num >> 8) & 0x00FF) + Math.round(255 * percent / 100));
             const b = Math.min(255, (num & 0x0000FF) + Math.round(255 * percent / 100));
             return '#' + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1);
+        }
+
+        // === ТАБ-БАР: ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ===
+        const tabPages = {
+            home: 'pageHome',
+            analytics: 'pageAnalytics',
+            pro: 'pagePro',
+            profile: 'pageProfile'
+        };
+
+        function switchTab(tab, btn) {
+            haptic('light');
+            // Скрыть все страницы
+            document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+            // Показать нужную
+            document.getElementById(tabPages[tab]).classList.add('active');
+            // Обновить активную кнопку
+            document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // При переходе на аналитику — обновить
+            if (tab === 'analytics') {
+                updateDashboard();
+            }
+            // При переходе на профиль — обновить данные
+            if (tab === 'profile') {
+                const name = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user)
+                    ? tg.initDataUnsafe.user.first_name : 'Пользователь';
+                document.getElementById('profileName').textContent = name;
+                document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+                // Обновить кошельки в профиле
+                walletSettings.forEach((ws, i) => {
+                    const iconEl = document.getElementById('profileWalletIcon' + i);
+                    const nameEl = document.getElementById('profileWalletName' + i);
+                    const amountEl = document.getElementById('profileWalletAmount' + i);
+                    if (iconEl) iconEl.textContent = ws.icon;
+                    if (nameEl) nameEl.textContent = ws.name;
+                    if (amountEl) amountEl.textContent = document.getElementById(i === 0 ? 'walletCard' : 'walletCash').textContent;
+                });
+            }
+            // Прокрутить вверх
+            window.scrollTo(0, 0);
+        }
+
+        // Поделиться приложением
+        function shareApp() {
+            haptic();
+            const botUsername = 'mycash1233333_bot';
+            const shareUrl = 'https://t.me/' + botUsername + '/app';
+            if (tg && tg.openTelegramLink) {
+                tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent('Попробуй MyCash — удобный учёт финансов прямо в Telegram!'));
+            } else {
+                window.open('https://t.me/share/url?url=' + encodeURIComponent(shareUrl), '_blank');
+            }
+        }
+
+        // Очистить все данные
+        function clearAllData() {
+            const doIt = () => {
+                localStorage.clear();
+                operations = [];
+                walletBalances = { '💳 Карта': 0, '💵 Наличка': 0 };
+                Storage.save('mycash_ops', operations);
+                Storage.save('mycash_balances', walletBalances);
+                haptic('success');
+                renderAll();
+                switchTab('home', document.querySelector('.tab-item'));
+            };
+            if (tg && tg.showConfirm) {
+                tg.showConfirm('Удалить все данные? Это действие нельзя отменить.', (ok) => { if (ok) doIt(); });
+            } else {
+                if (confirm('Удалить все данные? Это действие нельзя отменить.')) doIt();
+            }
         }
 
         // === СТАРТ ===
