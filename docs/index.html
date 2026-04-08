@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MyCash</title>
     <style>
+        /* === ПЕРЕМЕННЫЕ — СВЕТЛАЯ APPLE-ТЕМА === */
         :root {
             --bg: #F2F2F7;
             --card: #FFFFFF;
@@ -13,10 +14,13 @@
             --accent: #007AFF;
             --green: #34C759;
             --red: #FF3B30;
+            --orange: #FF9500;
             --border: #E5E5EA;
             --shadow: 0 2px 12px rgba(0,0,0,0.06);
             --radius: 16px;
         }
+
+        /* === СБРОС И БАЗА === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
@@ -25,76 +29,175 @@
             min-height: 100vh;
             padding-bottom: 100px;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
-        /* Шапка */
+        /* === ШАПКА === */
         .header {
             background: var(--card);
-            padding: 16px 20px 20px;
+            padding: 14px 20px;
             text-align: center;
             box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
-        .header h1 {
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-        }
+        .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
 
-        /* Карточка итогов */
-        .summary {
+        /* === БЛОК БАЛАНСА С КОШЕЛЬКАМИ === */
+        .balance-card {
             margin: 16px;
             background: var(--card);
             border-radius: var(--radius);
             padding: 20px;
             box-shadow: var(--shadow);
         }
-        .summary-period {
-            font-size: 13px;
-            color: var(--text2);
+        .balance-total {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            text-align: center;
             margin-bottom: 16px;
+        }
+        .wallets-row {
+            display: flex;
+            gap: 12px;
+        }
+        .wallet-badge {
+            flex: 1;
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+        .wallet-badge-icon { font-size: 20px; margin-bottom: 4px; }
+        .wallet-badge-name { font-size: 12px; color: var(--text2); }
+        .wallet-badge-amount { font-size: 16px; font-weight: 600; margin-top: 2px; }
+
+        /* === ПЕРИОД + ДОХОДЫ/РАСХОДЫ === */
+        .period-card {
+            margin: 0 16px 16px;
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow);
+        }
+        .period-tabs {
             display: flex;
             gap: 8px;
+            margin-bottom: 14px;
         }
         .period-btn {
-            padding: 4px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             border: 1px solid var(--border);
             background: var(--card);
             font-size: 13px;
             color: var(--text2);
             cursor: pointer;
+            transition: all 0.2s;
+            min-height: 32px;
         }
         .period-btn.active {
             background: var(--accent);
             color: white;
             border-color: var(--accent);
         }
-        .summary-balance {
-            font-size: 36px;
-            font-weight: 700;
-            letter-spacing: -1px;
-            margin-bottom: 16px;
-        }
-        .summary-row {
+        .income-expense-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
         }
-        .summary-label { font-size: 15px; color: var(--text2); }
-        .summary-income { font-size: 15px; font-weight: 600; color: var(--green); }
-        .summary-expense { font-size: 15px; font-weight: 600; color: var(--red); }
+        .ie-label { font-size: 14px; color: var(--text2); }
+        .ie-income { font-size: 16px; font-weight: 600; color: var(--green); }
+        .ie-expense { font-size: 16px; font-weight: 600; color: var(--red); }
 
-        /* Список операций */
+        /* === ДАШБОРД === */
+        .dashboard { margin: 0 16px 16px; display: none; }
         .section-title {
             font-size: 13px;
             font-weight: 600;
             color: var(--text2);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin: 20px 20px 8px;
+            margin-bottom: 8px;
         }
+        .dash-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+        .dash-chart-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        .dash-legend { width: 100%; }
+        .dash-legend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .dash-legend-left { display: flex; align-items: center; gap: 8px; }
+        .dash-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .dash-legend-name { font-size: 13px; }
+        .dash-legend-amount { font-size: 13px; font-weight: 600; }
+        .dash-legend-percent { font-size: 11px; color: var(--text2); margin-left: 4px; }
+        .dash-legend-item { cursor: pointer; border-radius: 8px; padding: 6px 4px; transition: background 0.15s; }
+        .dash-legend-item:active { background: var(--bg); }
+        .dash-legend-arrow { font-size: 12px; color: var(--text2); margin-left: 6px; transition: transform 0.2s; }
+        .dash-legend-arrow.open { transform: rotate(90deg); }
+        /* Раскрывающийся список операций по категории */
+        .dash-cat-ops {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin: 0 -4px;
+        }
+        .dash-cat-ops.open { max-height: 1000px; }
+        .dash-cat-op {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 8px 8px 28px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .dash-cat-op:last-child { border-bottom: none; }
+        .dash-cat-op:active { background: var(--bg); }
+        .dash-cat-op-left { color: var(--text2); }
+        .dash-cat-op-amount { font-weight: 600; color: var(--red); }
+
+        /* === ОНБОРДИНГ-БАННЕР === */
+        .demo-banner {
+            margin: 0 16px 16px;
+            background: linear-gradient(135deg, #007AFF, #5856D6);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            color: white;
+            display: none;
+        }
+        .demo-banner.active { display: block; }
+        .demo-banner-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+        .demo-banner-text { font-size: 13px; opacity: 0.9; margin-bottom: 14px; line-height: 1.4; }
+        .demo-banner-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            min-height: 44px;
+        }
+        .demo-banner-btn:active { opacity: 0.8; }
+
+        /* === СПИСОК ОПЕРАЦИЙ === */
+        .ops-section { margin: 0 16px 16px; }
         .operations {
-            margin: 0 16px;
             background: var(--card);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
@@ -105,27 +208,105 @@
             align-items: center;
             padding: 14px 16px;
             border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
         }
         .op-item:last-child { border-bottom: none; }
         .op-icon {
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             font-size: 18px;
             margin-right: 12px;
             flex-shrink: 0;
         }
         .op-icon.income { background: #E8F5E9; }
         .op-icon.expense { background: #FFEBEE; }
-        .op-info { flex: 1; }
+        .op-icon.transfer { background: #E3F2FD; }
+        .op-info { flex: 1; min-width: 0; }
         .op-category { font-size: 15px; font-weight: 500; }
-        .op-comment { font-size: 13px; color: var(--text2); margin-top: 2px; }
-        .op-amount { font-size: 15px; font-weight: 600; text-align: right; }
+        .op-comment { font-size: 12px; color: var(--text2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .op-right { text-align: right; flex-shrink: 0; margin-left: 8px; }
+        .op-amount { font-size: 15px; font-weight: 600; }
         .op-amount.income { color: var(--green); }
         .op-amount.expense { color: var(--red); }
+        .op-amount.transfer { color: var(--accent); }
+        .op-wallet { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+        /* Свайп: две кнопки — Редактировать и Удалить */
+        .op-swipe-actions {
+            position: absolute;
+            right: 0; top: 0; bottom: 0;
+            display: flex;
+            transform: translateX(160px);
+            transition: transform 0.2s;
+        }
+        .op-swipe-btn {
+            width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+        .op-swipe-btn.edit { background: var(--accent); }
+        .op-swipe-btn.delete { background: var(--red); }
+
+        /* === МОДАЛКА РЕДАКТИРОВАНИЯ ОПЕРАЦИИ === */
+        .edit-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 150;
+            backdrop-filter: blur(4px);
+        }
+        .edit-overlay.active { display: flex; align-items: flex-end; }
+        .edit-modal {
+            background: var(--card);
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            padding: 16px 20px 24px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        .edit-title {
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .edit-buttons { display: flex; gap: 10px; margin-top: 16px; }
+        .edit-save-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: var(--accent);
+            cursor: pointer;
+            min-height: 52px;
+        }
+        .edit-save-btn:active { opacity: 0.8; }
+        .edit-delete-btn {
+            padding: 16px 20px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: var(--red);
+            cursor: pointer;
+            min-height: 52px;
+        }
+        .edit-delete-btn:active { opacity: 0.8; }
 
         .empty-state {
             text-align: center;
@@ -133,133 +314,9 @@
             color: var(--text2);
         }
         .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
-        .empty-state p { font-size: 15px; }
+        .empty-state p { font-size: 15px; line-height: 1.5; }
 
-        /* Форма ввода (модальное окно) */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.3);
-            z-index: 100;
-            backdrop-filter: blur(4px);
-        }
-        .modal-overlay.active { display: flex; align-items: flex-end; }
-        .modal {
-            background: var(--card);
-            border-radius: 20px 20px 0 0;
-            width: 100%;
-            padding: 20px;
-            max-height: 85vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-        .modal-handle {
-            width: 36px;
-            height: 5px;
-            background: var(--border);
-            border-radius: 3px;
-            margin: 0 auto 16px;
-        }
-        .modal h2 {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        /* Переключатель доход/расход */
-        .type-switch {
-            display: flex;
-            background: var(--bg);
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 20px;
-        }
-        .type-btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            background: transparent;
-            color: var(--text2);
-            transition: all 0.2s;
-        }
-        .type-btn.active.expense-btn { background: var(--red); color: white; }
-        .type-btn.active.income-btn { background: var(--green); color: white; }
-
-        /* Поля формы */
-        .form-group { margin-bottom: 16px; }
-        .form-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text2);
-            margin-bottom: 6px;
-            display: block;
-        }
-        .form-input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            font-size: 17px;
-            background: var(--bg);
-            color: var(--text);
-            outline: none;
-            -webkit-appearance: none;
-        }
-        .form-input:focus { border-color: var(--accent); }
-        .form-input.amount {
-            font-size: 28px;
-            font-weight: 700;
-            text-align: center;
-            letter-spacing: -0.5px;
-        }
-
-        /* Категории */
-        .categories {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .cat-btn {
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            background: var(--card);
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .cat-btn.active {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
-
-        /* Кнопка сохранить */
-        .save-btn {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 14px;
-            font-size: 17px;
-            font-weight: 600;
-            color: white;
-            background: var(--accent);
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        .save-btn:active { opacity: 0.8; }
-
-        /* Плавающие кнопки внизу */
+        /* === ПЛАВАЮЩИЕ КНОПКИ === */
         .fab-container {
             position: fixed;
             bottom: 20px;
@@ -284,7 +341,10 @@
             gap: 8px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             padding: 0 24px;
+            transition: transform 0.1s;
+            min-height: 56px;
         }
+        .fab:active { transform: scale(0.95); }
         .fab.primary { background: var(--accent); flex: 1; }
         .fab.voice {
             background: var(--card);
@@ -295,36 +355,237 @@
             font-size: 24px;
         }
 
-        /* Подтверждение голосового ввода */
-        .voice-confirm {
+        /* === МОДАЛЬНОЕ ОКНО: БЫСТРЫЙ ВВОД === */
+        .modal-overlay {
             display: none;
             position: fixed;
-            bottom: 90px;
-            left: 16px; right: 16px;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active { display: flex; align-items: flex-end; }
+        .modal {
             background: var(--card);
-            border-radius: var(--radius);
-            padding: 16px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-            z-index: 60;
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            padding: 16px 20px 24px;
+            max-height: 90vh;
+            overflow-y: auto;
             animation: slideUp 0.3s ease;
         }
-        .voice-confirm.active { display: block; }
-        .voice-confirm-text { font-size: 15px; margin-bottom: 12px; }
-        .voice-confirm-parsed { font-size: 17px; font-weight: 600; margin-bottom: 16px; }
-        .voice-confirm-buttons { display: flex; gap: 8px; }
-        .voice-confirm-buttons button {
-            flex: 1;
-            padding: 12px;
-            border: none;
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .modal-handle {
+            width: 36px; height: 5px;
+            background: var(--border);
+            border-radius: 3px;
+            margin: 0 auto 16px;
+        }
+
+        /* Поле суммы — крупное */
+        .amount-input-wrap {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .amount-display {
+            font-size: 42px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: var(--text);
+            min-height: 52px;
+        }
+        .amount-display.placeholder { color: var(--text2); }
+        .amount-currency { font-size: 24px; color: var(--text2); margin-left: 4px; }
+        .amount-real-input {
+            position: absolute;
+            opacity: 0;
+            width: 1px;
+            height: 1px;
+        }
+
+        /* Кошелёк-переключатель */
+        .wallet-switch {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .wallet-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 36px;
+        }
+        .wallet-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* Быстрые категории — круглые иконки */
+        .quick-cats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .quick-cat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px 0;
             border-radius: 12px;
-            font-size: 15px;
+            border: none;
+            background: none;
+            transition: all 0.15s;
+            min-height: 44px;
+        }
+        .quick-cat:active { background: var(--bg); transform: scale(0.93); }
+        .quick-cat-icon {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .quick-cat-name { font-size: 11px; color: var(--text2); text-align: center; }
+
+        /* Кнопка "Подробнее" */
+        .more-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 12px;
+            color: var(--accent);
+            font-size: 14px;
+            font-weight: 500;
+            background: none;
+            border: none;
+            cursor: pointer;
+            min-height: 44px;
+        }
+
+        /* === РАСШИРЕННАЯ ФОРМА === */
+        .extended-form { display: none; }
+        .extended-form.active { display: block; }
+
+        .type-switch {
+            display: flex;
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+        .type-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
+            background: transparent;
+            color: var(--text2);
+            transition: all 0.2s;
+            min-height: 44px;
         }
-        .btn-confirm { background: var(--green); color: white; }
-        .btn-edit { background: var(--bg); color: var(--text); }
+        .type-btn.active.expense-btn { background: var(--red); color: white; }
+        .type-btn.active.income-btn { background: var(--green); color: white; }
+        .type-btn.active.transfer-btn { background: var(--accent); color: white; }
 
-        /* Запись голоса */
+        .form-group { margin-bottom: 14px; }
+        .form-label {
+            font-size: 13px; font-weight: 600;
+            color: var(--text2);
+            margin-bottom: 6px;
+            display: block;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 16px;
+            background: var(--bg);
+            color: var(--text);
+            outline: none;
+            -webkit-appearance: none;
+            min-height: 44px;
+        }
+        .form-input:focus { border-color: var(--accent); }
+
+        /* Категории в расширенной форме */
+        .cat-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .cat-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 36px;
+        }
+        .cat-chip.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* Переводы */
+        .transfer-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .transfer-wallet {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--bg);
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .transfer-arrow { font-size: 20px; color: var(--text2); }
+
+        .save-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            color: white;
+            background: var(--accent);
+            cursor: pointer;
+            margin-top: 12px;
+            min-height: 52px;
+            transition: opacity 0.15s;
+        }
+        .save-btn:active { opacity: 0.8; }
+
+        /* === ЗАПИСЬ ГОЛОСА === */
         .recording-indicator {
             display: none;
             position: fixed;
@@ -338,8 +599,7 @@
         }
         .recording-indicator.active { display: flex; }
         .rec-circle {
-            width: 120px;
-            height: 120px;
+            width: 120px; height: 120px;
             border-radius: 50%;
             background: var(--red);
             display: flex;
@@ -356,41 +616,94 @@
         }
         .rec-text { color: white; font-size: 17px; margin-top: 20px; font-weight: 500; }
 
-        /* Дашборд */
-        .dash-card {
-            margin: 8px 16px 0;
+        /* === ПОДТВЕРЖДЕНИЕ ГОЛОСА === */
+        .voice-confirm {
+            display: none;
+            position: fixed;
+            bottom: 90px;
+            left: 16px; right: 16px;
             background: var(--card);
             border-radius: var(--radius);
-            padding: 20px;
-            box-shadow: var(--shadow);
+            padding: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            z-index: 60;
+            animation: slideUp 0.3s ease;
         }
-        .dash-chart-row {
-            display: flex;
-            flex-direction: column;
+        .voice-confirm.active { display: block; }
+        .voice-confirm-text { font-size: 15px; margin-bottom: 8px; color: var(--text2); }
+        .voice-confirm-parsed { font-size: 17px; font-weight: 600; margin-bottom: 16px; }
+        .voice-confirm-buttons { display: flex; gap: 8px; }
+        .voice-confirm-buttons button {
+            flex: 1; padding: 12px;
+            border: none; border-radius: 12px;
+            font-size: 15px; font-weight: 600;
+            cursor: pointer; min-height: 44px;
+        }
+        .btn-confirm { background: var(--green); color: white; }
+        .btn-edit { background: var(--bg); color: var(--text); }
+
+        /* === МОДАЛКА ОНБОРДИНГА (запрос остатков) === */
+        .onboarding-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 300;
+            backdrop-filter: blur(4px);
             align-items: center;
-            gap: 12px;
+            justify-content: center;
         }
-        .dash-legend { width: 100%; }
-        .dash-legend-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
+        .onboarding-overlay.active { display: flex; }
+        .onboarding-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 28px 24px;
+            margin: 16px;
+            width: 100%;
+            max-width: 360px;
+            animation: slideUp 0.3s ease;
+            text-align: center;
         }
-        .dash-legend-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .onboarding-emoji { font-size: 48px; margin-bottom: 12px; }
+        .onboarding-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .onboarding-text { font-size: 14px; color: var(--text2); margin-bottom: 20px; line-height: 1.5; }
+        .onboarding-input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+            background: var(--bg);
+            color: var(--text);
+            outline: none;
+            -webkit-appearance: none;
+            margin-bottom: 12px;
+            min-height: 52px;
         }
-        .dash-legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            flex-shrink: 0;
+        .onboarding-input:focus { border-color: var(--accent); }
+        .onboarding-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: var(--accent);
+            cursor: pointer;
+            min-height: 48px;
         }
-        .dash-legend-name { font-size: 13px; color: var(--text); }
-        .dash-legend-amount { font-size: 13px; font-weight: 600; color: var(--text); }
-        .dash-legend-percent { font-size: 11px; color: var(--text2); margin-left: 4px; }
+        .onboarding-skip {
+            background: none;
+            border: none;
+            color: var(--text2);
+            font-size: 14px;
+            margin-top: 12px;
+            cursor: pointer;
+            padding: 8px;
+        }
     </style>
 </head>
 <body>
@@ -400,103 +713,213 @@
         <h1>MyCash</h1>
     </div>
 
-    <!-- Итоги -->
-    <div class="summary">
-        <div class="summary-period">
-            <button class="period-btn" onclick="setPeriod('today')">Сегодня</button>
-            <button class="period-btn" onclick="setPeriod('week')">Неделя</button>
-            <button class="period-btn active" onclick="setPeriod('month')">Месяц</button>
-        </div>
-        <div class="summary-balance" id="balance">0 ₽</div>
-        <div class="summary-row">
-            <span class="summary-label">Доходы</span>
-            <span class="summary-income" id="totalIncome">+0 ₽</span>
-        </div>
-        <div class="summary-row">
-            <span class="summary-label">Расходы</span>
-            <span class="summary-expense" id="totalExpense">-0 ₽</span>
+    <!-- Блок 1: Баланс с кошельками -->
+    <div class="balance-card">
+        <div class="balance-total" id="balanceTotal">0 ₽</div>
+        <div class="wallets-row">
+            <div class="wallet-badge">
+                <div class="wallet-badge-icon">💳</div>
+                <div class="wallet-badge-name">Карта</div>
+                <div class="wallet-badge-amount" id="walletCard">0 ₽</div>
+            </div>
+            <div class="wallet-badge">
+                <div class="wallet-badge-icon">💵</div>
+                <div class="wallet-badge-name">Наличка</div>
+                <div class="wallet-badge-amount" id="walletCash">0 ₽</div>
+            </div>
         </div>
     </div>
 
-    <!-- Дашборд -->
-    <div class="dashboard" id="dashboard" style="display:none">
+    <!-- Блок 2: Период + доходы/расходы -->
+    <div class="period-card">
+        <div class="period-tabs">
+            <button class="period-btn" onclick="setPeriod('today', this)">Сегодня</button>
+            <button class="period-btn" onclick="setPeriod('week', this)">Неделя</button>
+            <button class="period-btn active" onclick="setPeriod('month', this)">Месяц</button>
+        </div>
+        <div class="income-expense-row">
+            <div>
+                <div class="ie-label">Доходы</div>
+                <div class="ie-income" id="totalIncome">+0 ₽</div>
+            </div>
+            <div style="text-align:right">
+                <div class="ie-label">Расходы</div>
+                <div class="ie-expense" id="totalExpense">-0 ₽</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Онбординг-баннер -->
+    <div class="demo-banner" id="demoBanner">
+        <div class="demo-banner-title">👋 Это примеры</div>
+        <div class="demo-banner-text">Мы добавили демо-данные, чтобы вы увидели как работает приложение. Очистите их и начните свой учёт!</div>
+        <button class="demo-banner-btn" onclick="clearDemoData()">🗑 Очистить и начать</button>
+    </div>
+
+    <!-- Блок 3: Дашборд -->
+    <div class="dashboard" id="dashboard">
         <div class="section-title">Аналитика расходов</div>
         <div class="dash-card">
             <div class="dash-chart-row">
-                <canvas id="pieChart" width="140" height="140" style="max-width:140px"></canvas>
+                <canvas id="pieChart" width="220" height="220" style="max-width:220px"></canvas>
                 <div class="dash-legend" id="dashLegend"></div>
             </div>
         </div>
     </div>
 
-    <!-- Список операций -->
-    <div class="section-title">Операции</div>
-    <div class="operations" id="operationsList">
-        <div class="empty-state">
-            <div class="icon">📝</div>
-            <p>Пока нет операций.<br>Нажми + чтобы добавить первую</p>
+    <!-- Блок 4: Список операций -->
+    <div class="ops-section">
+        <div class="section-title">Операции</div>
+        <div class="operations" id="operationsList">
+            <div class="empty-state">
+                <div class="icon">📝</div>
+                <p>Пока нет операций.<br>Нажмите + чтобы добавить первую</p>
+            </div>
         </div>
     </div>
 
-    <!-- Кнопки внизу -->
+    <!-- Блок 5: Плавающие кнопки -->
     <div class="fab-container">
         <button class="fab voice" onclick="startVoice()">🎤</button>
         <button class="fab primary" onclick="openModal()">+ Новая операция</button>
     </div>
 
-    <!-- Индикатор записи -->
+    <!-- Индикатор записи голоса -->
     <div class="recording-indicator" id="recordingIndicator">
         <div class="rec-circle" onclick="stopVoice()">🎤</div>
-        <div class="rec-text">Слушаю... Говори!</div>
+        <div class="rec-text">Слушаю... Говорите!</div>
     </div>
 
-    <!-- Подтверждение голоса -->
+    <!-- Подтверждение голосового ввода -->
     <div class="voice-confirm" id="voiceConfirm">
         <div class="voice-confirm-text">Я правильно понял?</div>
         <div class="voice-confirm-parsed" id="voiceParsed"></div>
         <div class="voice-confirm-buttons">
             <button class="btn-edit" onclick="closeVoiceConfirm()">✏️ Изменить</button>
-            <button class="btn-confirm" onclick="confirmVoice()">✅ Да, записать</button>
+            <button class="btn-confirm" onclick="confirmVoice()">✅ Записать</button>
         </div>
     </div>
 
-    <!-- Модальное окно ввода -->
+    <!-- Модальное окно: Быстрый ввод (2 тапа) -->
     <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
         <div class="modal" onclick="event.stopPropagation()">
             <div class="modal-handle"></div>
-            <h2>Новая операция</h2>
+
+            <!-- Поле суммы — крупное, с автофокусом -->
+            <div class="amount-input-wrap" onclick="focusAmount()">
+                <div class="amount-display placeholder" id="amountDisplay">0 <span class="amount-currency">₽</span></div>
+                <input class="amount-real-input" type="number" id="amountInput" inputmode="numeric"
+                       oninput="updateAmountDisplay()" autofocus>
+            </div>
+
+            <!-- Кошелёк-переключатель -->
+            <div class="wallet-switch" id="walletSwitch"></div>
+
+            <!-- Быстрые категории расходов -->
+            <div class="quick-cats" id="quickCats"></div>
+
+            <!-- Кнопка "Подробнее" -->
+            <button class="more-btn" onclick="toggleExtended()">Подробнее ▾</button>
+
+            <!-- Расширенная форма -->
+            <div class="extended-form" id="extendedForm">
+                <div class="type-switch">
+                    <button class="type-btn expense-btn active" onclick="setType('expense')">Расход</button>
+                    <button class="type-btn income-btn" onclick="setType('income')">Доход</button>
+                    <button class="type-btn transfer-btn" onclick="setType('transfer')">Перевод</button>
+                </div>
+
+                <!-- Категории расширенного режима -->
+                <div class="form-group" id="extCatGroup">
+                    <label class="form-label">Категория</label>
+                    <div class="cat-grid" id="extCatGrid"></div>
+                </div>
+
+                <!-- Переводы -->
+                <div class="form-group" id="transferGroup" style="display:none">
+                    <label class="form-label">Перевод</label>
+                    <div class="transfer-row">
+                        <div class="transfer-wallet" id="transferFrom">💳 Карта</div>
+                        <div class="transfer-arrow">→</div>
+                        <div class="transfer-wallet" id="transferTo">💵 Наличка</div>
+                    </div>
+                    <button class="more-btn" onclick="swapTransfer()" style="margin:0;padding:8px">↔ Поменять</button>
+                </div>
+
+                <!-- Дата -->
+                <div class="form-group">
+                    <label class="form-label">Дата</label>
+                    <input class="form-input" type="date" id="dateInput">
+                </div>
+
+                <!-- Комментарий -->
+                <div class="form-group">
+                    <label class="form-label">Комментарий</label>
+                    <input class="form-input" type="text" id="commentInput" placeholder="Необязательно">
+                </div>
+
+                <button class="save-btn" onclick="saveExtended()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка онбординга: запрос остатков -->
+    <div class="onboarding-overlay" id="onboardingOverlay">
+        <div class="onboarding-card">
+            <div class="onboarding-emoji" id="onbEmoji">💳</div>
+            <div class="onboarding-title" id="onbTitle">Сколько на карте?</div>
+            <div class="onboarding-text" id="onbText">Введите текущий остаток на банковской карте</div>
+            <input class="onboarding-input" type="number" id="onbInput" inputmode="numeric" placeholder="0">
+            <button class="onboarding-btn" id="onbBtn" onclick="onboardingNext()">Далее</button>
+            <button class="onboarding-skip" onclick="onboardingSkip()">Пропустить</button>
+        </div>
+    </div>
+
+    <!-- Модалка редактирования операции -->
+    <div class="edit-overlay" id="editOverlay" onclick="closeEdit(event)">
+        <div class="edit-modal" onclick="event.stopPropagation()">
+            <div class="modal-handle"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+                <div style="width:32px"></div>
+                <div class="edit-title" style="margin:0">Редактирование</div>
+                <button onclick="closeEdit()" style="width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">✕</button>
+            </div>
 
             <div class="type-switch">
-                <button class="type-btn expense-btn active" onclick="setType('expense')">Расход</button>
-                <button class="type-btn income-btn" onclick="setType('income')">Доход</button>
+                <button class="type-btn expense-btn" id="editExpBtn" onclick="setEditType('expense')">Расход</button>
+                <button class="type-btn income-btn" id="editIncBtn" onclick="setEditType('income')">Доход</button>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Сумма</label>
-                <input class="form-input amount" type="number" id="amountInput" placeholder="0" inputmode="numeric">
+                <input class="form-input" type="number" id="editAmount" inputmode="numeric" style="font-size:24px;font-weight:700;text-align:center">
             </div>
 
             <div class="form-group">
                 <label class="form-label">Кошелёк</label>
-                <div class="categories" id="walletContainer"></div>
+                <div class="cat-grid" id="editWalletGrid"></div>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Категория</label>
-                <div class="categories" id="categoriesContainer"></div>
+                <div class="cat-grid" id="editCatGrid"></div>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Дата</label>
-                <input class="form-input" type="date" id="dateInput">
+                <input class="form-input" type="date" id="editDate">
             </div>
 
             <div class="form-group">
                 <label class="form-label">Комментарий</label>
-                <input class="form-input" type="text" id="commentInput" placeholder="Необязательно">
+                <input class="form-input" type="text" id="editComment" placeholder="Необязательно">
             </div>
 
-            <button class="save-btn" onclick="saveOperation()">Сохранить</button>
+            <div class="edit-buttons">
+                <button class="edit-delete-btn" onclick="deleteFromEdit()">🗑</button>
+                <button onclick="closeEdit()" style="padding:16px 20px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:var(--text);background:var(--bg);cursor:pointer;min-height:52px">← Назад</button>
+                <button class="edit-save-btn" onclick="saveEdit()">💾 Сохранить</button>
+            </div>
         </div>
     </div>
 
@@ -509,41 +932,67 @@
             tg.expand();
         }
 
-        // === ХРАНИЛИЩЕ (CloudStorage → localStorage фоллбек) ===
-        // Проверяем поддержку CloudStorage безопасно
-        let cloudStorageAvailable = false;
-        try {
-            if (tg && tg.CloudStorage && typeof tg.CloudStorage.setItem === 'function') {
-                cloudStorageAvailable = true;
+        // Вибрация (HapticFeedback)
+        function haptic(type) {
+            if (tg && tg.HapticFeedback) {
+                if (type === 'light') tg.HapticFeedback.impactOccurred('light');
+                else if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
+                else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
+                else tg.HapticFeedback.impactOccurred('medium');
             }
-        } catch(e) { cloudStorageAvailable = false; }
+        }
 
+        // === ХРАНИЛИЩЕ (localStorage основное, CloudStorage бэкап) ===
         const Storage = {
             save(key, data) {
                 const json = JSON.stringify(data);
                 localStorage.setItem(key, json);
-                if (cloudStorageAvailable) {
-                    try { tg.CloudStorage.setItem(key, json); } catch(e) {}
-                }
+                try {
+                    if (tg && tg.CloudStorage && typeof tg.CloudStorage.setItem === 'function') {
+                        tg.CloudStorage.setItem(key, json);
+                    }
+                } catch(e) {}
             },
-
-            load(key, callback) {
+            load(key) {
                 const local = localStorage.getItem(key);
-                callback(local ? JSON.parse(local) : null);
+                return local ? JSON.parse(local) : null;
             }
         };
 
         // === ДАННЫЕ ===
-        const wallets = ['💳 Карта', '💵 Наличка'];
-        const expenseCategories = ['Продукты', 'Кафе', 'Транспорт', 'ЖКХ', 'Связь', 'Одежда', 'Здоровье', 'Развлечения', 'Подписки', 'Прочее'];
-        const incomeCategories = ['Зарплата', 'Подработка', 'Кэшбек', 'Подарок', 'Возврат', 'Прочее'];
+        const WALLETS = ['💳 Карта', '💵 Наличка'];
+        const EXPENSE_CATS = [
+            { name: 'Продукты', icon: '🛒' },
+            { name: 'Кафе', icon: '☕' },
+            { name: 'Транспорт', icon: '🚌' },
+            { name: 'ЖКХ', icon: '🏠' },
+            { name: 'Связь', icon: '📱' },
+            { name: 'Одежда', icon: '👕' },
+            { name: 'Здоровье', icon: '💊' },
+            { name: 'Развлечения', icon: '🎬' },
+            { name: 'Подписки', icon: '📺' },
+            { name: 'Прочее', icon: '📦' }
+        ];
+        const INCOME_CATS = [
+            { name: 'Зарплата', icon: '💰' },
+            { name: 'Подработка', icon: '🔧' },
+            { name: 'Кэшбек', icon: '💳' },
+            { name: 'Подарок', icon: '🎁' },
+            { name: 'Возврат', icon: '↩️' },
+            { name: 'Прочее', icon: '📦' }
+        ];
+        const chartColors = ['#FF3B30','#FF9500','#FFCC00','#34C759','#007AFF','#5856D6','#AF52DE','#FF2D55','#00C7BE','#8E8E93'];
 
         let operations = [];
         let currentType = 'expense';
+        let selectedWallet = WALLETS[0];
         let selectedCategory = '';
-        let selectedWallet = wallets[0];
         let currentPeriod = 'month';
         let voiceParsedData = null;
+        let isDemo = false;
+        let transferFrom = '💳 Карта';
+        let transferTo = '💵 Наличка';
+        let walletBalances = { '💳 Карта': 0, '💵 Наличка': 0 };
 
         // === ДЕМО-ДАННЫЕ ===
         function generateDemoData() {
@@ -557,7 +1006,7 @@
                 { type: 'expense', amount: 1200, category: 'Связь', wallet: '💳 Карта', comment: 'Телефон + интернет', day: 3 },
                 { type: 'expense', amount: 8500, category: 'Продукты', wallet: '💳 Карта', comment: 'Пятёрочка', day: 4 },
                 { type: 'expense', amount: 3200, category: 'Продукты', wallet: '💵 Наличка', comment: 'Рынок', day: 5 },
-                { type: 'expense', amount: 2500, category: 'Транспорт', wallet: '💳 Карта', comment: 'Метро + автобус', day: 5 },
+                { type: 'expense', amount: 2500, category: 'Транспорт', wallet: '💳 Карта', comment: 'Метро', day: 5 },
                 { type: 'expense', amount: 3500, category: 'Транспорт', wallet: '💳 Карта', comment: 'Бензин', day: 7 },
                 { type: 'expense', amount: 1800, category: 'Кафе', wallet: '💵 Наличка', comment: 'Обед с другом', day: 8 },
                 { type: 'expense', amount: 4500, category: 'Одежда', wallet: '💳 Карта', comment: 'Кроссовки', day: 10 },
@@ -565,9 +1014,9 @@
                 { type: 'expense', amount: 799, category: 'Подписки', wallet: '💳 Карта', comment: 'Кинопоиск', day: 15 },
                 { type: 'expense', amount: 2000, category: 'Развлечения', wallet: '💵 Наличка', comment: 'Кино', day: 18 },
                 { type: 'expense', amount: 1500, category: 'Продукты', wallet: '💳 Карта', comment: 'Магнит', day: 20 },
-                { type: 'income', amount: 1200, category: 'Кэшбек', wallet: '💳 Карта', comment: 'Кэшбек за март', day: 22 },
+                { type: 'income', amount: 1200, category: 'Кэшбек', wallet: '💳 Карта', comment: 'Кэшбек за месяц', day: 22 },
                 { type: 'expense', amount: 2000, category: 'Прочее', wallet: '💵 Наличка', comment: 'Подарок маме', day: 25 },
-                { type: 'income', amount: 15000, category: 'Подработка', wallet: '💵 Наличка', comment: 'Фриланс', day: 28 },
+                { type: 'income', amount: 15000, category: 'Подработка', wallet: '💵 Наличка', comment: 'Фриланс', day: 28 }
             ];
             return demo.map((d, i) => ({
                 id: Date.now() - (demo.length - i) * 100000,
@@ -581,157 +1030,84 @@
         }
 
         // === ИНИЦИАЛИЗАЦИЯ ===
-        Storage.load('mycash_ops', (data) => {
+        function init() {
+            const data = Storage.load('mycash_ops');
+            const demoFlag = Storage.load('mycash_is_demo');
+            const balances = Storage.load('mycash_balances');
+
+            if (balances) {
+                walletBalances = balances;
+            }
+
             if (!data || data.length === 0) {
+                // Первый запуск — демо-данные
                 operations = generateDemoData();
+                isDemo = true;
                 Storage.save('mycash_ops', operations);
+                Storage.save('mycash_is_demo', true);
             } else {
                 operations = data;
-            }
-            renderCategories();
-            renderOperations();
-            updateSummary();
-            updateDashboard();
-        });
-
-        // === ТИП ОПЕРАЦИИ ===
-        function setType(type) {
-            currentType = type;
-            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(type === 'expense' ? '.expense-btn' : '.income-btn').classList.add('active');
-            selectedCategory = '';
-            renderCategories();
-        }
-
-        // === КАТЕГОРИИ ===
-        function renderCategories() {
-            const cats = currentType === 'expense' ? expenseCategories : incomeCategories;
-            const container = document.getElementById('categoriesContainer');
-            container.innerHTML = cats.map(c =>
-                `<button class="cat-btn ${c === selectedCategory ? 'active' : ''}" onclick="selectCategory('${c}')">${c}</button>`
-            ).join('');
-        }
-
-        function selectCategory(cat) {
-            selectedCategory = cat;
-            renderCategories();
-        }
-
-        // === КОШЕЛЬКИ ===
-        function renderWallets() {
-            const container = document.getElementById('walletContainer');
-            container.innerHTML = wallets.map(w =>
-                `<button class="cat-btn ${w === selectedWallet ? 'active' : ''}" onclick="selectWallet('${w}')">${w}</button>`
-            ).join('');
-        }
-
-        function selectWallet(w) {
-            selectedWallet = w;
-            renderWallets();
-        }
-
-        // === МОДАЛЬНОЕ ОКНО ===
-        function openModal() {
-            document.getElementById('modalOverlay').classList.add('active');
-            document.getElementById('amountInput').value = '';
-            document.getElementById('commentInput').value = '';
-            document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
-            selectedCategory = '';
-            selectedWallet = wallets[0];
-            renderCategories();
-            renderWallets();
-        }
-
-        function closeModal(e) {
-            if (e && e.target !== e.currentTarget) return;
-            document.getElementById('modalOverlay').classList.remove('active');
-        }
-
-        // === СОХРАНЕНИЕ ===
-        function saveOperation() {
-            const amount = parseFloat(document.getElementById('amountInput').value);
-            if (!amount || !selectedCategory) {
-                if (!amount) document.getElementById('amountInput').style.borderColor = 'var(--red)';
-                return;
+                isDemo = demoFlag === true;
             }
 
-            const dateVal = document.getElementById('dateInput').value;
-            const opDate = dateVal ? new Date(dateVal + 'T12:00:00') : new Date();
+            if (isDemo) {
+                document.getElementById('demoBanner').classList.add('active');
+            }
 
-            const op = {
-                id: Date.now(),
-                type: currentType,
-                amount: amount,
-                category: selectedCategory,
-                wallet: selectedWallet,
-                comment: document.getElementById('commentInput').value || '',
-                date: opDate.toISOString()
-            };
+            renderAll();
+        }
 
-            operations.unshift(op);
-            Storage.save('mycash_ops', operations);
-
-            document.getElementById('modalOverlay').classList.remove('active');
-            renderOperations();
+        function renderAll() {
+            updateBalance();
             updateSummary();
+            renderOperations();
             updateDashboard();
         }
 
-        // === ОТОБРАЖЕНИЕ ОПЕРАЦИЙ ===
-        function renderOperations() {
-            const container = document.getElementById('operationsList');
-            const filtered = filterByPeriod(operations);
+        // === БАЛАНС ПО КОШЕЛЬКАМ ===
+        function updateBalance() {
+            let cardBalance = walletBalances['💳 Карта'] || 0;
+            let cashBalance = walletBalances['💵 Наличка'] || 0;
 
-            if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">📝</div>
-                        <p>Пока нет операций.<br>Нажми + чтобы добавить первую</p>
-                    </div>`;
-                return;
-            }
+            // Считаем по операциям
+            operations.forEach(op => {
+                if (op.type === 'income') {
+                    if (op.wallet === '💳 Карта') cardBalance += op.amount;
+                    else cashBalance += op.amount;
+                } else if (op.type === 'expense') {
+                    if (op.wallet === '💳 Карта') cardBalance -= op.amount;
+                    else cashBalance -= op.amount;
+                } else if (op.type === 'transfer') {
+                    if (op.walletFrom === '💳 Карта') { cardBalance -= op.amount; cashBalance += op.amount; }
+                    else { cashBalance -= op.amount; cardBalance += op.amount; }
+                }
+            });
 
-            container.innerHTML = filtered.map(op => {
-                const icon = op.type === 'income' ? '📈' : '📉';
-                const iconClass = op.type === 'income' ? 'income' : 'expense';
-                const sign = op.type === 'income' ? '+' : '-';
-                const formatted = op.amount.toLocaleString('ru-RU');
-                const wallet = op.wallet || '💳 Карта';
-                const subtitle = op.comment ? `${op.comment} · ${wallet}` : `${formatDate(op.date)} · ${wallet}`;
-                return `
-                    <div class="op-item" onclick="deleteOperation(${op.id})">
-                        <div class="op-icon ${iconClass}">${icon}</div>
-                        <div class="op-info">
-                            <div class="op-category">${op.category}</div>
-                            <div class="op-comment">${subtitle}</div>
-                        </div>
-                        <div class="op-amount ${iconClass}">${sign}${formatted} ₽</div>
-                    </div>`;
-            }).join('');
+            const total = cardBalance + cashBalance;
+            document.getElementById('balanceTotal').textContent = fmt(total) + ' ₽';
+            document.getElementById('walletCard').textContent = fmt(cardBalance) + ' ₽';
+            document.getElementById('walletCash').textContent = fmt(cashBalance) + ' ₽';
         }
 
-        // === ИТОГИ ===
+        // === ИТОГИ ЗА ПЕРИОД ===
         function updateSummary() {
             const filtered = filterByPeriod(operations);
             let income = 0, expense = 0;
             filtered.forEach(op => {
                 if (op.type === 'income') income += op.amount;
-                else expense += op.amount;
+                else if (op.type === 'expense') expense += op.amount;
             });
-            const balance = income - expense;
-
-            document.getElementById('balance').textContent = balance.toLocaleString('ru-RU') + ' ₽';
-            document.getElementById('totalIncome').textContent = '+' + income.toLocaleString('ru-RU') + ' ₽';
-            document.getElementById('totalExpense').textContent = '-' + expense.toLocaleString('ru-RU') + ' ₽';
+            document.getElementById('totalIncome').textContent = '+' + fmt(income) + ' ₽';
+            document.getElementById('totalExpense').textContent = '-' + fmt(expense) + ' ₽';
         }
 
-        // === ПЕРИОД ===
-        function setPeriod(period) {
+        function setPeriod(period, btn) {
             currentPeriod = period;
             document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            renderOperations();
+            btn.classList.add('active');
+            haptic('light');
             updateSummary();
+            renderOperations();
             updateDashboard();
         }
 
@@ -741,8 +1117,7 @@
                 const d = new Date(op.date);
                 if (currentPeriod === 'today') return d.toDateString() === now.toDateString();
                 if (currentPeriod === 'week') {
-                    const week = new Date(now);
-                    week.setDate(week.getDate() - 7);
+                    const week = new Date(now); week.setDate(week.getDate() - 7);
                     return d >= week;
                 }
                 if (currentPeriod === 'month') {
@@ -752,97 +1127,569 @@
             });
         }
 
-        // === УДАЛЕНИЕ ===
-        function deleteOperation(id) {
-            if (!confirm('Удалить эту операцию?')) return;
-            operations = operations.filter(op => op.id !== id);
-            Storage.save('mycash_ops', operations);
-            renderOperations();
-            updateSummary();
-            updateDashboard();
+        // === ОПЕРАЦИИ — ОТОБРАЖЕНИЕ ===
+        function renderOperations() {
+            const container = document.getElementById('operationsList');
+            const filtered = filterByPeriod(operations);
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">📝</div><p>Пока нет операций.<br>Нажмите + чтобы добавить первую</p></div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(op => {
+                const catObj = [...EXPENSE_CATS, ...INCOME_CATS].find(c => c.name === op.category);
+                let icon = catObj ? catObj.icon : '📦';
+                let iconClass = op.type;
+                let sign = op.type === 'income' ? '+' : '-';
+                let walletText = op.wallet || '💳 Карта';
+
+                if (op.type === 'transfer') {
+                    icon = '↔️';
+                    sign = '';
+                    walletText = (op.walletFrom || '💳 Карта') + ' → ' + (op.walletTo || '💵 Наличка');
+                }
+
+                const dateStr = formatDate(op.date);
+                const subtitle = (op.comment ? op.comment + ' · ' : '') + dateStr + ' · ' + walletText;
+
+                return `
+                    <div class="op-item" data-id="${op.id}"
+                         onclick="openEdit(${op.id})"
+                         ontouchstart="swipeStart(event)" ontouchmove="swipeMove(event)" ontouchend="swipeEnd(event)">
+                        <div class="op-swipe-actions">
+                            <button class="op-swipe-btn edit" onclick="event.stopPropagation(); openEdit(${op.id})">✏️<br>Изменить</button>
+                            <button class="op-swipe-btn delete" onclick="event.stopPropagation(); deleteOperation(${op.id})">🗑<br>Удалить</button>
+                        </div>
+                        <div class="op-icon ${iconClass}">${icon}</div>
+                        <div class="op-info">
+                            <div class="op-category">${op.type === 'transfer' ? 'Перевод' : op.category}</div>
+                            <div class="op-comment">${subtitle}</div>
+                        </div>
+                        <div class="op-right">
+                            <div class="op-amount ${iconClass}">${sign}${fmt(op.amount)} ₽</div>
+                        </div>
+                    </div>`;
+            }).join('');
         }
 
-        function formatDate(dateStr) {
-            const d = new Date(dateStr);
-            return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        // === СВАЙП ДЛЯ УДАЛЕНИЯ ===
+        let swipeStartX = 0;
+        let swipeCurrentItem = null;
+        let swiped = false;
+
+        function swipeStart(e) {
+            swipeStartX = e.touches[0].clientX;
+            swipeCurrentItem = e.currentTarget;
+            swiped = false;
+        }
+
+        function swipeMove(e) {
+            if (!swipeCurrentItem) return;
+            const dx = e.touches[0].clientX - swipeStartX;
+            if (dx < -20) {
+                swiped = true;
+                const offset = Math.min(160, Math.abs(dx));
+                swipeCurrentItem.style.transform = `translateX(-${offset}px)`;
+                swipeCurrentItem.querySelector('.op-swipe-actions').style.transform = `translateX(${160 - offset}px)`;
+                e.preventDefault();
+            }
+        }
+
+        function swipeEnd(e) {
+            if (!swipeCurrentItem) return;
+            const dx = e.changedTouches[0].clientX - swipeStartX;
+            if (dx < -80) {
+                // Показать кнопки редактирования и удаления
+                swipeCurrentItem.style.transform = 'translateX(-160px)';
+                swipeCurrentItem.querySelector('.op-swipe-actions').style.transform = 'translateX(0)';
+            } else {
+                swipeCurrentItem.style.transform = '';
+                swipeCurrentItem.querySelector('.op-swipe-actions').style.transform = 'translateX(160px)';
+            }
+            swipeCurrentItem = null;
+        }
+
+        // Закрыть свайп при тапе в другое место
+        document.addEventListener('touchstart', function(e) {
+            document.querySelectorAll('.op-item').forEach(item => {
+                if (!item.contains(e.target)) {
+                    item.style.transform = '';
+                    const actions = item.querySelector('.op-swipe-actions');
+                    if (actions) actions.style.transform = 'translateX(160px)';
+                }
+            });
+        });
+
+        function deleteOperation(id) {
+            const doDelete = () => {
+                operations = operations.filter(op => op.id !== id);
+                Storage.save('mycash_ops', operations);
+                haptic('success');
+                renderAll();
+            };
+            if (tg && tg.showConfirm) {
+                tg.showConfirm('Удалить эту операцию?', (ok) => { if (ok) doDelete(); });
+            } else {
+                if (confirm('Удалить эту операцию?')) doDelete();
+            }
+        }
+
+        // === МОДАЛЬНОЕ ОКНО: БЫСТРЫЙ ВВОД ===
+        function openModal() {
+            haptic('light');
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById('amountInput').value = '';
+            document.getElementById('amountDisplay').textContent = '0 ';
+            document.getElementById('amountDisplay').innerHTML = '0 <span class="amount-currency">₽</span>';
+            document.getElementById('amountDisplay').classList.add('placeholder');
+            document.getElementById('extendedForm').classList.remove('active');
+            currentType = 'expense';
+            selectedCategory = '';
+            selectedWallet = Storage.load('mycash_last_wallet') || WALLETS[0];
+            renderWalletSwitch();
+            renderQuickCats();
+            setTimeout(() => document.getElementById('amountInput').focus(), 300);
+        }
+
+        function closeModal(e) {
+            if (e && e.target !== e.currentTarget) return;
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        function focusAmount() {
+            document.getElementById('amountInput').focus();
+        }
+
+        function updateAmountDisplay() {
+            const val = document.getElementById('amountInput').value;
+            const display = document.getElementById('amountDisplay');
+            if (val && parseInt(val) > 0) {
+                display.innerHTML = fmt(parseInt(val)) + ' <span class="amount-currency">₽</span>';
+                display.classList.remove('placeholder');
+            } else {
+                display.innerHTML = '0 <span class="amount-currency">₽</span>';
+                display.classList.add('placeholder');
+            }
+        }
+
+        function renderWalletSwitch() {
+            const container = document.getElementById('walletSwitch');
+            container.innerHTML = WALLETS.map(w =>
+                `<button class="wallet-btn ${w === selectedWallet ? 'active' : ''}" onclick="selectWallet('${w}')">${w}</button>`
+            ).join('');
+        }
+
+        function selectWallet(w) {
+            selectedWallet = w;
+            haptic('light');
+            renderWalletSwitch();
+        }
+
+        // === БЫСТРЫЕ КАТЕГОРИИ (2 тапа!) ===
+        function renderQuickCats() {
+            const cats = currentType === 'expense' ? EXPENSE_CATS : INCOME_CATS;
+            document.getElementById('quickCats').innerHTML = cats.map(c =>
+                `<button class="quick-cat" onclick="quickSave('${c.name}')">
+                    <div class="quick-cat-icon">${c.icon}</div>
+                    <div class="quick-cat-name">${c.name}</div>
+                </button>`
+            ).join('');
+        }
+
+        // Быстрое сохранение: тап на категорию = сохранено!
+        function quickSave(category) {
+            const amount = parseFloat(document.getElementById('amountInput').value);
+            if (!amount || amount <= 0) {
+                haptic('error');
+                document.getElementById('amountDisplay').style.color = 'var(--red)';
+                setTimeout(() => { document.getElementById('amountDisplay').style.color = ''; }, 500);
+                return;
+            }
+
+            const op = {
+                id: Date.now(),
+                type: 'expense',
+                amount: amount,
+                category: category,
+                wallet: selectedWallet,
+                comment: '',
+                date: new Date().toISOString()
+            };
+            operations.unshift(op);
+            Storage.save('mycash_ops', operations);
+            Storage.save('mycash_last_wallet', selectedWallet);
+
+            haptic('success');
+            document.getElementById('modalOverlay').classList.remove('active');
+            renderAll();
+        }
+
+        // === РАСШИРЕННАЯ ФОРМА ===
+        function toggleExtended() {
+            const form = document.getElementById('extendedForm');
+            form.classList.toggle('active');
+            if (form.classList.contains('active')) {
+                document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
+                document.getElementById('commentInput').value = '';
+                updateExtType();
+            }
+        }
+
+        function setType(type) {
+            currentType = type;
+            haptic('light');
+            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.' + type + '-btn').classList.add('active');
+            updateExtType();
+        }
+
+        function updateExtType() {
+            const catGroup = document.getElementById('extCatGroup');
+            const transferGroup = document.getElementById('transferGroup');
+            if (currentType === 'transfer') {
+                catGroup.style.display = 'none';
+                transferGroup.style.display = 'block';
+            } else {
+                catGroup.style.display = 'block';
+                transferGroup.style.display = 'none';
+                renderExtCats();
+            }
+            renderQuickCats();
+        }
+
+        function renderExtCats() {
+            const cats = currentType === 'expense' ? EXPENSE_CATS : INCOME_CATS;
+            document.getElementById('extCatGrid').innerHTML = cats.map(c =>
+                `<button class="cat-chip ${c.name === selectedCategory ? 'active' : ''}" onclick="selectExtCat('${c.name}')">${c.icon} ${c.name}</button>`
+            ).join('');
+        }
+
+        function selectExtCat(cat) {
+            selectedCategory = cat;
+            haptic('light');
+            renderExtCats();
+        }
+
+        function swapTransfer() {
+            [transferFrom, transferTo] = [transferTo, transferFrom];
+            document.getElementById('transferFrom').textContent = transferFrom;
+            document.getElementById('transferTo').textContent = transferTo;
+            haptic('light');
+        }
+
+        function saveExtended() {
+            const amount = parseFloat(document.getElementById('amountInput').value);
+            if (!amount || amount <= 0) {
+                haptic('error');
+                return;
+            }
+
+            if (currentType === 'transfer') {
+                const op = {
+                    id: Date.now(),
+                    type: 'transfer',
+                    amount: amount,
+                    category: 'Перевод',
+                    wallet: transferFrom,
+                    walletFrom: transferFrom,
+                    walletTo: transferTo,
+                    comment: document.getElementById('commentInput').value || '',
+                    date: (document.getElementById('dateInput').value || new Date().toISOString().split('T')[0]) + 'T12:00:00'
+                };
+                operations.unshift(op);
+            } else {
+                if (!selectedCategory) {
+                    haptic('error');
+                    return;
+                }
+                const dateVal = document.getElementById('dateInput').value;
+                const op = {
+                    id: Date.now(),
+                    type: currentType,
+                    amount: amount,
+                    category: selectedCategory,
+                    wallet: selectedWallet,
+                    comment: document.getElementById('commentInput').value || '',
+                    date: (dateVal || new Date().toISOString().split('T')[0]) + 'T12:00:00'
+                };
+                operations.unshift(op);
+            }
+
+            Storage.save('mycash_ops', operations);
+            Storage.save('mycash_last_wallet', selectedWallet);
+            haptic('success');
+            document.getElementById('modalOverlay').classList.remove('active');
+            renderAll();
         }
 
         // === ДАШБОРД ===
-        const chartColors = ['#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#007AFF', '#5856D6', '#AF52DE', '#FF2D55'];
+        let dashExpenses = []; // сохраняем для раскрытия категорий
 
         function updateDashboard() {
             const filtered = filterByPeriod(operations);
-            const expenses = filtered.filter(op => op.type === 'expense');
+            dashExpenses = filtered.filter(op => op.type === 'expense');
 
-            if (expenses.length === 0) {
+            if (dashExpenses.length === 0) {
                 document.getElementById('dashboard').style.display = 'none';
                 return;
             }
             document.getElementById('dashboard').style.display = 'block';
 
-            // Группируем по категориям
             const cats = {};
-            expenses.forEach(op => {
-                cats[op.category] = (cats[op.category] || 0) + op.amount;
-            });
-
-            // Сортируем по сумме
+            dashExpenses.forEach(op => { cats[op.category] = (cats[op.category] || 0) + op.amount; });
             const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
             const total = sorted.reduce((s, [_, v]) => s + v, 0);
 
-            // Рисуем круговую диаграмму
+            // Вариант 4 — Горизонтальные полоски
             const canvas = document.getElementById('pieChart');
-            const ctx = canvas.getContext('2d');
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = 140 * dpr;
-            canvas.height = 140 * dpr;
-            ctx.scale(dpr, dpr);
+            canvas.style.display = 'none'; // скрываем canvas
+            window._chartData = null;
 
-            const cx = 70, cy = 70, r = 55;
+            // Создаём или обновляем контейнер полосок
+            let barsContainer = document.getElementById('dashBars');
+            if (!barsContainer) {
+                barsContainer = document.createElement('div');
+                barsContainer.id = 'dashBars';
+                canvas.parentNode.insertBefore(barsContainer, canvas);
+            }
+            barsContainer.style.width = '100%';
+
+            const maxAmount = sorted[0] ? sorted[0][1] : 1;
+
+            barsContainer.innerHTML = sorted.map(([cat, amount], i) => {
+                const pct = Math.round(amount / total * 100);
+                const barWidth = Math.round((amount / maxAmount) * 100);
+                const color = chartColors[i % chartColors.length];
+                const catObj = EXPENSE_CATS.find(c => c.name === cat);
+                const icon = catObj ? catObj.icon : '📦';
+
+                return `<div style="margin-bottom:12px;cursor:pointer" onclick="toggleCatOps(${i})">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                        <div style="display:flex;align-items:center;gap:6px">
+                            <span style="font-size:16px">${icon}</span>
+                            <span style="font-size:13px;font-weight:500">${cat}</span>
+                            <span class="dash-legend-arrow" id="dashArrow${i}" style="font-size:12px;color:var(--text2);transition:transform 0.2s">›</span>
+                        </div>
+                        <div style="display:flex;align-items:baseline;gap:4px">
+                            <span style="font-size:14px;font-weight:600">${fmt(amount)} ₽</span>
+                            <span style="font-size:11px;color:var(--text2)">${pct}%</span>
+                        </div>
+                    </div>
+                    <div style="height:8px;background:var(--bg);border-radius:4px;overflow:hidden">
+                        <div style="height:100%;width:${barWidth}%;background:${color};border-radius:4px;transition:width 0.4s ease"></div>
+                    </div>
+                </div>
+                <div class="dash-cat-ops" id="dashCatOps${i}">${
+                    dashExpenses.filter(op => op.category === cat).map(op => {
+                        const dateStr = formatDate(op.date);
+                        const comment = op.comment ? op.comment + ' · ' : '';
+                        const wallet = op.wallet || '💳 Карта';
+                        return `<div class="dash-cat-op" onclick="event.stopPropagation(); openEdit(${op.id})" style="cursor:pointer">
+                            <span class="dash-cat-op-left">${comment}${dateStr} · ${wallet}</span>
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <span class="dash-cat-op-amount">-${fmt(op.amount)} ₽</span>
+                                <span style="font-size:14px">✏️</span>
+                            </div>
+                        </div>`;
+                    }).join('')
+                }</div>`;
+            }).join('');
+
+            // Легенда скрыта — всё уже в полосках выше
+            document.getElementById('dashLegend').innerHTML = '';
+
+            // Итого внизу
+            document.getElementById('dashLegend').innerHTML = `
+                <div style="display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border);margin-top:4px">
+                    <span style="font-size:14px;font-weight:600;color:var(--text2)">Итого расходы</span>
+                    <span style="font-size:14px;font-weight:700;color:var(--red)">${fmt(total)} ₽</span>
+                </div>`;
+        }
+
+        function toggleCatOps(index) {
+            haptic('light');
+            const ops = document.getElementById('dashCatOps' + index);
+            const arrow = document.getElementById('dashArrow' + index);
+            ops.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+
+        // Рисуем диаграмму (selectedIdx = -1 — ничего не выделено)
+        let selectedChartIdx = -1;
+
+        function drawChart(sorted, total, cx, cy, outerR, innerR, size, ctx, selectedIdx) {
+            ctx.clearRect(0, 0, size, size);
             let startAngle = -Math.PI / 2;
 
-            ctx.clearRect(0, 0, 140, 140);
+            // Тень
+            ctx.save();
+            ctx.shadowColor = 'rgba(0,0,0,0.10)';
+            ctx.shadowBlur = 16;
+            ctx.shadowOffsetY = 4;
+            ctx.beginPath();
+            ctx.arc(cx, cy, outerR + 8, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(200,200,200,0.01)';
+            ctx.fill();
+            ctx.restore();
 
             sorted.forEach(([cat, amount], i) => {
                 const slice = (amount / total) * Math.PI * 2;
+                const color = chartColors[i % chartColors.length];
+                const isSelected = (i === selectedIdx);
+                const isOther = (selectedIdx >= 0 && i !== selectedIdx);
+
+                // Выделенный сегмент "вылетает" наружу
+                const offset = isSelected ? 10 : 0;
+                const midAngle = startAngle + slice / 2;
+                const offX = offset * Math.cos(midAngle);
+                const offY = offset * Math.sin(midAngle);
+                const drawR = isSelected ? outerR + 4 : outerR;
+
+                ctx.globalAlpha = isOther ? 0.35 : 1;
+
                 ctx.beginPath();
-                ctx.moveTo(cx, cy);
-                ctx.arc(cx, cy, r, startAngle, startAngle + slice);
+                ctx.arc(cx + offX, cy + offY, drawR, startAngle, startAngle + slice);
+                ctx.arc(cx + offX, cy + offY, innerR, startAngle + slice, startAngle, true);
                 ctx.closePath();
-                ctx.fillStyle = chartColors[i % chartColors.length];
+                ctx.fillStyle = color;
                 ctx.fill();
+
+                ctx.globalAlpha = 1;
                 startAngle += slice;
             });
 
-            // Белый круг по центру (donut)
+            // Белый центр
             ctx.beginPath();
-            ctx.arc(cx, cy, 32, 0, Math.PI * 2);
+            ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
             ctx.fillStyle = '#FFFFFF';
             ctx.fill();
 
             // Текст в центре
-            ctx.fillStyle = '#1C1C1E';
-            ctx.font = 'bold 14px -apple-system, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(total.toLocaleString('ru-RU'), cx, cy - 5);
-            ctx.font = '10px -apple-system, sans-serif';
-            ctx.fillStyle = '#8E8E93';
-            ctx.fillText('руб.', cx, cy + 10);
 
-            // Легенда
-            const legend = document.getElementById('dashLegend');
-            legend.innerHTML = sorted.slice(0, 5).map(([cat, amount], i) => {
-                const pct = Math.round(amount / total * 100);
-                return `
-                    <div class="dash-legend-item">
-                        <div class="dash-legend-left">
-                            <div class="dash-legend-dot" style="background:${chartColors[i % chartColors.length]}"></div>
-                            <span class="dash-legend-name">${cat}</span>
-                        </div>
-                        <span class="dash-legend-amount">${amount.toLocaleString('ru-RU')} ₽<span class="dash-legend-percent">${pct}%</span></span>
-                    </div>`;
-            }).join('');
+            if (selectedIdx >= 0) {
+                const selCat = sorted[selectedIdx];
+                const selPct = Math.round(selCat[1] / total * 100);
+                ctx.fillStyle = chartColors[selectedIdx % chartColors.length];
+                ctx.font = 'bold 22px -apple-system, sans-serif';
+                ctx.fillText(fmt(selCat[1]) + ' ₽', cx, cy - 8);
+                ctx.fillStyle = '#8E8E93';
+                ctx.font = '11px -apple-system, sans-serif';
+                ctx.fillText(selCat[0] + ' · ' + selPct + '%', cx, cy + 12);
+            } else {
+                ctx.fillStyle = '#1C1C1E';
+                ctx.font = 'bold 18px -apple-system, sans-serif';
+                ctx.fillText(fmt(total) + ' ₽', cx, cy - 6);
+                ctx.fillStyle = '#8E8E93';
+                ctx.font = '11px -apple-system, sans-serif';
+                ctx.fillText('расходы', cx, cy + 14);
+            }
+        }
+
+        // Тап по диаграмме — определяем сегмент
+        document.getElementById('pieChart').addEventListener('click', function(e) {
+            const d = window._chartData;
+            if (!d) return;
+
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left - d.cx;
+            const y = e.clientY - rect.top - d.cy;
+            const dist = Math.sqrt(x * x + y * y);
+
+            // Клик внутри кольца?
+            if (dist < d.innerR || dist > d.outerR + 10) {
+                // Сбросить выделение
+                selectedChartIdx = -1;
+                const canvas = document.getElementById('pieChart');
+                const ctx = canvas.getContext('2d');
+                const dprr = window.devicePixelRatio || 1;
+                ctx.setTransform(dprr, 0, 0, dprr, 0, 0);
+                drawChart(d.sorted, d.total, d.cx, d.cy, d.outerR, d.innerR, d.size, ctx, -1);
+                haptic('light');
+                return;
+            }
+
+            // Определяем угол
+            let angle = Math.atan2(y, x);
+            if (angle < -Math.PI / 2) angle += Math.PI * 2;
+            let cumAngle = -Math.PI / 2;
+
+            for (let i = 0; i < d.sorted.length; i++) {
+                const slice = (d.sorted[i][1] / d.total) * Math.PI * 2;
+                if (angle >= cumAngle && angle < cumAngle + slice) {
+                    selectedChartIdx = (selectedChartIdx === i) ? -1 : i;
+                    const canvas = document.getElementById('pieChart');
+                    const ctx = canvas.getContext('2d');
+                    const dprr = window.devicePixelRatio || 1;
+                    ctx.setTransform(dprr, 0, 0, dprr, 0, 0);
+                    drawChart(d.sorted, d.total, d.cx, d.cy, d.outerR, d.innerR, d.size, ctx, selectedChartIdx);
+                    haptic('light');
+
+                    // Раскрыть/закрыть категорию в легенде
+                    toggleCatOps(i);
+                    return;
+                }
+                cumAngle += slice;
+            }
+        });
+
+        // === ОНБОРДИНГ ===
+        let onboardingStep = 0;
+
+        function clearDemoData() {
+            haptic();
+            operations = [];
+            isDemo = false;
+            Storage.save('mycash_ops', operations);
+            Storage.save('mycash_is_demo', false);
+            document.getElementById('demoBanner').classList.remove('active');
+
+            // Показываем запрос остатков
+            onboardingStep = 0;
+            showOnboardingStep();
+            document.getElementById('onboardingOverlay').classList.add('active');
+        }
+
+        function showOnboardingStep() {
+            if (onboardingStep === 0) {
+                document.getElementById('onbEmoji').textContent = '💳';
+                document.getElementById('onbTitle').textContent = 'Сколько на карте?';
+                document.getElementById('onbText').textContent = 'Введите текущий остаток на банковской карте';
+                document.getElementById('onbInput').value = '';
+                document.getElementById('onbBtn').textContent = 'Далее';
+            } else if (onboardingStep === 1) {
+                document.getElementById('onbEmoji').textContent = '💵';
+                document.getElementById('onbTitle').textContent = 'А наличных?';
+                document.getElementById('onbText').textContent = 'Введите сколько наличных денег';
+                document.getElementById('onbInput').value = '';
+                document.getElementById('onbBtn').textContent = 'Готово';
+            }
+        }
+
+        function onboardingNext() {
+            const val = parseFloat(document.getElementById('onbInput').value) || 0;
+            haptic('success');
+
+            if (onboardingStep === 0) {
+                walletBalances['💳 Карта'] = val;
+                onboardingStep = 1;
+                showOnboardingStep();
+            } else {
+                walletBalances['💵 Наличка'] = val;
+                Storage.save('mycash_balances', walletBalances);
+                document.getElementById('onboardingOverlay').classList.remove('active');
+                renderAll();
+            }
+        }
+
+        function onboardingSkip() {
+            walletBalances = { '💳 Карта': 0, '💵 Наличка': 0 };
+            Storage.save('mycash_balances', walletBalances);
+            document.getElementById('onboardingOverlay').classList.remove('active');
+            haptic('light');
+            renderAll();
         }
 
         // === ГОЛОСОВОЙ ВВОД ===
@@ -864,11 +1711,7 @@
                     showVoiceConfirm(parsed);
                 }
             };
-
-            recognition.onerror = function(event) {
-                stopVoice();
-            };
-
+            recognition.onerror = function() { stopVoice(); };
             recognition.onend = function() {
                 document.getElementById('recordingIndicator').classList.remove('active');
             };
@@ -876,6 +1719,7 @@
 
         function startVoice() {
             if (!recognition) return;
+            haptic();
             document.getElementById('recordingIndicator').classList.add('active');
             recognition.start();
         }
@@ -887,8 +1731,7 @@
 
         function showVoiceConfirm(data) {
             const sign = data.type === 'income' ? 'Доход' : 'Расход';
-            const formatted = data.amount.toLocaleString('ru-RU');
-            document.getElementById('voiceParsed').textContent = `${sign} ${formatted} ₽ — ${data.category}`;
+            document.getElementById('voiceParsed').textContent = `${sign} ${fmt(data.amount)} ₽ — ${data.category}`;
             document.getElementById('voiceConfirm').classList.add('active');
         }
 
@@ -897,8 +1740,8 @@
             if (voiceParsedData) {
                 openModal();
                 document.getElementById('amountInput').value = voiceParsedData.amount;
-                setType(voiceParsedData.type);
-                selectCategory(voiceParsedData.category);
+                updateAmountDisplay();
+                currentType = voiceParsedData.type;
             }
         }
 
@@ -909,7 +1752,7 @@
                 type: voiceParsedData.type,
                 amount: voiceParsedData.amount,
                 category: voiceParsedData.category,
-                wallet: voiceParsedData.wallet || wallets[0],
+                wallet: selectedWallet,
                 comment: 'Голосовой ввод',
                 date: new Date().toISOString()
             };
@@ -917,15 +1760,13 @@
             Storage.save('mycash_ops', operations);
             document.getElementById('voiceConfirm').classList.remove('active');
             voiceParsedData = null;
-            renderOperations();
-            updateSummary();
-            updateDashboard();
+            haptic('success');
+            renderAll();
         }
 
         // === ПАРСЕР ГОЛОСОВЫХ КОМАНД ===
         function parseCommand(text) {
             text = text.toLowerCase().trim();
-
             let type = null;
             if (text.includes('расход') || text.includes('потратил') || text.includes('заплатил')) type = 'expense';
             else if (text.includes('доход') || text.includes('получил') || text.includes('заработал')) type = 'income';
@@ -938,10 +1779,9 @@
                 'один': 1, 'одну': 1, 'два': 2, 'две': 2, 'три': 3, 'четыре': 4, 'пять': 5,
                 'шесть': 6, 'семь': 7, 'восемь': 8, 'девять': 9, 'десять': 10,
                 'одиннадцать': 11, 'двенадцать': 12, 'тринадцать': 13, 'четырнадцать': 14,
-                'пятнадцать': 15, 'шестнадцать': 16, 'семнадцать': 17, 'восемнадцать': 18,
-                'девятнадцать': 19, 'двадцать': 20, 'тридцать': 30, 'сорок': 40,
+                'пятнадцать': 15, 'двадцать': 20, 'тридцать': 30, 'сорок': 40,
                 'пятьдесят': 50, 'шестьдесят': 60, 'семьдесят': 70, 'восемьдесят': 80,
-                'девяносто': 90, 'миллион': 1000000, 'миллиона': 1000000
+                'девяносто': 90
             };
 
             const digitMatch = text.match(/(\d[\d\s]*\d|\d+)/);
@@ -954,44 +1794,28 @@
                     if (wordNumbers[word] !== undefined) {
                         hasNumber = true;
                         const val = wordNumbers[word];
-                        if (val === 1000 || val === 1000000) {
+                        if (val === 1000) {
                             current = current === 0 ? val : current * val;
-                            total += current;
-                            current = 0;
-                        } else if (val >= 100) {
-                            current += val;
-                        } else {
-                            current += val;
-                        }
+                            total += current; current = 0;
+                        } else if (val >= 100) { current += val; }
+                        else { current += val; }
                     }
                 }
                 total += current;
                 if (hasNumber) amount = total;
             }
 
-            // Категория
-            const skipWords = ['расход', 'доход', 'потратил', 'получил', 'заплатил', 'заработал',
-                'рублей', 'рубль', 'руб', 'тысяч', 'тысячу', 'тысячи', 'миллион', 'миллиона',
-                'сто', 'двести', 'триста', 'четыреста', 'пятьсот', 'шестьсот', 'семьсот',
-                'восемьсот', 'девятьсот', 'один', 'одну', 'два', 'две', 'три', 'четыре',
-                'пять', 'шесть', 'семь', 'восемь', 'девять', 'десять', 'двадцать', 'тридцать',
-                'сорок', 'пятьдесят', 'шестьдесят', 'семьдесят', 'восемьдесят', 'девяносто', 'на'];
-
+            // Ищем категорию
+            const allCats = [...EXPENSE_CATS, ...INCOME_CATS];
+            const allCatNames = allCats.map(c => c.name.toLowerCase());
             const words = text.split(/\s+/);
             let category = null;
-            const allCats = [...expenseCategories, ...incomeCategories].map(c => c.toLowerCase());
-
-            // Сначала ищем точное совпадение с категорией
             for (const word of words) {
-                const idx = allCats.indexOf(word);
-                if (idx !== -1) {
-                    category = [...expenseCategories, ...incomeCategories][idx];
-                    break;
-                }
+                const idx = allCatNames.indexOf(word);
+                if (idx !== -1) { category = allCats[idx].name; break; }
             }
-
-            // Если не нашли — берём последнее значимое слово
             if (!category) {
+                const skipWords = ['расход','доход','потратил','получил','заплатил','заработал','рублей','рубль','руб','тысяч','тысячу','тысячи','на','сто','двести','триста','четыреста','пятьсот','шестьсот','семьсот','восемьсот','девятьсот','один','одну','два','две','три','четыре','пять','шесть','семь','восемь','девять','десять','двадцать','тридцать','сорок','пятьдесят'];
                 for (let i = words.length - 1; i >= 0; i--) {
                     if (!skipWords.includes(words[i]) && isNaN(words[i]) && words[i].length > 2) {
                         category = words[i].charAt(0).toUpperCase() + words[i].slice(1);
@@ -1000,11 +1824,131 @@
                 }
             }
 
-            if (type && amount) {
-                return { type, amount, category: category || 'Прочее' };
-            }
+            if (type && amount) return { type, amount, category: category || 'Прочее' };
             return null;
         }
+
+        // === РЕДАКТИРОВАНИЕ ОПЕРАЦИИ ===
+        let editingOpId = null;
+        let editType = 'expense';
+        let editWallet = '💳 Карта';
+        let editCategory = '';
+
+        function openEdit(id) {
+            // Не открывать если был свайп
+            if (swiped) return;
+
+            const op = operations.find(o => o.id === id);
+            if (!op) return;
+
+            editingOpId = id;
+            editType = op.type === 'transfer' ? 'expense' : op.type;
+            editWallet = op.wallet || '💳 Карта';
+            editCategory = op.category || '';
+
+            haptic('light');
+
+            // Заполняем форму
+            document.getElementById('editAmount').value = op.amount;
+            document.getElementById('editDate').value = op.date ? op.date.split('T')[0] : new Date().toISOString().split('T')[0];
+            document.getElementById('editComment').value = op.comment || '';
+
+            // Тип
+            setEditType(editType);
+
+            document.getElementById('editOverlay').classList.add('active');
+        }
+
+        function closeEdit(e) {
+            if (e && e.target && e.target !== e.currentTarget) return;
+            document.getElementById('editOverlay').classList.remove('active');
+            editingOpId = null;
+        }
+
+        function setEditType(type) {
+            editType = type;
+            document.getElementById('editExpBtn').classList.toggle('active', type === 'expense');
+            document.getElementById('editIncBtn').classList.toggle('active', type === 'income');
+            renderEditCats();
+            renderEditWallets();
+        }
+
+        function renderEditWallets() {
+            document.getElementById('editWalletGrid').innerHTML = WALLETS.map(w =>
+                `<button class="cat-chip ${w === editWallet ? 'active' : ''}" onclick="editWallet='${w}'; renderEditWallets(); haptic('light')">${w}</button>`
+            ).join('');
+        }
+
+        function renderEditCats() {
+            const cats = editType === 'expense' ? EXPENSE_CATS : INCOME_CATS;
+            document.getElementById('editCatGrid').innerHTML = cats.map(c =>
+                `<button class="cat-chip ${c.name === editCategory ? 'active' : ''}" onclick="editCategory='${c.name}'; renderEditCats(); haptic('light')">${c.icon} ${c.name}</button>`
+            ).join('');
+        }
+
+        function saveEdit() {
+            const amount = parseFloat(document.getElementById('editAmount').value);
+            if (!amount || amount <= 0 || !editCategory) {
+                haptic('error');
+                return;
+            }
+
+            const op = operations.find(o => o.id === editingOpId);
+            if (!op) return;
+
+            op.type = editType;
+            op.amount = amount;
+            op.category = editCategory;
+            op.wallet = editWallet;
+            op.date = (document.getElementById('editDate').value || new Date().toISOString().split('T')[0]) + 'T12:00:00';
+            op.comment = document.getElementById('editComment').value || '';
+
+            Storage.save('mycash_ops', operations);
+            haptic('success');
+            document.getElementById('editOverlay').classList.remove('active');
+            editingOpId = null;
+            renderAll();
+        }
+
+        function deleteFromEdit() {
+            if (!editingOpId) return;
+            const id = editingOpId;
+            const doDelete = () => {
+                operations = operations.filter(op => op.id !== id);
+                Storage.save('mycash_ops', operations);
+                haptic('success');
+                document.getElementById('editOverlay').classList.remove('active');
+                editingOpId = null;
+                renderAll();
+            };
+            if (tg && tg.showConfirm) {
+                tg.showConfirm('Удалить эту операцию?', (ok) => { if (ok) doDelete(); });
+            } else {
+                if (confirm('Удалить эту операцию?')) doDelete();
+            }
+        }
+
+        // === УТИЛИТЫ ===
+        function fmt(n) {
+            return Math.round(n).toLocaleString('ru-RU');
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+        }
+
+        // Осветлить цвет на percent%
+        function lightenColor(hex, percent) {
+            const num = parseInt(hex.replace('#', ''), 16);
+            const r = Math.min(255, (num >> 16) + Math.round(255 * percent / 100));
+            const g = Math.min(255, ((num >> 8) & 0x00FF) + Math.round(255 * percent / 100));
+            const b = Math.min(255, (num & 0x0000FF) + Math.round(255 * percent / 100));
+            return '#' + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1);
+        }
+
+        // === СТАРТ ===
+        init();
     </script>
 </body>
 </html>
