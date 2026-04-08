@@ -75,11 +75,10 @@
         .wallet-badge-amount { font-size: 16px; font-weight: 600; margin-top: 2px; }
         /* Кнопка "До 10 кошельков" */
         .wallet-add-btn {
-            flex: none;
-            width: 56px;
+            flex: 1;
             background: var(--bg);
             border-radius: 12px;
-            padding: 8px 4px;
+            padding: 12px;
             text-align: center;
             border: 2px dashed var(--border);
             cursor: pointer;
@@ -91,6 +90,90 @@
             gap: 2px;
         }
         .wallet-add-btn:active { opacity: 0.4; }
+        /* Редактирование кошелька */
+        .wallet-badge { cursor: pointer; transition: transform 0.1s; }
+        .wallet-badge:active { transform: scale(0.96); }
+        .wallet-edit-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 150;
+            backdrop-filter: blur(4px);
+        }
+        .wallet-edit-overlay.active { display: flex; align-items: flex-end; }
+        .wallet-edit-modal {
+            background: var(--card);
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            padding: 16px 20px 24px;
+            animation: slideUp 0.3s ease;
+        }
+        .wallet-edit-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .wallet-edit-title span { font-size: 20px; font-weight: 700; }
+        .wallet-color-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .wallet-color-btn {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .wallet-color-btn.active { border-color: var(--text); transform: scale(1.15); }
+        .wallet-color-btn:active { transform: scale(0.9); }
+
+        /* Карусель аналитики (категории / таблица) */
+        .analytics-carousel { overflow: hidden; position: relative; }
+        .analytics-track { display: flex; transition: transform 0.3s ease; }
+        .analytics-page { min-width: 100%; }
+        .analytics-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 12px;
+        }
+        .analytics-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.2s;
+        }
+        .analytics-dot.active { background: var(--accent); width: 18px; border-radius: 3px; }
+
+        /* Таблица расходов */
+        .expense-table { width: 100%; border-collapse: collapse; }
+        .expense-table th {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text2);
+            text-transform: uppercase;
+            text-align: left;
+            padding: 8px 6px;
+            border-bottom: 2px solid var(--border);
+        }
+        .expense-table th:last-child { text-align: right; }
+        .expense-table td {
+            font-size: 13px;
+            padding: 8px 6px;
+            border-bottom: 1px solid var(--border);
+        }
+        .expense-table td:last-child { text-align: right; font-weight: 600; }
+        .expense-table tr:last-child td { border-bottom: none; }
+        .expense-table .total-row td {
+            font-weight: 700;
+            border-top: 2px solid var(--border);
+            border-bottom: none;
+            padding-top: 10px;
+        }
         /* Модалка "Обновить тариф" */
         .upgrade-overlay {
             display: none;
@@ -775,33 +858,69 @@
 <body>
 
     <!-- Шапка -->
-    <div class="header" style="display:flex;align-items:center;justify-content:space-between">
+    <div class="header" style="display:flex;align-items:center;justify-content:space-between;text-align:left">
         <div>
             <div id="headerGreeting" style="font-size:16px;font-weight:700">Привет! 👋</div>
             <div id="headerDate" style="font-size:12px;color:var(--text2);margin-top:2px"></div>
         </div>
-        <div style="font-size:14px;font-weight:600;color:var(--text2)">MyCash</div>
+        <div style="display:flex;align-items:flex-end;gap:6px">
+            <img src="logo.png" alt="MyCash" style="width:32px;height:32px;border-radius:8px">
+            <span style="font-size:14px;font-weight:600;color:var(--text2);line-height:1;padding-bottom:2px">MyCash</span>
+        </div>
     </div>
 
     <!-- Блок 1: Баланс с кошельками -->
     <div class="section-title" style="margin:16px 20px 8px">Мои финансы</div>
     <div class="balance-card" style="margin-top:0">
         <div class="balance-total" id="balanceTotal">0 ₽</div>
-        <div class="wallets-row">
-            <div class="wallet-badge">
-                <div class="wallet-badge-icon">💳</div>
-                <div class="wallet-badge-name">Карта</div>
+        <div class="wallets-row" id="walletsRow">
+            <div class="wallet-badge" id="walletBadge0" onclick="openWalletEdit(0)">
+                <div class="wallet-badge-icon" id="walletIcon0">💳</div>
+                <div class="wallet-badge-name" id="walletName0">Карта</div>
                 <div class="wallet-badge-amount" id="walletCard">0 ₽</div>
             </div>
-            <div class="wallet-badge">
-                <div class="wallet-badge-icon">💵</div>
-                <div class="wallet-badge-name">Наличка</div>
+            <div class="wallet-badge" id="walletBadge1" onclick="openWalletEdit(1)">
+                <div class="wallet-badge-icon" id="walletIcon1">💵</div>
+                <div class="wallet-badge-name" id="walletName1">Наличка</div>
                 <div class="wallet-badge-amount" id="walletCash">0 ₽</div>
             </div>
             <div class="wallet-add-btn" onclick="showUpgrade()">
                 <span style="font-size:18px">＋</span>
                 <span style="font-size:9px;color:var(--text2);line-height:1.2">до 10<br>карт</span>
                 <span style="font-size:9px;color:var(--accent);font-weight:600">Pro</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка редактирования кошелька -->
+    <div class="wallet-edit-overlay" id="walletEditOverlay" onclick="closeWalletEdit(event)">
+        <div class="wallet-edit-modal" onclick="event.stopPropagation()">
+            <div class="modal-handle"></div>
+            <div class="wallet-edit-title">
+                <div style="width:32px"></div>
+                <span>Настройки кошелька</span>
+                <button onclick="closeWalletEdit()" style="width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">✕</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Название</label>
+                <input class="form-input" type="text" id="walletEditName" placeholder="Например: Сбер, Тинькофф">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Начальный остаток</label>
+                <input class="form-input" type="number" id="walletEditBalance" inputmode="numeric" placeholder="0" style="font-size:20px;font-weight:600;text-align:center">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Цвет карточки</label>
+                <div class="wallet-color-grid" id="walletColorGrid"></div>
+            </div>
+
+            <div class="edit-buttons" style="margin-top:20px">
+                <button onclick="deleteWallet()" style="padding:16px 20px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:white;background:var(--red);cursor:pointer;min-height:52px;opacity:0.6" id="walletDeleteBtn">🗑</button>
+                <button onclick="closeWalletEdit()" style="padding:16px 20px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:var(--text);background:var(--bg);cursor:pointer;min-height:52px">← Назад</button>
+                <button onclick="saveWalletEdit()" style="flex:1;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:white;background:var(--accent);cursor:pointer;min-height:52px">💾 Сохранить</button>
             </div>
         </div>
     </div>
@@ -821,7 +940,7 @@
     <!-- Блок 2: Аналитика (период + доходы/расходы + категории) -->
     <div class="section-title" style="margin:16px 20px 8px">Аналитика</div>
     <div class="period-card">
-        <!-- Переключатель расходы/доходы + суммы -->
+        <!-- Переключатель расходы/доходы + период (вне карусели) -->
         <div id="dashboardInline" style="display:none">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
                 <div style="display:flex;background:var(--bg);border-radius:10px;padding:3px;gap:2px">
@@ -849,10 +968,32 @@
             <!-- Скрытые элементы для совместимости -->
             <span id="totalIncome" style="display:none"></span>
             <span id="totalExpense" style="display:none"></span>
-            <canvas id="pieChart" width="220" height="220" style="max-width:220px;display:none"></canvas>
-            <div id="dashBars"></div>
-            <div id="dashLegend"></div>
         </div>
+
+            <!-- Карусель: категории / таблица (отдельно от кнопок) -->
+            <div class="analytics-carousel" id="analyticsCarousel"
+                 ontouchstart="anCarStart(event)" ontouchmove="anCarMove(event)" ontouchend="anCarEnd(event)">
+                <div class="analytics-track" id="analyticsTrack">
+                    <!-- Страница 1: категории (полоски) -->
+                    <div class="analytics-page">
+                        <canvas id="pieChart" width="220" height="220" style="max-width:220px;display:none"></canvas>
+                        <div id="dashBars"></div>
+                        <div id="dashLegend"></div>
+                    </div>
+                    <!-- Страница 2: таблица -->
+                    <div class="analytics-page">
+                        <div style="display:flex;gap:6px;margin-bottom:12px">
+                            <button class="period-btn" id="tableByDays" onclick="setTableMode('days')" style="flex:1">По дням</button>
+                            <button class="period-btn active" id="tableByMonths" onclick="setTableMode('months')" style="flex:1">По месяцам</button>
+                        </div>
+                        <div id="expenseTableContainer" style="overflow-x:auto"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="analytics-dots">
+                <div class="analytics-dot active" id="anDot0"></div>
+                <div class="analytics-dot" id="anDot1"></div>
+            </div>
     </div>
 
     <!-- Онбординг-баннер -->
@@ -1294,7 +1435,7 @@
         // === ОПЕРАЦИИ — ОТОБРАЖЕНИЕ ===
         function renderOperations() {
             const container = document.getElementById('operationsList');
-            const filtered = filterByPeriod(operations);
+            const filtered = filterByPeriod(operations).sort((a, b) => new Date(b.date) - new Date(a.date));
 
             if (filtered.length === 0) {
                 container.innerHTML = '<div class="empty-state"><div class="icon">📝</div><p>Пока нет операций.<br>Нажмите + чтобы добавить первую</p></div>';
@@ -1998,6 +2139,242 @@
             return null;
         }
 
+        // === КАРУСЕЛЬ АНАЛИТИКИ ===
+        let anCarPage = 0;
+        let anCarStartX = 0;
+
+        function anCarStart(e) { anCarStartX = e.touches[0].clientX; }
+
+        function anCarMove(e) {
+            const dx = e.touches[0].clientX - anCarStartX;
+            if (Math.abs(dx) > 15) {
+                const track = document.getElementById('analyticsTrack');
+                const offset = -anCarPage * 100 + (dx / track.parentElement.offsetWidth) * 100;
+                track.style.transition = 'none';
+                track.style.transform = `translateX(${offset}%)`;
+                e.preventDefault();
+            }
+        }
+
+        function anCarEnd(e) {
+            const dx = e.changedTouches[0].clientX - anCarStartX;
+            if (dx < -50 && anCarPage < 1) { anCarPage = 1; updateExpenseTable(); }
+            else if (dx > 50 && anCarPage > 0) anCarPage = 0;
+            const track = document.getElementById('analyticsTrack');
+            track.style.transition = 'transform 0.3s ease';
+            track.style.transform = `translateX(-${anCarPage * 100}%)`;
+            document.getElementById('anDot0').classList.toggle('active', anCarPage === 0);
+            document.getElementById('anDot1').classList.toggle('active', anCarPage === 1);
+            haptic('light');
+        }
+
+        // === ТАБЛИЦА РАСХОДОВ ===
+        let tableMode = 'months'; // 'days' или 'months'
+
+        function setTableMode(mode) {
+            tableMode = mode;
+            haptic('light');
+            document.getElementById('tableByDays').classList.toggle('active', mode === 'days');
+            document.getElementById('tableByMonths').classList.toggle('active', mode === 'months');
+            updateExpenseTable();
+        }
+
+        function updateExpenseTable() {
+            const container = document.getElementById('expenseTableContainer');
+            const isExpense = dashTab === 'expense';
+
+            // Берём ВСЕ операции (не только за период) для полной таблицы
+            const ops = operations.filter(op => op.type === (isExpense ? 'expense' : 'income'));
+
+            if (ops.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2)">Нет данных</div>';
+                return;
+            }
+
+            // Группировка: строки = категории, столбцы = периоды (месяцы или дни)
+            const periods = {};  // { "Апр 2026": { "Продукты": 5000, ... } }
+            const allCats = new Set();
+
+            ops.forEach(op => {
+                const d = new Date(op.date);
+                let periodKey;
+                if (tableMode === 'days') {
+                    periodKey = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+                } else {
+                    const monthNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+                    periodKey = monthNames[d.getMonth()] + ' ' + d.getFullYear();
+                }
+                if (!periods[periodKey]) periods[periodKey] = {};
+                periods[periodKey][op.category] = (periods[periodKey][op.category] || 0) + op.amount;
+                allCats.add(op.category);
+            });
+
+            const catList = [...allCats];
+            const periodKeys = Object.keys(periods);
+            const amountColor = isExpense ? 'var(--red)' : 'var(--green)';
+
+            // Строки = категории, столбцы = периоды
+            // Шапка: Категория | Период1 | Период2 | ... | Итого
+            let html = '<table class="expense-table"><thead><tr>';
+            html += '<th>Категория</th>';
+            periodKeys.forEach(p => {
+                html += `<th style="text-align:right;white-space:nowrap">${p}</th>`;
+            });
+            html += '<th style="text-align:right">Итого</th>';
+            html += '</tr></thead><tbody>';
+
+            // Строки — по категориям
+            const periodTotals = {};
+            periodKeys.forEach(p => periodTotals[p] = 0);
+            let grandTotal = 0;
+
+            catList.forEach(cat => {
+                const catObj = [...EXPENSE_CATS, ...INCOME_CATS].find(c => c.name === cat);
+                const icon = catObj ? catObj.icon : '📦';
+                let catTotal = 0;
+
+                html += '<tr>';
+                html += `<td style="white-space:nowrap;font-weight:500">${icon} ${cat}</td>`;
+                periodKeys.forEach(p => {
+                    const val = periods[p][cat] || 0;
+                    catTotal += val;
+                    periodTotals[p] += val;
+                    html += `<td style="text-align:right;color:${val ? amountColor : 'var(--border)'}">${val ? fmt(val) : '—'}</td>`;
+                });
+                grandTotal += catTotal;
+                html += `<td style="text-align:right;color:${amountColor};font-weight:600">${fmt(catTotal)}</td>`;
+                html += '</tr>';
+            });
+
+            // Итого по столбцам
+            html += '<tr class="total-row">';
+            html += '<td>Итого</td>';
+            periodKeys.forEach(p => {
+                html += `<td style="text-align:right;color:${amountColor}">${fmt(periodTotals[p])}</td>`;
+            });
+            html += `<td style="text-align:right;color:${amountColor}">${fmt(grandTotal)}</td>`;
+            html += '</tr>';
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // === РЕДАКТИРОВАНИЕ КОШЕЛЬКА ===
+        const WALLET_COLORS = [
+            { name: 'Серый', color: '#F2F2F7' },
+            { name: 'Синий', color: '#D6E4FF' },
+            { name: 'Зелёный', color: '#D4EDDA' },
+            { name: 'Оранжевый', color: '#FFE8CC' },
+            { name: 'Розовый', color: '#FFD6E0' },
+            { name: 'Фиолетовый', color: '#E8DAEF' },
+            { name: 'Жёлтый', color: '#FFF9C4' },
+            { name: 'Голубой', color: '#D1ECF1' }
+        ];
+
+        // Настройки кошельков (сохраняются в localStorage)
+        let walletSettings = Storage.load('mycash_wallet_settings') || [
+            { name: 'Карта', icon: '💳', color: '#F2F2F7' },
+            { name: 'Наличка', icon: '💵', color: '#F2F2F7' }
+        ];
+        let editingWalletIdx = -1;
+        let editWalletColor = '#F2F2F7';
+
+        function applyWalletSettings() {
+            walletSettings.forEach((ws, i) => {
+                const nameEl = document.getElementById('walletName' + i);
+                const iconEl = document.getElementById('walletIcon' + i);
+                const badgeEl = document.getElementById('walletBadge' + i);
+                if (nameEl) nameEl.textContent = ws.name;
+                if (iconEl) iconEl.textContent = ws.icon;
+                if (badgeEl) badgeEl.style.background = ws.color;
+            });
+            // Обновить WALLETS массив для совместимости
+            WALLETS[0] = walletSettings[0].icon + ' ' + walletSettings[0].name;
+            WALLETS[1] = walletSettings[1].icon + ' ' + walletSettings[1].name;
+        }
+
+        function openWalletEdit(idx) {
+            editingWalletIdx = idx;
+            const ws = walletSettings[idx];
+            editWalletColor = ws.color;
+            haptic('light');
+
+            document.getElementById('walletEditName').value = ws.name;
+            document.getElementById('walletEditBalance').value = walletBalances[WALLETS[idx]] || 0;
+
+            // Цвета
+            document.getElementById('walletColorGrid').innerHTML = WALLET_COLORS.map(c =>
+                `<div class="wallet-color-btn ${c.color === editWalletColor ? 'active' : ''}"
+                     style="background:${c.color}"
+                     onclick="selectWalletColor('${c.color}')"></div>`
+            ).join('');
+
+            // Кнопка удаления — заблокирована (Pro)
+            document.getElementById('walletDeleteBtn').onclick = function() { showUpgrade(); };
+
+            document.getElementById('walletEditOverlay').classList.add('active');
+        }
+
+        function closeWalletEdit(e) {
+            if (e && e.target && e.target !== e.currentTarget) return;
+            document.getElementById('walletEditOverlay').classList.remove('active');
+            editingWalletIdx = -1;
+        }
+
+        function selectWalletColor(color) {
+            editWalletColor = color;
+            haptic('light');
+            document.querySelectorAll('.wallet-color-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.style.background === color);
+            });
+        }
+
+        function saveWalletEdit() {
+            const idx = editingWalletIdx;
+            if (idx < 0) return;
+
+            const newName = document.getElementById('walletEditName').value.trim();
+            if (!newName) { haptic('error'); return; }
+
+            const newBalance = parseFloat(document.getElementById('walletEditBalance').value) || 0;
+            const oldWalletKey = WALLETS[idx];
+
+            // Обновляем настройки
+            walletSettings[idx].name = newName;
+            walletSettings[idx].color = editWalletColor;
+            Storage.save('mycash_wallet_settings', walletSettings);
+
+            // Обновляем WALLETS
+            const newWalletKey = walletSettings[idx].icon + ' ' + newName;
+
+            // Переименовываем кошелёк в операциях
+            if (oldWalletKey !== newWalletKey) {
+                operations.forEach(op => {
+                    if (op.wallet === oldWalletKey) op.wallet = newWalletKey;
+                    if (op.walletFrom === oldWalletKey) op.walletFrom = newWalletKey;
+                    if (op.walletTo === oldWalletKey) op.walletTo = newWalletKey;
+                });
+                Storage.save('mycash_ops', operations);
+
+                // Переносим баланс
+                walletBalances[newWalletKey] = newBalance;
+                if (oldWalletKey !== newWalletKey) delete walletBalances[oldWalletKey];
+            } else {
+                walletBalances[oldWalletKey] = newBalance;
+            }
+            Storage.save('mycash_balances', walletBalances);
+
+            WALLETS[idx] = newWalletKey;
+            applyWalletSettings();
+            haptic('success');
+            closeWalletEdit();
+            renderAll();
+        }
+
+        function deleteWallet() {
+            showUpgrade();
+        }
+
         // === МОДАЛКА "ОБНОВИТЬ ТАРИФ" ===
         function showUpgrade() {
             haptic();
@@ -2129,6 +2506,7 @@
         }
 
         // === СТАРТ ===
+        applyWalletSettings();
         init();
     </script>
 </body>
