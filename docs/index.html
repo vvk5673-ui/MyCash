@@ -940,8 +940,12 @@
     <!-- Блок 2: Аналитика (период + доходы/расходы + категории) -->
     <div class="section-title" style="margin:16px 20px 8px">Аналитика</div>
     <div class="period-card">
-        <!-- Переключатель расходы/доходы + период (вне карусели) -->
+        <!-- Скрытые элементы для совместимости -->
+        <span id="totalIncome" style="display:none"></span>
+        <span id="totalExpense" style="display:none"></span>
+
         <div id="dashboardInline" style="display:none">
+            <!-- Переключатель расходы/доходы -->
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
                 <div style="display:flex;background:var(--bg);border-radius:10px;padding:3px;gap:2px">
                     <button id="dashTabExpense" onclick="setDashTab('expense')" style="padding:6px 14px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:var(--red);color:white;transition:all 0.2s">Расходы</button>
@@ -949,38 +953,33 @@
                 </div>
                 <span id="dashTotalLabel" style="font-size:14px;font-weight:700;color:var(--red)"></span>
             </div>
-            <div class="period-tabs">
-                <button class="period-btn" onclick="setPeriod('today', this)">Сегодня</button>
-                <button class="period-btn" onclick="setPeriod('week', this)">Неделя</button>
-                <button class="period-btn active" onclick="setPeriod('month', this)">Месяц</button>
-                <button class="period-btn" onclick="setPeriod('year', this)">Год</button>
-                <button class="period-btn" onclick="openCustomPeriod()" style="border-style:dashed;flex:none;padding:6px 12px">📅</button>
-            </div>
-            <!-- Произвольный период -->
-            <div id="customPeriodRow" style="display:none;margin-bottom:14px">
-                <div style="display:flex;gap:8px;align-items:center">
-                    <input type="date" id="periodFrom" class="form-input" style="flex:1;font-size:13px;padding:8px 10px;min-height:36px">
-                    <span style="color:var(--text2);font-size:13px">—</span>
-                    <input type="date" id="periodTo" class="form-input" style="flex:1;font-size:13px;padding:8px 10px;min-height:36px">
-                    <button onclick="applyCustomPeriod()" style="padding:8px 12px;border:none;border-radius:10px;background:var(--accent);color:white;font-size:13px;font-weight:600;cursor:pointer;min-height:36px">OK</button>
-                </div>
-            </div>
-            <!-- Скрытые элементы для совместимости -->
-            <span id="totalIncome" style="display:none"></span>
-            <span id="totalExpense" style="display:none"></span>
-        </div>
 
-            <!-- Карусель: категории / таблица (отдельно от кнопок) -->
+            <!-- Карусель: категории / таблица -->
             <div class="analytics-carousel" id="analyticsCarousel"
                  ontouchstart="anCarStart(event)" ontouchmove="anCarMove(event)" ontouchend="anCarEnd(event)">
                 <div class="analytics-track" id="analyticsTrack">
-                    <!-- Страница 1: категории (полоски) -->
+                    <!-- Страница 1: период + категории -->
                     <div class="analytics-page">
+                        <div class="period-tabs">
+                            <button class="period-btn" onclick="setPeriod('today', this)">Сегодня</button>
+                            <button class="period-btn" onclick="setPeriod('week', this)">Неделя</button>
+                            <button class="period-btn active" onclick="setPeriod('month', this)">Месяц</button>
+                            <button class="period-btn" onclick="setPeriod('year', this)">Год</button>
+                            <button class="period-btn" onclick="openCustomPeriod()" style="border-style:dashed;flex:none;padding:6px 12px">📅</button>
+                        </div>
+                        <div id="customPeriodRow" style="display:none;margin-bottom:14px">
+                            <div style="display:flex;gap:8px;align-items:center">
+                                <input type="date" id="periodFrom" class="form-input" style="flex:1;font-size:13px;padding:8px 10px;min-height:36px">
+                                <span style="color:var(--text2);font-size:13px">—</span>
+                                <input type="date" id="periodTo" class="form-input" style="flex:1;font-size:13px;padding:8px 10px;min-height:36px">
+                                <button onclick="applyCustomPeriod()" style="padding:8px 12px;border:none;border-radius:10px;background:var(--accent);color:white;font-size:13px;font-weight:600;cursor:pointer;min-height:36px">OK</button>
+                            </div>
+                        </div>
                         <canvas id="pieChart" width="220" height="220" style="max-width:220px;display:none"></canvas>
                         <div id="dashBars"></div>
                         <div id="dashLegend"></div>
                     </div>
-                    <!-- Страница 2: таблица -->
+                    <!-- Страница 2: таблица (без кнопок периода) -->
                     <div class="analytics-page">
                         <div style="display:flex;gap:6px;margin-bottom:12px">
                             <button class="period-btn" id="tableByDays" onclick="setTableMode('days')" style="flex:1">По дням</button>
@@ -990,6 +989,7 @@
                     </div>
                 </div>
             </div>
+        </div>
             <div class="analytics-dots">
                 <div class="analytics-dot active" id="anDot0"></div>
                 <div class="analytics-dot" id="anDot1"></div>
