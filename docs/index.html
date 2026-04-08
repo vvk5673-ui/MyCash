@@ -979,21 +979,30 @@
                         <div id="dashBars"></div>
                         <div id="dashLegend"></div>
                     </div>
-                    <!-- Страница 2: таблица (без кнопок периода) -->
-                    <div class="analytics-page">
-                        <div style="display:flex;gap:6px;margin-bottom:12px">
-                            <button class="period-btn" id="tableByDays" onclick="setTableMode('days')" style="flex:1">По дням</button>
-                            <button class="period-btn active" id="tableByMonths" onclick="setTableMode('months')" style="flex:1">По месяцам</button>
+                    <!-- Страница 2: таблица (Pro) -->
+                    <div class="analytics-page" style="position:relative">
+                        <!-- Контент таблицы (заблюренный) -->
+                        <div id="tableBlurWrap" style="filter:blur(4px);pointer-events:none;user-select:none;opacity:0.5">
+                            <div style="display:flex;gap:6px;margin-bottom:12px">
+                                <button class="period-btn" id="tableByDays" onclick="setTableMode('days')" style="flex:1">По дням</button>
+                                <button class="period-btn active" id="tableByMonths" onclick="setTableMode('months')" style="flex:1">По месяцам</button>
+                            </div>
+                            <div id="expenseTableContainer" style="overflow-x:auto"></div>
                         </div>
-                        <div id="expenseTableContainer" style="overflow-x:auto"></div>
+                        <!-- Оверлей Pro -->
+                        <div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5">
+                            <div style="background:var(--card);border-radius:16px;padding:24px 20px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.12);max-width:280px">
+                                <div style="font-size:36px;margin-bottom:8px">🔒</div>
+                                <div style="font-size:18px;font-weight:700;margin-bottom:6px">Таблица расходов</div>
+                                <div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:16px">Детальная таблица по дням и месяцам доступна в тарифе Pro</div>
+                                <button onclick="showUpgrade()" style="width:100%;padding:12px;border:none;border-radius:12px;background:var(--accent);color:white;font-size:15px;font-weight:600;cursor:pointer;min-height:44px">Попробовать Pro</button>
+                                <div style="font-size:12px;color:var(--text2);margin-top:8px">149 ₽/мес · 14 дней бесплатно</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-            <div class="analytics-dots">
-                <div class="analytics-dot active" id="anDot0"></div>
-                <div class="analytics-dot" id="anDot1"></div>
-            </div>
     </div>
 
     <!-- Онбординг-баннер -->
@@ -1810,12 +1819,7 @@
             // Легенда скрыта — всё уже в полосках выше
             document.getElementById('dashLegend').innerHTML = '';
 
-            // Итого внизу
-            document.getElementById('dashLegend').innerHTML = `
-                <div style="display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border);margin-top:4px">
-                    <span style="font-size:14px;font-weight:600;color:var(--text2)">Итого ${isExpense ? 'расходы' : 'доходы'}</span>
-                    <span style="font-size:14px;font-weight:700;color:${isExpense ? 'var(--red)' : 'var(--green)'}">${fmt(total)} ₽</span>
-                </div>`;
+            document.getElementById('dashLegend').innerHTML = '';
         }
 
         function toggleCatOps(index) {
