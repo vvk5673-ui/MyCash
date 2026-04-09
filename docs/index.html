@@ -440,6 +440,31 @@
         </div>
     </div>
 
+    <!-- Экран-оффер (при первом открытии) -->
+    <div class="offer-overlay" id="offerOverlay">
+        <div class="offer-card">
+            <div class="offer-icon"><i data-lucide="gift" style="width:56px;height:56px;color:#FF9500"></i></div>
+            <div class="offer-title">Бесплатный Pro на 14 дней</div>
+            <div class="offer-subtitle">Подпишитесь на бота и получите полный доступ</div>
+            <div class="offer-bullets">
+                <div class="offer-bullet">
+                    <i data-lucide="bell" style="width:18px;height:18px;color:#007AFF;flex-shrink:0"></i>
+                    <span>Напоминания о записи расходов</span>
+                </div>
+                <div class="offer-bullet">
+                    <i data-lucide="file-text" style="width:18px;height:18px;color:#34C759;flex-shrink:0"></i>
+                    <span>Еженедельный отчёт в чат</span>
+                </div>
+                <div class="offer-bullet">
+                    <i data-lucide="sparkles" style="width:18px;height:18px;color:#FF9500;flex-shrink:0"></i>
+                    <span>Первыми узнаете о новых функциях</span>
+                </div>
+            </div>
+            <button class="offer-btn" onclick="acceptOffer()">Получить бесплатно</button>
+            <button class="offer-skip" onclick="skipOffer()">Пропустить</button>
+        </div>
+    </div>
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="app.js"></script>

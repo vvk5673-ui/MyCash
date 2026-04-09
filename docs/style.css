@@ -865,3 +865,59 @@ body {
     cursor: pointer;
     padding: 8px;
 }
+
+/* === ЭКРАН-ОФФЕР === */
+.offer-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 400;
+    backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+}
+.offer-overlay.active { display: flex; }
+.offer-card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 32px 24px 24px;
+    margin: 16px;
+    width: 100%;
+    max-width: 340px;
+    text-align: center;
+    animation: slideUp 0.3s ease;
+}
+.offer-icon { margin-bottom: 16px; }
+.offer-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
+.offer-subtitle { font-size: 14px; color: var(--text2); margin-bottom: 20px; line-height: 1.4; }
+.offer-bullets { text-align: left; margin-bottom: 24px; }
+.offer-bullet {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 14px;
+}
+.offer-btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 600;
+    color: white;
+    background: var(--accent);
+    cursor: pointer;
+    min-height: 52px;
+}
+.offer-btn:active { opacity: 0.8; }
+.offer-skip {
+    background: none;
+    border: none;
+    color: var(--text2);
+    font-size: 14px;
+    margin-top: 12px;
+    cursor: pointer;
+    padding: 8px;
+}

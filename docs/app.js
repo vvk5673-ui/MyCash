@@ -1462,6 +1462,7 @@ function clearAllData() {
         haptic('success');
         renderAll();
         switchTab('home', document.querySelector('.tab-item'));
+        showOfferIfNeeded();
     };
     if (confirm('Удалить все данные? Это действие нельзя отменить.')) doIt();
 }
@@ -1470,6 +1471,37 @@ function clearAllData() {
 applyWalletSettings();
 init();
 refreshIcons();
+showOfferIfNeeded();
+
+// === ЭКРАН-ОФФЕР (показать один раз при первом открытии) ===
+function showOfferIfNeeded() {
+    // Показываем только если ещё не видели
+    if (Storage.load('mycash_offer_shown')) return;
+    // Показываем с задержкой чтобы приложение успело загрузиться
+    setTimeout(function() {
+        document.getElementById('offerOverlay').classList.add('active');
+        refreshIcons();
+    }, 1500);
+}
+
+function acceptOffer() {
+    haptic('success');
+    Storage.save('mycash_offer_shown', true);
+    document.getElementById('offerOverlay').classList.remove('active');
+    // Открыть бота — пользователь нажмёт Start и подпишется
+    const botUrl = 'https://t.me/mycash1233333_bot?start=from_app';
+    if (tg && tg.openTelegramLink) {
+        tg.openTelegramLink(botUrl);
+    } else {
+        window.open(botUrl, '_blank');
+    }
+}
+
+function skipOffer() {
+    haptic('light');
+    Storage.save('mycash_offer_shown', true);
+    document.getElementById('offerOverlay').classList.remove('active');
+}
 
 // === ЭКСПОРТ ФУНКЦИЙ В WINDOW (для onclick в HTML) ===
 Object.assign(window, {
@@ -1481,7 +1513,7 @@ Object.assign(window, {
     renderEditWallets, saveEdit, saveExtended, saveWalletEdit, selectExtCat,
     selectWallet, selectWalletColor, setDashTab, setEditType, setPeriod,
     setTableMode, setType, shareApp, showUpgrade, stopVoice, swapTransfer,
-    switchTab, toggleCatOps, toggleExtended, updateAmountDisplay,
+    switchTab, toggleCatOps, toggleExtended, updateAmountDisplay, acceptOffer, skipOffer,
     swipeStart, swipeMove, swipeEnd
 });
 
