@@ -1381,7 +1381,19 @@
 
         // Обновить все Lucide-иконки на странице
         function refreshIcons() {
-            if (window.lucide) lucide.createIcons();
+            if (window.lucide) {
+                lucide.createIcons();
+            } else {
+                // Фоллбек: если Lucide не загрузился — первая буква
+                document.querySelectorAll('i[data-lucide]').forEach(el => {
+                    if (!el.querySelector('svg')) {
+                        const name = el.getAttribute('data-lucide') || '';
+                        el.textContent = name.charAt(0).toUpperCase();
+                        el.style.fontStyle = 'normal';
+                        el.style.fontWeight = '600';
+                    }
+                });
+            }
         }
         const chartColors = ['#FF3B30','#FF9500','#FFCC00','#34C759','#007AFF','#5856D6','#AF52DE','#FF2D55','#00C7BE','#8E8E93'];
 
