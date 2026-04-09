@@ -1337,8 +1337,13 @@
                 } catch(e) {}
             },
             load(key) {
-                const local = localStorage.getItem(key);
-                return local ? JSON.parse(local) : null;
+                try {
+                    const local = localStorage.getItem(key);
+                    return local ? JSON.parse(local) : null;
+                } catch(e) {
+                    console.warn('Ошибка загрузки данных:', key, e);
+                    return null;
+                }
             }
         };
 
@@ -1603,7 +1608,7 @@
                 }
 
                 const dateStr = formatDate(op.date);
-                const subtitle = (op.comment ? op.comment + ' · ' : '') + dateStr + ' · ' + walletText;
+                const subtitle = (op.comment ? esc(op.comment) + ' · ' : '') + dateStr + ' · ' + esc(walletText);
 
                 return `
                     <div class="op-item" data-id="${op.id}"
@@ -1615,7 +1620,7 @@
                         </div>
                         <div class="op-icon ${iconClass}">${iconHtml}</div>
                         <div class="op-info">
-                            <div class="op-category">${op.type === 'transfer' ? 'Перевод' : op.category}</div>
+                            <div class="op-category">${op.type === 'transfer' ? 'Перевод' : esc(op.category)}</div>
                             <div class="op-comment">${subtitle}</div>
                         </div>
                         <div class="op-right">
@@ -1752,13 +1757,14 @@
 
         // Быстрое сохранение: тап на категорию = сохранено!
         function quickSave(category) {
-            const amount = parseFloat(document.getElementById('amountInput').value);
-            if (!amount || amount <= 0) {
+            const v = validateAmount(document.getElementById('amountInput').value);
+            if (!v.ok) {
                 haptic('error');
                 document.getElementById('amountDisplay').style.color = 'var(--red)';
                 setTimeout(() => { document.getElementById('amountDisplay').style.color = ''; }, 500);
                 return;
             }
+            const amount = v.amount;
 
             const op = {
                 id: Date.now(),
@@ -1833,11 +1839,9 @@
         }
 
         function saveExtended() {
-            const amount = parseFloat(document.getElementById('amountInput').value);
-            if (!amount || amount <= 0) {
-                haptic('error');
-                return;
-            }
+            const v = validateAmount(document.getElementById('amountInput').value);
+            if (!v.ok) { haptic('error'); return; }
+            const amount = v.amount;
 
             if (currentType === 'transfer') {
                 const op = {
@@ -1943,7 +1947,7 @@
                 <div class="dash-cat-ops" id="dashCatOps${i}">${
                     dashExpenses.filter(op => op.category === cat).map(op => {
                         const dateStr = formatDate(op.date);
-                        const comment = op.comment ? op.comment + ' · ' : '';
+                        const comment = op.comment ? esc(op.comment) + ' · ' : '';
                         const wallet = op.wallet || '💳 Карта';
                         return `<div class="dash-cat-op" onclick="event.stopPropagation(); openEdit(${op.id})" style="cursor:pointer">
                             <span class="dash-cat-op-left">${comment}${dateStr} · ${wallet}</span>
@@ -2423,18 +2427,31 @@
         let editingWalletIdx = -1;
         let editWalletColor = '#F2F2F7';
 
+        // Маппинг кошельков на Lucide-иконки
+        const WALLET_ICON_MAP = {
+            '💳': { lucide: 'credit-card', color: '#007AFF' },
+            '💵': { lucide: 'banknote', color: '#34C759' }
+        };
+
+        function walletLucideIcon(emoji, size) {
+            const mapped = WALLET_ICON_MAP[emoji];
+            if (mapped) return lucideIcon(mapped.lucide, size || 22, mapped.color);
+            return lucideIcon('wallet', size || 22, '#007AFF');
+        }
+
         function applyWalletSettings() {
             walletSettings.forEach((ws, i) => {
                 const nameEl = document.getElementById('walletName' + i);
                 const iconEl = document.getElementById('walletIcon' + i);
                 const badgeEl = document.getElementById('walletBadge' + i);
                 if (nameEl) nameEl.textContent = ws.name;
-                if (iconEl) iconEl.textContent = ws.icon;
+                if (iconEl) iconEl.innerHTML = walletLucideIcon(ws.icon, 22);
                 if (badgeEl) badgeEl.style.background = ws.color;
             });
             // Обновить WALLETS массив для совместимости
             WALLETS[0] = walletSettings[0].icon + ' ' + walletSettings[0].name;
             WALLETS[1] = walletSettings[1].icon + ' ' + walletSettings[1].name;
+            setTimeout(refreshIcons, 50);
         }
 
         function openWalletEdit(idx) {
@@ -2590,11 +2607,9 @@
         }
 
         function saveEdit() {
-            const amount = parseFloat(document.getElementById('editAmount').value);
-            if (!amount || amount <= 0 || !editCategory) {
-                haptic('error');
-                return;
-            }
+            const v = validateAmount(document.getElementById('editAmount').value);
+            if (!v.ok || !editCategory) { haptic('error'); return; }
+            const amount = v.amount;
 
             const op = operations.find(o => o.id === editingOpId);
             if (!op) return;
@@ -2639,6 +2654,20 @@
         function formatDate(dateStr) {
             const d = new Date(dateStr);
             return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+        }
+
+        // Экранирование HTML — защита от XSS
+        function esc(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // Валидация суммы
+        function validateAmount(val) {
+            const n = parseFloat(val);
+            if (!n || isNaN(n) || n <= 0) return { ok: false, error: 'Введите сумму больше 0' };
+            if (n > 10000000) return { ok: false, error: 'Сумма не может превышать 10 000 000' };
+            return { ok: true, amount: n };
         }
 
         // Осветлить цвет на percent%
