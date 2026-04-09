@@ -1468,6 +1468,19 @@ function clearAllData() {
 }
 
 // === СТАРТ ===
+
+// Попытка авторизации через API (если сервер доступен)
+(async function() {
+    if (tg && tg.initData) {
+        const user = await API.auth(tg.initData);
+        if (user) {
+            console.log('API: онлайн-режим, пользователь:', user.first_name);
+        } else {
+            console.log('API: оффлайн-режим (localStorage)');
+        }
+    }
+})();
+
 applyWalletSettings();
 init();
 refreshIcons();
