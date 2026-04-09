@@ -184,7 +184,7 @@ function renderAll() {
     updateSummary();
     renderOperations();
     updateDashboard();
-    setTimeout(refreshIcons, 50);
+    refreshIcons();
 }
 
 // === БАЛАНС ПО КОШЕЛЬКАМ ===
@@ -470,7 +470,7 @@ function renderQuickCats() {
             <div class="quick-cat-name">${c.name}</div>
         </button>`
     ).join('');
-    setTimeout(refreshIcons, 50);
+    refreshIcons();
 }
 
 // Быстрое сохранение: тап на категорию = сохранено!
@@ -535,12 +535,17 @@ function updateExtType() {
     renderQuickCats();
 }
 
-function renderExtCats() {
-    const cats = currentType === 'expense' ? EXPENSE_CATS : INCOME_CATS;
-    document.getElementById('extCatGrid').innerHTML = cats.map(c =>
-        `<button class="cat-chip ${c.name === selectedCategory ? 'active' : ''}" onclick="selectExtCat('${c.name}')">${lucideIcon(c.icon, 16, c.color)} ${c.name}</button>`
+// Общая функция рендера категорий (для ввода и редактирования)
+function renderCatGrid(containerId, type, selected, onClickTemplate) {
+    const cats = type === 'expense' ? EXPENSE_CATS : INCOME_CATS;
+    document.getElementById(containerId).innerHTML = cats.map(c =>
+        `<button class="cat-chip ${c.name === selected ? 'active' : ''}" onclick="${onClickTemplate(c.name)}">${lucideIcon(c.icon, 16, c.color)} ${c.name}</button>`
     ).join('');
-    setTimeout(refreshIcons, 50);
+    refreshIcons();
+}
+
+function renderExtCats() {
+    renderCatGrid('extCatGrid', currentType, selectedCategory, (name) => `selectExtCat('${name}')`);
 }
 
 function selectExtCat(cat) {
@@ -1170,7 +1175,7 @@ function applyWalletSettings() {
     // Обновить WALLETS массив для совместимости
     WALLETS[0] = walletSettings[0].icon + ' ' + walletSettings[0].name;
     WALLETS[1] = walletSettings[1].icon + ' ' + walletSettings[1].name;
-    setTimeout(refreshIcons, 50);
+    refreshIcons();
 }
 
 function openWalletEdit(idx) {
@@ -1318,11 +1323,7 @@ function renderEditWallets() {
 }
 
 function renderEditCats() {
-    const cats = editType === 'expense' ? EXPENSE_CATS : INCOME_CATS;
-    document.getElementById('editCatGrid').innerHTML = cats.map(c =>
-        `<button class="cat-chip ${c.name === editCategory ? 'active' : ''}" onclick="editCategory='${c.name}'; renderEditCats(); haptic('light')">${lucideIcon(c.icon, 16, c.color)} ${c.name}</button>`
-    ).join('');
-    setTimeout(refreshIcons, 50);
+    renderCatGrid('editCatGrid', editType, editCategory, (name) => `editCategory='${name}'; renderEditCats(); haptic('light')`);
 }
 
 function saveEdit() {
@@ -1435,7 +1436,7 @@ function switchTab(tab, btn) {
     }
     // Прокрутить вверх и обновить иконки
     window.scrollTo(0, 0);
-    setTimeout(refreshIcons, 50);
+    refreshIcons();
 }
 
 // Поделиться приложением
@@ -1468,7 +1469,7 @@ function clearAllData() {
 // === СТАРТ ===
 applyWalletSettings();
 init();
-setTimeout(refreshIcons, 100);
+refreshIcons();
 
 // === ЭКСПОРТ ФУНКЦИЙ В WINDOW (для onclick в HTML) ===
 Object.assign(window, {
