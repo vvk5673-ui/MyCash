@@ -1,3 +1,6 @@
+(function() {
+'use strict';
+
 // === TELEGRAM WEB APP ===
 const tg = window.Telegram && window.Telegram.WebApp;
 if (tg) {
@@ -1467,6 +1470,20 @@ applyWalletSettings();
 init();
 setTimeout(refreshIcons, 100);
 
+// === ЭКСПОРТ ФУНКЦИЙ В WINDOW (для onclick в HTML) ===
+Object.assign(window, {
+    anCarEnd, anCarMove, anCarStart, applyCustomPeriod, clearAllData,
+    clearDemoData, closeEdit, closeModal, closeUpgrade, closeVoiceConfirm,
+    closeWalletEdit, confirmVoice, deleteFromEdit, deleteOperation, deleteWallet,
+    focusAmount, haptic, onboardingNext, onboardingSkip, openCustomPeriod,
+    openEdit, openModal, openWalletEdit, quickSave, renderEditCats,
+    renderEditWallets, saveEdit, saveExtended, saveWalletEdit, selectExtCat,
+    selectWallet, selectWalletColor, setDashTab, setEditType, setPeriod,
+    setTableMode, setType, shareApp, showUpgrade, stopVoice, swapTransfer,
+    switchTab, toggleCatOps, toggleExtended, updateAmountDisplay,
+    swipeStart, swipeMove, swipeEnd
+});
+
 // Восстановить вкладку из хэша URL
 (function() {
     const hash = location.hash.replace('#', '');
@@ -1477,3 +1494,6 @@ setTimeout(refreshIcons, 100);
         if (idx >= 0 && btns[idx]) switchTab(hash, btns[idx]);
     }
 })();
+
+})(); // закрытие главного IIFE
+
