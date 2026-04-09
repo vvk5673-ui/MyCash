@@ -19,23 +19,16 @@ const dateOpts = { day: 'numeric', month: 'long', year: 'numeric', weekday: 'lon
 const dateStr = now.toLocaleDateString('ru-RU', dateOpts);
 document.getElementById('headerDate').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
 
-// Вибрация (HapticFeedback)
+// Вибрация (HapticFeedback) — с try/catch для работы вне Telegram
 function haptic(type) {
-    if (tg && tg.HapticFeedback) {
-        if (type === 'light') tg.HapticFeedback.impactOccurred('light');
-        else if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
-        else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
-        else tg.HapticFeedback.impactOccurred('medium');
-    }
-}
-
-// Общая функция подтверждения (вместо дублирования tg.showConfirm/confirm)
-function confirmAction(message, callback) {
-    if (tg && tg.showConfirm) {
-        tg.showConfirm(message, (ok) => { if (ok) callback(); });
-    } else {
-        if (confirm(message)) callback();
-    }
+    try {
+        if (tg && tg.HapticFeedback) {
+            if (type === 'light') tg.HapticFeedback.impactOccurred('light');
+            else if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
+            else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
+            else tg.HapticFeedback.impactOccurred('medium');
+        }
+    } catch(e) {}
 }
 
 // === ХРАНИЛИЩЕ (localStorage основное, CloudStorage бэкап) ===
@@ -90,19 +83,18 @@ function lucideIcon(name, size, color) {
     return '<i data-lucide="' + name + '" style="width:' + size + 'px;height:' + size + 'px;color:' + color + '"></i>';
 }
 
-// Обновить все Lucide-иконки на странице (с фоллбеком)
+// Обновить все Lucide-иконки на странице
 function refreshIcons() {
     if (window.lucide) {
         lucide.createIcons();
     } else {
-        // Фоллбек: если Lucide не загрузился — показать первую букву
+        // Фоллбек: если Lucide не загрузился — первая буква
         document.querySelectorAll('i[data-lucide]').forEach(el => {
-            if (!el.innerHTML || el.innerHTML.trim() === '') {
+            if (!el.querySelector('svg')) {
                 const name = el.getAttribute('data-lucide') || '';
                 el.textContent = name.charAt(0).toUpperCase();
                 el.style.fontStyle = 'normal';
                 el.style.fontWeight = '600';
-                el.style.fontSize = (parseInt(el.style.width) || 16) * 0.6 + 'px';
             }
         });
     }
@@ -178,6 +170,7 @@ function init() {
 
     if (isDemo) {
         document.getElementById('demoBanner').classList.add('active');
+        document.getElementById('demoBannerProfile').classList.add('active');
     }
 
     renderAll();
@@ -339,8 +332,7 @@ function renderOperations() {
         return `
             <div class="op-item" data-id="${op.id}"
                  onclick="openEdit(${op.id})"
-                 ontouchstart="swipeStart(event)" ontouchmove="swipeMove(event)" ontouchend="swipeEnd(event)"
-                         onmousedown="swipeStart(event)" onmousemove="swipeMove(event)" onmouseup="swipeEnd(event)">
+                 ontouchstart="swipeStart(event)" ontouchmove="swipeMove(event)" ontouchend="swipeEnd(event)">
                 <div class="op-swipe-actions">
                     <button class="op-swipe-btn edit" onclick="event.stopPropagation(); openEdit(${op.id})"><i data-lucide="pencil" style="width:16px;height:16px;color:white"></i><br>Изменить</button>
                     <button class="op-swipe-btn delete" onclick="event.stopPropagation(); deleteOperation(${op.id})"><i data-lucide="trash-2" style="width:16px;height:16px;color:white"></i><br>Удалить</button>
@@ -357,40 +349,34 @@ function renderOperations() {
     }).join('');
 }
 
-// === СВАЙП ДЛЯ УДАЛЕНИЯ (тач + мышь) ===
+// === СВАЙП ДЛЯ УДАЛЕНИЯ ===
 let swipeStartX = 0;
 let swipeCurrentItem = null;
 let swiped = false;
 
-function getClientX(e) {
-    return e.touches ? e.touches[0].clientX : e.clientX;
-}
-function getEndClientX(e) {
-    return e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-}
-
 function swipeStart(e) {
-    swipeStartX = getClientX(e);
+    swipeStartX = e.touches[0].clientX;
     swipeCurrentItem = e.currentTarget;
     swiped = false;
 }
 
 function swipeMove(e) {
     if (!swipeCurrentItem) return;
-    const dx = getClientX(e) - swipeStartX;
+    const dx = e.touches[0].clientX - swipeStartX;
     if (dx < -20) {
         swiped = true;
         const offset = Math.min(160, Math.abs(dx));
         swipeCurrentItem.style.transform = `translateX(-${offset}px)`;
         swipeCurrentItem.querySelector('.op-swipe-actions').style.transform = `translateX(${160 - offset}px)`;
-        if (e.cancelable) e.preventDefault();
+        e.preventDefault();
     }
 }
 
 function swipeEnd(e) {
     if (!swipeCurrentItem) return;
-    const dx = getEndClientX(e) - swipeStartX;
+    const dx = e.changedTouches[0].clientX - swipeStartX;
     if (dx < -80) {
+        // Показать кнопки редактирования и удаления
         swipeCurrentItem.style.transform = 'translateX(-160px)';
         swipeCurrentItem.querySelector('.op-swipe-actions').style.transform = 'translateX(0)';
     } else {
@@ -412,12 +398,13 @@ document.addEventListener('touchstart', function(e) {
 });
 
 function deleteOperation(id) {
-    confirmAction('Удалить эту операцию?', () => {
+    const doDelete = () => {
         operations = operations.filter(op => op.id !== id);
         Storage.save('mycash_ops', operations);
         haptic('success');
         renderAll();
-    });
+    };
+    if (confirm('Удалить эту операцию?')) doDelete();
 }
 
 // === МОДАЛЬНОЕ ОКНО: БЫСТРЫЙ ВВОД ===
@@ -832,6 +819,7 @@ function clearDemoData() {
     Storage.save('mycash_ops', operations);
     Storage.save('mycash_is_demo', false);
     document.getElementById('demoBanner').classList.remove('active');
+    document.getElementById('demoBannerProfile').classList.remove('active');
 
     // Показываем запрос остатков
     onboardingStep = 0;
@@ -1359,14 +1347,15 @@ function saveEdit() {
 function deleteFromEdit() {
     if (!editingOpId) return;
     const id = editingOpId;
-    confirmAction('Удалить эту операцию?', () => {
+    const doDelete = () => {
         operations = operations.filter(op => op.id !== id);
         Storage.save('mycash_ops', operations);
         haptic('success');
         document.getElementById('editOverlay').classList.remove('active');
         editingOpId = null;
         renderAll();
-    }
+    };
+    if (confirm('Удалить эту операцию?')) doDelete();
 }
 
 // === УТИЛИТЫ ===
@@ -1460,7 +1449,7 @@ function shareApp() {
 
 // Очистить все данные
 function clearAllData() {
-    confirmAction('Удалить все данные? Это действие нельзя отменить.', () => {
+    const doIt = () => {
         localStorage.clear();
         operations = [];
         walletBalances = { '💳 Карта': 0, '💵 Наличка': 0 };
@@ -1469,7 +1458,8 @@ function clearAllData() {
         haptic('success');
         renderAll();
         switchTab('home', document.querySelector('.tab-item'));
-    }
+    };
+    if (confirm('Удалить все данные? Это действие нельзя отменить.')) doIt();
 }
 
 // === СТАРТ ===
@@ -1481,8 +1471,8 @@ setTimeout(refreshIcons, 100);
 (function() {
     const hash = location.hash.replace('#', '');
     if (hash && tabPages[hash]) {
-        const btns = document.querySelectorAll('.tab-item');
         const tabKeys = ['home', 'analytics', 'pro', 'profile'];
+        const btns = document.querySelectorAll('.tab-item');
         const idx = tabKeys.indexOf(hash);
         if (idx >= 0 && btns[idx]) switchTab(hash, btns[idx]);
     }
