@@ -402,10 +402,23 @@ document.addEventListener('touchstart', function(e) {
 
 function deleteOperation(id) {
     const doDelete = () => {
+        // Запоминаем _server_id перед удалением (для отправки на сервер)
+        const op = operations.find(function(o) { return o.id === id; });
+        const serverId = op && op._server_id;
+
         operations = operations.filter(op => op.id !== id);
         Storage.save('mycash_ops', operations);
         haptic('success');
         renderAll();
+
+        // Удаление на сервере, если операция была синхронизирована
+        if (serverId && typeof API !== 'undefined') {
+            API.deleteOperation(serverId).then(function() {
+                console.log('Операция удалена на сервере:', serverId);
+            }).catch(function(e) {
+                console.warn('Не удалось удалить операцию на сервере:', e.message);
+            });
+        }
     };
     if (confirm('Удалить эту операцию?')) doDelete();
 }
@@ -500,6 +513,39 @@ function quickSave(category) {
     haptic('success');
     document.getElementById('modalOverlay').classList.remove('active');
     renderAll();
+
+    // Отправка на сервер (фоном, не блокирует UI)
+    sendOperationToServer(op);
+}
+
+// Отправка операции на сервер. Обновляет op._server_id если успех.
+async function sendOperationToServer(op) {
+    if (typeof API === 'undefined') return;
+    try {
+        const walletId = window.walletIdMap ? window.walletIdMap[op.wallet] : null;
+        const walletFromId = window.walletIdMap && op.walletFrom ? window.walletIdMap[op.walletFrom] : null;
+        const walletToId = window.walletIdMap && op.walletTo ? window.walletIdMap[op.walletTo] : null;
+
+        const payload = {
+            type: op.type,
+            amount: op.amount,
+            category: op.category || null,
+            wallet_id: walletId,
+            wallet_from_id: walletFromId,
+            wallet_to_id: walletToId,
+            comment: op.comment || '',
+            date: op.date
+        };
+
+        const result = await API.createOperation(payload);
+        if (result && result.id) {
+            op._server_id = result.id;
+            Storage.save('mycash_ops', operations);
+            console.log('Операция отправлена на сервер:', result.id);
+        }
+    } catch (e) {
+        console.warn('Не удалось отправить операцию на сервер:', e.message);
+    }
 }
 
 // === РАСШИРЕННАЯ ФОРМА ===
@@ -566,8 +612,9 @@ function saveExtended() {
     if (!v.ok) { haptic('error'); return; }
     const amount = v.amount;
 
+    let newOp;
     if (currentType === 'transfer') {
-        const op = {
+        newOp = {
             id: Date.now(),
             type: 'transfer',
             amount: amount,
@@ -578,14 +625,14 @@ function saveExtended() {
             comment: document.getElementById('commentInput').value || '',
             date: (document.getElementById('dateInput').value || new Date().toISOString().split('T')[0]) + 'T12:00:00'
         };
-        operations.unshift(op);
+        operations.unshift(newOp);
     } else {
         if (!selectedCategory) {
             haptic('error');
             return;
         }
         const dateVal = document.getElementById('dateInput').value;
-        const op = {
+        newOp = {
             id: Date.now(),
             type: currentType,
             amount: amount,
@@ -594,7 +641,7 @@ function saveExtended() {
             comment: document.getElementById('commentInput').value || '',
             date: (dateVal || new Date().toISOString().split('T')[0]) + 'T12:00:00'
         };
-        operations.unshift(op);
+        operations.unshift(newOp);
     }
 
     Storage.save('mycash_ops', operations);
@@ -602,6 +649,9 @@ function saveExtended() {
     haptic('success');
     document.getElementById('modalOverlay').classList.remove('active');
     renderAll();
+
+    // Отправка на сервер в фоне
+    sendOperationToServer(newOp);
 }
 
 // === ДАШБОРД ===
@@ -1346,18 +1396,47 @@ function saveEdit() {
     document.getElementById('editOverlay').classList.remove('active');
     editingOpId = null;
     renderAll();
+
+    // Обновление на сервере (если операция была синхронизирована)
+    if (op._server_id && typeof API !== 'undefined') {
+        const walletId = window.walletIdMap ? window.walletIdMap[op.wallet] : null;
+        const payload = {
+            type: op.type,
+            amount: op.amount,
+            category: op.category,
+            wallet_id: walletId,
+            comment: op.comment,
+            date: op.date
+        };
+        API.updateOperation(op._server_id, payload).then(function() {
+            console.log('Операция обновлена на сервере:', op._server_id);
+        }).catch(function(e) {
+            console.warn('Не удалось обновить операцию на сервере:', e.message);
+        });
+    }
 }
 
 function deleteFromEdit() {
     if (!editingOpId) return;
     const id = editingOpId;
     const doDelete = () => {
+        const op = operations.find(function(o) { return o.id === id; });
+        const serverId = op && op._server_id;
+
         operations = operations.filter(op => op.id !== id);
         Storage.save('mycash_ops', operations);
         haptic('success');
         document.getElementById('editOverlay').classList.remove('active');
         editingOpId = null;
         renderAll();
+
+        if (serverId && typeof API !== 'undefined') {
+            API.deleteOperation(serverId).then(function() {
+                console.log('Операция удалена на сервере:', serverId);
+            }).catch(function(e) {
+                console.warn('Не удалось удалить операцию на сервере:', e.message);
+            });
+        }
     };
     if (confirm('Удалить эту операцию?')) doDelete();
 }
@@ -1469,12 +1548,27 @@ function clearAllData() {
 
 // === СТАРТ ===
 
-// Попытка авторизации через API (если сервер доступен)
+// Маппинг "имя кошелька" → uuid на сервере (для отправки wallet_id)
+window.walletIdMap = {};
+
+// Попытка авторизации через API + загрузка кошельков
 (async function() {
     if (tg && tg.initData) {
         const user = await API.auth(tg.initData);
         if (user) {
             console.log('API: онлайн-режим, пользователь:', user.first_name);
+            // Подгружаем кошельки с сервера и строим маппинг имя → uuid
+            try {
+                const serverWallets = await API.getWallets();
+                if (serverWallets && Array.isArray(serverWallets)) {
+                    serverWallets.forEach(function(w) {
+                        window.walletIdMap[w.name] = w.id;
+                    });
+                    console.log('Загружены кошельки с сервера:', Object.keys(window.walletIdMap));
+                }
+            } catch (e) {
+                console.warn('Не удалось загрузить кошельки с сервера:', e);
+            }
         } else {
             console.log('API: оффлайн-режим (localStorage)');
         }
