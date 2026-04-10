@@ -1,6 +1,8 @@
 """
-MyCash Bot — Telegram-бот для финансового учёта
-Фаза 1: MVP — базовый бот с Mini App
+MyCash Bot — ЛОКАЛЬНАЯ версия (polling)
+Используется для разработки и тестирования без VPS.
+
+Для продакшена (VPS) используется server/bot.py (webhook).
 """
 
 import asyncio

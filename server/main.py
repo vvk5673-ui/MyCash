@@ -8,13 +8,34 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional
 
-from config import HOST, PORT
+import logging
+from contextlib import asynccontextmanager
+
+from config import HOST, PORT, BOT_TOKEN
 from database import supabase
 from auth import verify_telegram_init_data, create_jwt_token
 from middleware import get_current_user
 from demo_data import generate_demo_operations
+from bot import bot as tg_bot, dp as tg_dp, setup_webhook, setup_bot_commands, setup_scheduler, process_webhook_update
 
-app = FastAPI(title='MyCash API', version='1.0')
+log = logging.getLogger(__name__)
+
+@asynccontextmanager
+async def lifespan(app):
+    """Запуск и остановка бота вместе с сервером"""
+    # При старте сервера
+    log.info("Запуск MyCash API + Bot...")
+    await setup_bot_commands()
+    setup_scheduler()
+    # Webhook будет установлен после деплоя на VPS
+    # await setup_webhook(f"https://your-domain.com/bot/webhook")
+    yield
+    # При остановке сервера
+    await tg_bot.session.close()
+    log.info("Сервер остановлен")
+
+
+app = FastAPI(title='MyCash API', version='1.0', lifespan=lifespan)
 
 # CORS — разрешаем запросы с GitHub Pages и локального файла
 app.add_middleware(
@@ -474,6 +495,18 @@ async def delete_account(current_user: dict = Depends(get_current_user)):
 async def health():
     """Проверка что сервер работает"""
     return {'status': 'ok', 'version': '1.0'}
+
+
+# ==========================================
+# 7. TELEGRAM WEBHOOK
+# ==========================================
+
+@app.post('/bot/webhook')
+async def telegram_webhook(request: Request):
+    """Принимаем обновления от Telegram"""
+    update_data = await request.json()
+    await process_webhook_update(update_data)
+    return {'ok': True}
 
 
 # ==========================================
