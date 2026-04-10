@@ -522,9 +522,9 @@ function quickSave(category) {
 async function sendOperationToServer(op) {
     if (typeof API === 'undefined') return;
     try {
-        const walletId = window.walletIdMap ? window.walletIdMap[op.wallet] : null;
-        const walletFromId = window.walletIdMap && op.walletFrom ? window.walletIdMap[op.walletFrom] : null;
-        const walletToId = window.walletIdMap && op.walletTo ? window.walletIdMap[op.walletTo] : null;
+        const walletId = window.getWalletId ? window.getWalletId(op.wallet) : null;
+        const walletFromId = window.getWalletId && op.walletFrom ? window.getWalletId(op.walletFrom) : null;
+        const walletToId = window.getWalletId && op.walletTo ? window.getWalletId(op.walletTo) : null;
 
         const payload = {
             type: op.type,
@@ -1399,7 +1399,7 @@ function saveEdit() {
 
     // Обновление на сервере (если операция была синхронизирована)
     if (op._server_id && typeof API !== 'undefined') {
-        const walletId = window.walletIdMap ? window.walletIdMap[op.wallet] : null;
+        const walletId = window.getWalletId ? window.getWalletId(op.wallet) : null;
         const payload = {
             type: op.type,
             amount: op.amount,
@@ -1548,8 +1548,22 @@ function clearAllData() {
 
 // === СТАРТ ===
 
-// Маппинг "имя кошелька" → uuid на сервере (для отправки wallet_id)
+// Маппинг "чистое имя кошелька" → uuid на сервере (для отправки wallet_id)
 window.walletIdMap = {};
+
+// Очищает имя кошелька от эмодзи и пробелов в начале.
+// "💳 Карта" → "Карта", "Наличка" → "Наличка"
+window.cleanWalletName = function(name) {
+    if (!name) return '';
+    return String(name).replace(/^[^а-яА-ЯёЁa-zA-Z]+/, '').trim();
+};
+
+// Возвращает uuid кошелька по имени (с эмодзи или без).
+window.getWalletId = function(name) {
+    if (!name || !window.walletIdMap) return null;
+    const clean = window.cleanWalletName(name);
+    return window.walletIdMap[clean] || null;
+};
 
 // Попытка авторизации через API + загрузка кошельков
 (async function() {
@@ -1562,7 +1576,8 @@ window.walletIdMap = {};
                 const serverWallets = await API.getWallets();
                 if (serverWallets && Array.isArray(serverWallets)) {
                     serverWallets.forEach(function(w) {
-                        window.walletIdMap[w.name] = w.id;
+                        // Ключ — чистое имя без эмодзи ("Карта", "Наличка")
+                        window.walletIdMap[window.cleanWalletName(w.name)] = w.id;
                     });
                     console.log('Загружены кошельки с сервера:', Object.keys(window.walletIdMap));
                 }
