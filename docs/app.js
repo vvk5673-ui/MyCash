@@ -118,11 +118,22 @@ let walletBalances = { '💳 Карта': 0, '💵 Наличка': 0 };
 // === ДЕМО-ДАННЫЕ ===
 function generateDemoData() {
     const now = new Date();
-    // Прошлый месяц — чтобы демо-операции были до сегодняшней даты,
-    // и новые реальные операции пользователя попадали в верх списка.
-    // new Date(year, monthIndex) автоматически нормализует -1 в декабрь прошлого года.
-    const y = now.getFullYear();
-    const m = now.getMonth() - 1;
+    const today = now.getDate();
+    // Если сегодня 3-е число или позже — распределяем демо по дням 1..(сегодня-1)
+    // текущего месяца. Так демо видны в фильтре "месяц", а реальные операции
+    // с датой "сегодня" всегда оказываются в самом верху списка.
+    // Если сегодня 1-2 число — уходим в прошлый месяц целиком.
+    let y, m, useCurrent;
+    if (today >= 3) {
+        y = now.getFullYear();
+        m = now.getMonth();
+        useCurrent = true;
+    } else {
+        y = now.getFullYear();
+        m = now.getMonth() - 1;
+        useCurrent = false;
+    }
+    const maxDay = useCurrent ? (today - 1) : 28;
     const demo = [
         { type: 'income', amount: 80000, category: 'Зарплата', wallet: '💳 Карта', comment: '', day: 1 },
         { type: 'expense', amount: 25000, category: 'ЖКХ', wallet: '💳 Карта', comment: 'Аренда квартиры', day: 2 },
@@ -142,15 +153,21 @@ function generateDemoData() {
         { type: 'expense', amount: 2000, category: 'Прочее', wallet: '💵 Наличка', comment: 'Подарок маме', day: 25 },
         { type: 'income', amount: 15000, category: 'Подработка', wallet: '💵 Наличка', comment: 'Фриланс', day: 28 }
     ];
-    return demo.map((d, i) => ({
-        id: Date.now() - (demo.length - i) * 100000,
-        type: d.type,
-        amount: d.amount,
-        category: d.category,
-        wallet: d.wallet,
-        comment: d.comment,
-        date: new Date(y, m, d.day, 10 + i % 12, i * 7 % 60).toISOString()
-    }));
+    return demo.map((d, i) => {
+        // Если демо в текущем месяце — ограничиваем день сверху maxDay,
+        // чтобы не попасть в будущее. Несколько операций могут оказаться
+        // в один день, но время (час) будет разным — порядок сохранится.
+        const day = Math.min(d.day, maxDay);
+        return {
+            id: Date.now() - (demo.length - i) * 100000,
+            type: d.type,
+            amount: d.amount,
+            category: d.category,
+            wallet: d.wallet,
+            comment: d.comment,
+            date: new Date(y, m, day, 10 + i % 12, i * 7 % 60).toISOString()
+        };
+    });
 }
 
 // === ИНИЦИАЛИЗАЦИЯ ===

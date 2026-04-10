@@ -8,17 +8,25 @@ from datetime import datetime, timedelta
 def generate_demo_operations(user_id: str, card_wallet_id: str, cash_wallet_id: str) -> list:
     """
     Генерирует 17 демо-операций для нового пользователя.
-    Даты — в прошлом месяце, чтобы реальные операции пользователя
-    попадали в верх списка, а не в середину.
+    Даты — в текущем месяце, до вчерашнего дня (чтобы фильтр "месяц"
+    их показывал, а новые операции пользователя с датой "сегодня"
+    попадали в самый верх списка).
+    Если сегодня 1-2 число месяца — демо уходят в прошлый месяц целиком.
     """
     now = datetime.now()
-    # Прошлый месяц (если сейчас январь — берём декабрь прошлого года)
-    if now.month == 1:
+    today = now.day
+    if today >= 3:
+        y = now.year
+        m = now.month
+        max_day = today - 1
+    elif now.month == 1:
         y = now.year - 1
         m = 12
+        max_day = 28
     else:
         y = now.year
         m = now.month - 1
+        max_day = 28
 
     demo = [
         {'type': 'income', 'amount': 80000, 'category': 'Зарплата', 'wallet_id': card_wallet_id, 'comment': '', 'day': 1},
