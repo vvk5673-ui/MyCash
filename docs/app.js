@@ -165,7 +165,8 @@ function generateDemoData() {
             category: d.category,
             wallet: d.wallet,
             comment: d.comment,
-            date: new Date(y, m, day, 10 + i % 12, i * 7 % 60).toISOString()
+            date: new Date(y, m, day, 10 + i % 12, i * 7 % 60).toISOString(),
+            _demo: true
         };
     });
 }
@@ -186,9 +187,18 @@ function init() {
         isDemo = true;
         Storage.save('mycash_ops', operations);
         Storage.save('mycash_is_demo', true);
+    } else if (demoFlag === true) {
+        // Демо-пользователь: перегенерируем демо (чтобы даты всегда были
+        // актуальны), но сохраняем все реальные операции пользователя
+        // (те что без флага _demo — добавленные вручную).
+        const userOps = data.filter(function(op) { return !op._demo; });
+        const freshDemo = generateDemoData();
+        operations = userOps.concat(freshDemo);
+        isDemo = true;
+        Storage.save('mycash_ops', operations);
     } else {
         operations = data;
-        isDemo = demoFlag === true;
+        isDemo = false;
     }
 
     if (isDemo) {
