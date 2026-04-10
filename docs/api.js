@@ -10,8 +10,9 @@
 const API = (function() {
 'use strict';
 
-// URL сервера (заменить на реальный после деплоя на VPS)
-const BASE_URL = localStorage.getItem('mycash_api_url') || '';
+// URL API сервера на VPS (Beget)
+// Можно переопределить через localStorage.setItem('mycash_api_url', '...')
+const BASE_URL = localStorage.getItem('mycash_api_url') || 'https://mycash-app.ru';
 // JWT-токен (хранится в памяти, не в localStorage)
 let authToken = null;
 // Режим работы: 'online' или 'offline'

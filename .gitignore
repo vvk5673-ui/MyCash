@@ -28,6 +28,7 @@ Thumbs.db
 # Логи
 *.log
 npm-debug.log*
+logs/
 
 # IDE
 .vscode/

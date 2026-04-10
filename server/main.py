@@ -11,6 +11,11 @@ from typing import Optional
 import logging
 from contextlib import asynccontextmanager
 
+from logger import setup_logging
+# Настраиваем логирование ДО импорта остальных модулей,
+# чтобы их логи тоже попали в файл
+setup_logging()
+
 from config import HOST, PORT, BOT_TOKEN
 from database import supabase
 from auth import verify_telegram_init_data, create_jwt_token
@@ -18,7 +23,7 @@ from middleware import get_current_user
 from demo_data import generate_demo_operations
 from bot import bot as tg_bot, dp as tg_dp, setup_webhook, setup_bot_commands, setup_scheduler, process_webhook_update
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('mycash.api')
 
 @asynccontextmanager
 async def lifespan(app):
@@ -44,6 +49,36 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+
+# Глобальный обработчик: ловим все необработанные исключения и пишем в лог
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Логируем все необработанные ошибки с полным трейсбеком"""
+    log.error(
+        f'Необработанная ошибка в {request.method} {request.url.path}: '
+        f'{type(exc).__name__}: {exc}',
+        exc_info=True
+    )
+    return JSONResponse(
+        status_code=500,
+        content={'detail': 'Внутренняя ошибка сервера'}
+    )
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Логируем HTTP-ошибки (400, 401, 404, 429 и т.д.)"""
+    if exc.status_code >= 500:
+        log.error(f'HTTP {exc.status_code} в {request.method} {request.url.path}: {exc.detail}')
+    elif exc.status_code >= 400:
+        log.warning(f'HTTP {exc.status_code} в {request.method} {request.url.path}: {exc.detail}')
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={'detail': exc.detail}
+    )
 
 
 # ==========================================
