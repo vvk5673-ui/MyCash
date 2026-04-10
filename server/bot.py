@@ -29,7 +29,7 @@ router = Router()
 dp.include_router(router)
 
 # URL Mini App (GitHub Pages)
-WEBAPP_URL = "https://vvk5673-ui.github.io/MyCash/?v=10"
+WEBAPP_URL = "https://vvk5673-ui.github.io/MyCash/?v=11"
 
 # Планировщик задач (напоминания, отчёты)
 scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
