@@ -118,8 +118,11 @@ let walletBalances = { '💳 Карта': 0, '💵 Наличка': 0 };
 // === ДЕМО-ДАННЫЕ ===
 function generateDemoData() {
     const now = new Date();
+    // Прошлый месяц — чтобы демо-операции были до сегодняшней даты,
+    // и новые реальные операции пользователя попадали в верх списка.
+    // new Date(year, monthIndex) автоматически нормализует -1 в декабрь прошлого года.
     const y = now.getFullYear();
-    const m = now.getMonth();
+    const m = now.getMonth() - 1;
     const demo = [
         { type: 'income', amount: 80000, category: 'Зарплата', wallet: '💳 Карта', comment: '', day: 1 },
         { type: 'expense', amount: 25000, category: 'ЖКХ', wallet: '💳 Карта', comment: 'Аренда квартиры', day: 2 },
