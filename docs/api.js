@@ -27,7 +27,12 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 минут
 
 // HTTP-запрос к серверу
 async function request(method, endpoint, body) {
-    if (!BASE_URL || mode === 'offline') {
+    // Блокируем запросы если нет BASE_URL или если мы в offline И это не auth
+    // (auth должен иметь возможность переключить mode в online)
+    if (!BASE_URL) {
+        throw new Error('offline');
+    }
+    if (mode === 'offline' && endpoint !== '/v1/auth/telegram') {
         throw new Error('offline');
     }
 
