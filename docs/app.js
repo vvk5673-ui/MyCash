@@ -549,6 +549,7 @@ function mapServerOp(s) {
         article_id: s.article_id || null,
         direction_id: s.direction_id || null,
         contragent_id: s.contragent_id || null,
+        created_at: s.created_at || s.date,   // время создания — для сортировки внутри одного дня
         _demo: !!s.is_demo
     };
 }
@@ -729,9 +730,26 @@ function filterByPeriod(ops) {
 }
 
 // === ОПЕРАЦИИ — ОТОБРАЖЕНИЕ ===
+// Метка «когда операция добавлена» (мс): created_at с сервера, иначе числовой id (Date.now())
+function opAddedTs(op) {
+    if (op.created_at) {
+        const t = new Date(op.created_at).getTime();
+        if (!isNaN(t)) return t;
+    }
+    return typeof op.id === 'number' ? op.id : 0;
+}
+
+// Сортировка списка: сначала по дате операции (новые сверху),
+// при одинаковой дате — последняя добавленная сверху
+function sortOpsForList(a, b) {
+    const d = new Date(b.date) - new Date(a.date);
+    if (d !== 0) return d;
+    return opAddedTs(b) - opAddedTs(a);
+}
+
 function renderOperations() {
     const container = document.getElementById('operationsList');
-    const filtered = filterByPeriod(operations).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const filtered = filterByPeriod(operations).slice().sort(sortOpsForList);
 
     if (filtered.length === 0) {
         container.innerHTML = '<div class="empty-state"><div class="icon">📝</div><p>Пока нет операций.<br>Нажмите + чтобы добавить первую</p></div>';
