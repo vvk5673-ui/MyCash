@@ -53,9 +53,19 @@ body {
     margin-bottom: 16px;
 }
 .wallets-row {
-    display: flex;
-    gap: 10px;
+    display: block;
 }
+/* Компактная строка кошелька в списке на главной */
+.wallet-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 2px;
+    border-bottom: 1px solid var(--border);
+}
+.wallet-line:last-child { border-bottom: none; }
+.wallet-line-name { flex: 1; font-size: 14px; }
+.wallet-line-amount { font-size: 14px; font-weight: 600; }
 .wallet-badge {
     flex: 1;
     background: var(--bg);
@@ -570,6 +580,7 @@ body {
 /* Кошелёк-переключатель */
 .wallet-switch {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 8px;
     margin-bottom: 20px;
@@ -593,7 +604,7 @@ body {
 /* Быстрые категории — круглые иконки */
 .quick-cats {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-bottom: 16px;
 }

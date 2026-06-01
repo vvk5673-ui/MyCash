@@ -221,17 +221,17 @@ function computeWalletBalances() {
     return bal;
 }
 
-// Рендер плашек кошельков на главном экране
+// Рендер кошельков на главном экране — компактным списком (по строке на кошелёк)
 function renderWalletsRow() {
     const wallets = getActiveWallets();
     const bal = computeWalletBalances();
     const row = document.getElementById('walletsRow');
     if (!row) return;
     row.innerHTML = wallets.map(function(w) {
-        return '<div class="wallet-badge">' +
-            '<div class="wallet-badge-icon">' + lucideIcon(w.icon || 'wallet', 22, w.color || '#007AFF') + '</div>' +
-            '<div class="wallet-badge-name">' + esc(w.name) + '</div>' +
-            '<div class="wallet-badge-amount">' + fmt(bal[w.name] || 0) + ' ₽</div>' +
+        return '<div class="wallet-line">' +
+            '<span style="flex-shrink:0">' + lucideIcon(w.icon || 'wallet', 18, w.color || '#007AFF') + '</span>' +
+            '<span class="wallet-line-name">' + esc(w.name) + '</span>' +
+            '<span class="wallet-line-amount">' + fmt(bal[w.name] || 0) + ' ₽</span>' +
             '</div>';
     }).join('');
     refreshIcons();
