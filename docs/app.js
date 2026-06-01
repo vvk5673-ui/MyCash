@@ -253,6 +253,204 @@ function renderProfileWallets() {
     refreshIcons();
 }
 
+// === СПРАВОЧНИКИ: УПРАВЛЕНИЕ (статьи / направления / контрагенты) ===
+
+// Метаданные по типам справочников
+const REF_META = {
+    articles:    { title: 'Статьи ДДС',  addLabel: 'статью' },
+    directions:  { title: 'Направления', addLabel: 'направление' },
+    contragents: { title: 'Контрагенты', addLabel: 'контрагента' }
+};
+let currentRefKind = null;   // 'articles' | 'directions' | 'contragents'
+let editingRefId = null;     // null = создаём новый
+let refArticleType = 'expense';
+
+// Обновить счётчики справочников в Профиле (только не скрытые)
+function updateRefCounts() {
+    const set = function(id, n) { const el = document.getElementById(id); if (el) el.textContent = n; };
+    set('refCountArticles', Refs.articles.filter(function(a) { return !a.is_archived; }).length);
+    set('refCountDirections', Refs.directions.filter(function(d) { return !d.is_archived; }).length);
+    set('refCountContragents', Refs.contragents.filter(function(c) { return !c.is_archived; }).length);
+}
+
+// Открыть окно списка справочника
+function openRefList(kind) {
+    currentRefKind = kind;
+    haptic('light');
+    document.getElementById('refListTitle').textContent = REF_META[kind].title;
+    renderRefList();
+    document.getElementById('refListOverlay').classList.add('active');
+}
+
+function closeRefList(e) {
+    if (e && e.target && e.target !== e.currentTarget) return;
+    document.getElementById('refListOverlay').classList.remove('active');
+}
+
+// HTML одной строки списка (тап = редактировать, корзина = скрыть)
+function refRowHtml(item) {
+    return '<div class="ref-row" onclick="openRefForm(\'' + item.id + '\')">' +
+        '<span class="ref-row-name">' + esc(item.name) + '</span>' +
+        '<button class="ref-row-del" onclick="event.stopPropagation();archiveRefItem(\'' + item.id + '\')">' +
+            lucideIcon('trash-2', 18, '#FF3B30') + '</button>' +
+        '<span style="color:var(--text2)">›</span></div>';
+}
+
+function refEmptyHtml() {
+    return '<div style="padding:12px;text-align:center;color:var(--text2);font-size:13px">Пока пусто</div>';
+}
+
+function refSubheader(text) {
+    return '<div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:14px 4px 6px">' + text + '</div>';
+}
+
+// Рендер тела окна списка
+function renderRefList() {
+    const kind = currentRefKind;
+    const body = document.getElementById('refListBody');
+    if (!body) return;
+
+    if (typeof API === 'undefined' || !API.isOnline()) {
+        body.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">Нужен интернет, чтобы управлять справочниками.</div>';
+        return;
+    }
+
+    if (kind === 'articles') {
+        const inGrp = Refs.groups.find(function(g) { return g.code === 'inflow'; });
+        const outGrp = Refs.groups.find(function(g) { return g.code === 'outflow'; });
+        const income = Refs.articles.filter(function(a) { return !a.is_archived && inGrp && a.group_id === inGrp.id; });
+        const expense = Refs.articles.filter(function(a) { return !a.is_archived && outGrp && a.group_id === outGrp.id; });
+        let html = '';
+        html += refSubheader('Доходные');
+        html += '<div class="ref-list-card">' + (income.length ? income.map(refRowHtml).join('') : refEmptyHtml()) + '</div>';
+        html += refSubheader('Расходные');
+        html += '<div class="ref-list-card">' + (expense.length ? expense.map(refRowHtml).join('') : refEmptyHtml()) + '</div>';
+        body.innerHTML = html;
+    } else {
+        const list = (kind === 'directions' ? Refs.directions : Refs.contragents).filter(function(x) { return !x.is_archived; });
+        body.innerHTML = '<div class="ref-list-card">' + (list.length ? list.map(refRowHtml).join('') : refEmptyHtml()) + '</div>';
+    }
+    refreshIcons();
+}
+
+// Открыть форму добавления/редактирования
+function openRefForm(id) {
+    editingRefId = (id && id !== 'null') ? id : null;
+    const kind = currentRefKind;
+    haptic('light');
+
+    document.getElementById('refFormName').value = '';
+    const artFields = document.getElementById('refFormArticleFields');
+    artFields.style.display = (kind === 'articles') ? 'block' : 'none';
+
+    // Список видов деятельности (для статей)
+    if (kind === 'articles') {
+        const sel = document.getElementById('refFormActivityKind');
+        sel.innerHTML = Refs.activityKinds.map(function(k) {
+            return '<option value="' + k.id + '">' + esc(k.name) + '</option>';
+        }).join('');
+    }
+
+    // Текущий элемент (при редактировании)
+    let item = null;
+    if (editingRefId) {
+        const list = kind === 'articles' ? Refs.articles : (kind === 'directions' ? Refs.directions : Refs.contragents);
+        item = list.find(function(x) { return x.id === editingRefId; });
+    }
+
+    if (item) {
+        document.getElementById('refFormTitle').textContent = 'Изменить';
+        document.getElementById('refFormName').value = item.name || '';
+        document.getElementById('refFormDeleteBtn').style.display = '';
+        if (kind === 'articles') {
+            const inGrp = Refs.groups.find(function(g) { return g.code === 'inflow'; });
+            setRefArticleType(inGrp && item.group_id === inGrp.id ? 'income' : 'expense');
+            if (item.activity_kind_id) document.getElementById('refFormActivityKind').value = item.activity_kind_id;
+        }
+    } else {
+        document.getElementById('refFormTitle').textContent = 'Добавить ' + REF_META[kind].addLabel;
+        document.getElementById('refFormDeleteBtn').style.display = 'none';
+        if (kind === 'articles') {
+            setRefArticleType('expense');
+            // По умолчанию — вид деятельности «Операционная» (или первый в списке)
+            const op = Refs.activityKinds.find(function(k) { return /операц/i.test(k.name); }) || Refs.activityKinds[0];
+            if (op) document.getElementById('refFormActivityKind').value = op.id;
+        }
+    }
+
+    document.getElementById('refFormOverlay').classList.add('active');
+    setTimeout(function() { document.getElementById('refFormName').focus(); }, 300);
+}
+
+function closeRefForm(e) {
+    if (e && e.target && e.target !== e.currentTarget) return;
+    document.getElementById('refFormOverlay').classList.remove('active');
+    editingRefId = null;
+}
+
+// Переключатель Доход/Расход в форме статьи
+function setRefArticleType(type) {
+    refArticleType = type;
+    document.getElementById('refTypeExpenseBtn').classList.toggle('active', type === 'expense');
+    document.getElementById('refTypeIncomeBtn').classList.toggle('active', type === 'income');
+    haptic('light');
+}
+
+// Сохранить (создать или обновить) элемент справочника
+async function saveRefForm() {
+    const kind = currentRefKind;
+    const name = document.getElementById('refFormName').value.trim();
+    if (!name) { haptic('error'); document.getElementById('refFormName').focus(); return; }
+
+    try {
+        if (kind === 'articles') {
+            const inGrp = Refs.groups.find(function(g) { return g.code === 'inflow'; });
+            const outGrp = Refs.groups.find(function(g) { return g.code === 'outflow'; });
+            const group_id = refArticleType === 'income' ? (inGrp && inGrp.id) : (outGrp && outGrp.id);
+            const activity_kind_id = document.getElementById('refFormActivityKind').value;
+            const data = { name: name, group_id: group_id, activity_kind_id: activity_kind_id };
+            if (editingRefId) await API.updateArticle(editingRefId, data);
+            else await API.createArticle(data);
+        } else if (kind === 'directions') {
+            if (editingRefId) await API.updateDirection(editingRefId, { name: name });
+            else await API.createDirection({ name: name });
+        } else {
+            if (editingRefId) await API.updateContragent(editingRefId, { name: name });
+            else await API.createContragent({ name: name });
+        }
+        haptic('success');
+        await loadReferences();   // перезагрузить справочники с сервера
+        closeRefForm();
+        renderRefList();
+        updateRefCounts();
+    } catch (e) {
+        haptic('error');
+        alert('Не удалось сохранить: ' + (e.message || 'ошибка'));
+    }
+}
+
+// Скрыть элемент (is_archived=true) — старые операции остаются целыми
+async function archiveRefItem(id) {
+    const kind = currentRefKind;
+    const targetId = id || editingRefId;
+    if (!targetId) return;
+    if (!confirm('Скрыть из списков выбора? Старые операции с этим элементом останутся целыми.')) return;
+
+    try {
+        if (kind === 'articles') await API.updateArticle(targetId, { is_archived: true });
+        else if (kind === 'directions') await API.updateDirection(targetId, { is_archived: true });
+        else await API.updateContragent(targetId, { is_archived: true });
+        haptic('success');
+        await loadReferences();
+        if (document.getElementById('refFormOverlay').classList.contains('active')) closeRefForm();
+        renderRefList();
+        updateRefCounts();
+    } catch (e) {
+        haptic('error');
+        alert('Не удалось скрыть: ' + (e.message || 'ошибка'));
+    }
+}
+
 // === ДЕМО-ДАННЫЕ ===
 function generateDemoData() {
     const now = new Date();
@@ -353,6 +551,7 @@ function renderAll() {
     updateSummary();
     renderOperations();
     updateDashboard();
+    updateRefCounts();
     refreshIcons();
 }
 
@@ -1857,6 +2056,7 @@ function switchTab(tab, btn) {
         document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
         // Обновить кошельки в профиле (динамически из справочника)
         renderProfileWallets();
+        updateRefCounts();
     }
     // Прокрутить вверх и обновить иконки
     window.scrollTo(0, 0);
@@ -1972,7 +2172,9 @@ Object.assign(window, {
     setTableMode, setType, shareApp, showUpgrade, stopVoice, swapTransfer,
     switchTab, toggleCatOps, toggleExtended, updateAmountDisplay, acceptOffer, skipOffer,
     swipeStart, swipeMove, swipeEnd,
-    quickSaveArticle, saveTransfer, cycleTransfer
+    quickSaveArticle, saveTransfer, cycleTransfer,
+    openRefList, closeRefList, openRefForm, closeRefForm,
+    setRefArticleType, saveRefForm, archiveRefItem
 });
 
 // Восстановить вкладку из хэша URL

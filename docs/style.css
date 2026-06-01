@@ -771,6 +771,31 @@ body {
 }
 .save-btn:active { opacity: 0.8; }
 
+/* === СПРАВОЧНИКИ: строки списка в окне управления === */
+.ref-list-card {
+    background: var(--bg);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.ref-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+}
+.ref-row:last-child { border-bottom: none; }
+.ref-row-name { flex: 1; font-size: 14px; overflow-wrap: anywhere; }
+.ref-row-del {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
 /* === ЗАПИСЬ ГОЛОСА === */
 .recording-indicator {
     display: none;

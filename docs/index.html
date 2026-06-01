@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=21">
+    <link rel="stylesheet" href="style.css?v=22">
 </head>
 <body>
 
@@ -169,6 +169,29 @@
                     <div class="demo-banner-text">Очистите их и начните свой учёт</div>
                 </div>
                 <button class="demo-banner-btn" onclick="clearDemoData()">Очистить</button>
+            </div>
+
+            <!-- Справочники ДДС (статьи / направления / контрагенты) -->
+            <div style="font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:16px 4px 8px">Справочники</div>
+            <div style="background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px">
+                <div onclick="openRefList('articles')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer">
+                    <i data-lucide="tag" style="width:20px;height:20px;color:#FF9500;flex-shrink:0"></i>
+                    <span style="flex:1;font-size:14px">Статьи ДДС</span>
+                    <span id="refCountArticles" style="font-size:13px;color:var(--text2)">—</span>
+                    <span style="color:var(--text2)">›</span>
+                </div>
+                <div onclick="openRefList('directions')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer">
+                    <i data-lucide="compass" style="width:20px;height:20px;color:#5856D6;flex-shrink:0"></i>
+                    <span style="flex:1;font-size:14px">Направления</span>
+                    <span id="refCountDirections" style="font-size:13px;color:var(--text2)">—</span>
+                    <span style="color:var(--text2)">›</span>
+                </div>
+                <div onclick="openRefList('contragents')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer">
+                    <i data-lucide="users" style="width:20px;height:20px;color:#34C759;flex-shrink:0"></i>
+                    <span style="flex:1;font-size:14px">Контрагенты</span>
+                    <span id="refCountContragents" style="font-size:13px;color:var(--text2)">—</span>
+                    <span style="color:var(--text2)">›</span>
+                </div>
             </div>
 
             <!-- Настройки -->
@@ -432,6 +455,58 @@
         </div>
     </div>
 
+    <!-- Окно списка справочника (статьи / направления / контрагенты) -->
+    <div class="edit-overlay" id="refListOverlay" onclick="closeRefList(event)">
+        <div class="edit-modal" onclick="event.stopPropagation()">
+            <div class="modal-handle"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                <div style="width:32px"></div>
+                <div class="edit-title" id="refListTitle" style="margin:0">Справочник</div>
+                <button onclick="closeRefList()" style="width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">✕</button>
+            </div>
+            <div id="refListBody"></div>
+            <button class="save-btn" onclick="openRefForm(null)" style="margin-top:14px">+ Добавить</button>
+        </div>
+    </div>
+
+    <!-- Окно добавления/редактирования элемента справочника -->
+    <div class="edit-overlay" id="refFormOverlay" onclick="closeRefForm(event)">
+        <div class="edit-modal" onclick="event.stopPropagation()">
+            <div class="modal-handle"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <div style="width:32px"></div>
+                <div class="edit-title" id="refFormTitle" style="margin:0">Добавить</div>
+                <button onclick="closeRefForm()" style="width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">✕</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Название</label>
+                <input class="form-input" type="text" id="refFormName" placeholder="Например: Аренда">
+            </div>
+
+            <!-- Доп. поля только для статей ДДС -->
+            <div id="refFormArticleFields" style="display:none">
+                <div class="form-group">
+                    <label class="form-label">Тип</label>
+                    <div class="type-switch">
+                        <button class="type-btn expense-btn" id="refTypeExpenseBtn" onclick="setRefArticleType('expense')">Расход</button>
+                        <button class="type-btn income-btn" id="refTypeIncomeBtn" onclick="setRefArticleType('income')">Доход</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Вид деятельности</label>
+                    <select class="form-input" id="refFormActivityKind"></select>
+                </div>
+            </div>
+
+            <div class="edit-buttons" style="margin-top:16px">
+                <button class="edit-delete-btn" id="refFormDeleteBtn" onclick="archiveRefItem()" style="display:none">🗑</button>
+                <button onclick="closeRefForm()" style="padding:12px 16px;border:none;border-radius:12px;font-size:15px;font-weight:600;color:var(--text);background:var(--bg);cursor:pointer;min-height:44px">← Назад</button>
+                <button class="edit-save-btn" onclick="saveRefForm()">💾 Сохранить</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Экран-оффер (при первом открытии) -->
     <div class="offer-overlay" id="offerOverlay">
         <div class="offer-card">
@@ -459,7 +534,7 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="api.js?v=21"></script>
-    <script src="app.js?v=21"></script>
+    <script src="api.js?v=22"></script>
+    <script src="app.js?v=22"></script>
 </body>
 </html>
