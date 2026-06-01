@@ -21,6 +21,7 @@ from database import supabase
 from auth import verify_telegram_init_data, create_jwt_token
 from middleware import get_current_user
 from demo_data import generate_demo_operations
+from dds_defaults import seed_user_defaults
 from bot import bot as tg_bot, dp as tg_dp, setup_webhook, setup_bot_commands, setup_scheduler, process_webhook_update
 
 log = logging.getLogger('mycash.api')
@@ -97,6 +98,11 @@ class OperationCreate(BaseModel):
     wallet_to_id: Optional[str] = None
     comment: str = ''
     date: str  # ISO формат
+    # Новые поля Этапа 1 (структура ДДС)
+    article_id: Optional[str] = None      # статья ДДС
+    direction_id: Optional[str] = None    # направление
+    contragent_id: Optional[str] = None   # контрагент
+    purpose: str = ''                     # назначение платежа
 
 class OperationUpdate(BaseModel):
     type: Optional[str] = None
@@ -105,6 +111,10 @@ class OperationUpdate(BaseModel):
     wallet_id: Optional[str] = None
     comment: Optional[str] = None
     date: Optional[str] = None
+    article_id: Optional[str] = None
+    direction_id: Optional[str] = None
+    contragent_id: Optional[str] = None
+    purpose: Optional[str] = None
 
 class WalletCreate(BaseModel):
     name: str
@@ -121,6 +131,50 @@ class WalletUpdate(BaseModel):
 class SetBalances(BaseModel):
     card_balance: float = 0
     cash_balance: float = 0
+
+# --- Статьи ДДС ---
+class ArticleCreate(BaseModel):
+    name: str
+    group_id: str                      # ссылка на dds_groups
+    activity_kind_id: str              # ссылка на dds_activity_kinds
+    description: str = ''
+    icon: str = 'tag'
+    color: str = '#F2F2F7'
+
+class ArticleUpdate(BaseModel):
+    name: Optional[str] = None
+    group_id: Optional[str] = None
+    activity_kind_id: Optional[str] = None
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    color: Optional[str] = None
+    sort_order: Optional[int] = None
+    is_archived: Optional[bool] = None
+
+# --- Контрагенты ---
+class ContragentCreate(BaseModel):
+    name: str
+    type: str = ''
+    notes: str = ''
+
+class ContragentUpdate(BaseModel):
+    name: Optional[str] = None
+    type: Optional[str] = None
+    notes: Optional[str] = None
+    is_archived: Optional[bool] = None
+
+# --- Направления ---
+class DirectionCreate(BaseModel):
+    name: str
+    icon: str = 'folder'
+    color: str = '#F2F2F7'
+
+class DirectionUpdate(BaseModel):
+    name: Optional[str] = None
+    icon: Optional[str] = None
+    color: Optional[str] = None
+    sort_order: Optional[int] = None
+    is_archived: Optional[bool] = None
 
 
 # ==========================================
@@ -160,28 +214,15 @@ async def auth_telegram(body: AuthRequest):
         }).execute()
         user = user_result.data[0]
 
-        # Создаём 2 кошелька по умолчанию
-        card = supabase.table('wallets').insert({
-            'user_id': user['id'],
-            'name': 'Карта',
-            'icon': 'credit-card',
-            'color': '#F2F2F7',
-            'sort_order': 0
-        }).execute()
+        # Засеваем структуру ДДС: 4 кошелька + 2 направления + 31 статью
+        seed_result = seed_user_defaults(supabase, user['id'])
+        wallet_ids = seed_result['wallet_id_by_name']
 
-        cash = supabase.table('wallets').insert({
-            'user_id': user['id'],
-            'name': 'Наличка',
-            'icon': 'banknote',
-            'color': '#F2F2F7',
-            'sort_order': 1
-        }).execute()
-
-        # Создаём демо-данные
+        # Создаём демо-данные на первых двух кошельках (Счёт №1 + Наличка)
         demo_ops = generate_demo_operations(
             user['id'],
-            card.data[0]['id'],
-            cash.data[0]['id']
+            wallet_ids.get('Счёт №1'),
+            wallet_ids.get('Наличка')
         )
         if demo_ops:
             supabase.table('operations').insert(demo_ops).execute()
@@ -298,6 +339,11 @@ async def create_operation(body: OperationCreate, current_user: dict = Depends(g
         'wallet_to_id': body.wallet_to_id,
         'comment': body.comment,
         'date': body.date,
+        # Новые поля структуры ДДС
+        'article_id': body.article_id,
+        'direction_id': body.direction_id,
+        'contragent_id': body.contragent_id,
+        'purpose': body.purpose,
         'is_demo': False
     }
 
@@ -409,6 +455,208 @@ async def update_wallet(wallet_id: str, body: WalletUpdate, current_user: dict =
     if not result.data:
         raise HTTPException(status_code=404, detail='Кошелёк не найден')
     return result.data[0]
+
+
+# ==========================================
+# 3.5 СПРАВОЧНИКИ ДДС (статьи, контрагенты, направления, виды/группы)
+# ==========================================
+
+@app.get('/v1/refs')
+async def get_refs(current_user: dict = Depends(get_current_user)):
+    """
+    Глобальные справочники: группы (Поступление/Выбытие) и виды деятельности.
+    Они одинаковы для всех пользователей.
+    """
+    groups = supabase.table('dds_groups').select('*').order('sort_order').execute()
+    kinds = supabase.table('dds_activity_kinds').select('*').order('sort_order').execute()
+    return {
+        'groups': groups.data or [],
+        'activity_kinds': kinds.data or []
+    }
+
+
+# --- Статьи ДДС ---
+
+@app.get('/v1/articles')
+async def get_articles(current_user: dict = Depends(get_current_user)):
+    """Список статей ДДС пользователя (не архивных — в начале)"""
+    user_id = current_user['user_id']
+    result = supabase.table('dds_articles') \
+        .select('*') \
+        .eq('user_id', user_id) \
+        .order('is_archived') \
+        .order('sort_order') \
+        .execute()
+    return {'articles': result.data or []}
+
+
+@app.post('/v1/articles')
+async def create_article(body: ArticleCreate, current_user: dict = Depends(get_current_user)):
+    """Создать статью ДДС"""
+    user_id = current_user['user_id']
+
+    # Определяем sort_order = max + 1
+    existing = supabase.table('dds_articles').select('sort_order').eq('user_id', user_id).order('sort_order', desc=True).limit(1).execute()
+    next_order = (existing.data[0]['sort_order'] + 1) if existing.data else 1
+
+    try:
+        result = supabase.table('dds_articles').insert({
+            'user_id': user_id,
+            'name': body.name,
+            'description': body.description,
+            'group_id': body.group_id,
+            'activity_kind_id': body.activity_kind_id,
+            'icon': body.icon,
+            'color': body.color,
+            'sort_order': next_order
+        }).execute()
+    except Exception:
+        raise HTTPException(status_code=400, detail='Статья с таким названием уже есть')
+    return result.data[0]
+
+
+@app.put('/v1/articles/{article_id}')
+async def update_article(article_id: str, body: ArticleUpdate, current_user: dict = Depends(get_current_user)):
+    """Редактировать статью ДДС"""
+    user_id = current_user['user_id']
+    existing = supabase.table('dds_articles').select('id').eq('id', article_id).eq('user_id', user_id).execute()
+    if not existing.data:
+        raise HTTPException(status_code=404, detail='Статья не найдена')
+
+    update_data = {k: v for k, v in body.dict().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail='Нечего обновлять')
+
+    result = supabase.table('dds_articles').update(update_data).eq('id', article_id).execute()
+    return result.data[0]
+
+
+@app.delete('/v1/articles/{article_id}')
+async def delete_article(article_id: str, current_user: dict = Depends(get_current_user)):
+    """Удалить статью ДДС (операции с этой статьёй сохранятся, ссылка обнулится)"""
+    user_id = current_user['user_id']
+    result = supabase.table('dds_articles').delete().eq('id', article_id).eq('user_id', user_id).execute()
+    if not result.data:
+        raise HTTPException(status_code=404, detail='Статья не найдена')
+    return {'ok': True}
+
+
+# --- Контрагенты ---
+
+@app.get('/v1/contragents')
+async def get_contragents(current_user: dict = Depends(get_current_user)):
+    """Список контрагентов пользователя"""
+    user_id = current_user['user_id']
+    result = supabase.table('contragents') \
+        .select('*') \
+        .eq('user_id', user_id) \
+        .order('is_archived') \
+        .order('name') \
+        .execute()
+    return {'contragents': result.data or []}
+
+
+@app.post('/v1/contragents')
+async def create_contragent(body: ContragentCreate, current_user: dict = Depends(get_current_user)):
+    """Создать контрагента"""
+    user_id = current_user['user_id']
+    try:
+        result = supabase.table('contragents').insert({
+            'user_id': user_id,
+            'name': body.name,
+            'type': body.type,
+            'notes': body.notes
+        }).execute()
+    except Exception:
+        raise HTTPException(status_code=400, detail='Контрагент с таким названием уже есть')
+    return result.data[0]
+
+
+@app.put('/v1/contragents/{contragent_id}')
+async def update_contragent(contragent_id: str, body: ContragentUpdate, current_user: dict = Depends(get_current_user)):
+    """Редактировать контрагента"""
+    user_id = current_user['user_id']
+    existing = supabase.table('contragents').select('id').eq('id', contragent_id).eq('user_id', user_id).execute()
+    if not existing.data:
+        raise HTTPException(status_code=404, detail='Контрагент не найден')
+
+    update_data = {k: v for k, v in body.dict().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail='Нечего обновлять')
+
+    result = supabase.table('contragents').update(update_data).eq('id', contragent_id).execute()
+    return result.data[0]
+
+
+@app.delete('/v1/contragents/{contragent_id}')
+async def delete_contragent(contragent_id: str, current_user: dict = Depends(get_current_user)):
+    """Удалить контрагента"""
+    user_id = current_user['user_id']
+    result = supabase.table('contragents').delete().eq('id', contragent_id).eq('user_id', user_id).execute()
+    if not result.data:
+        raise HTTPException(status_code=404, detail='Контрагент не найден')
+    return {'ok': True}
+
+
+# --- Направления ---
+
+@app.get('/v1/directions')
+async def get_directions(current_user: dict = Depends(get_current_user)):
+    """Список направлений пользователя"""
+    user_id = current_user['user_id']
+    result = supabase.table('business_directions') \
+        .select('*') \
+        .eq('user_id', user_id) \
+        .order('is_archived') \
+        .order('sort_order') \
+        .execute()
+    return {'directions': result.data or []}
+
+
+@app.post('/v1/directions')
+async def create_direction(body: DirectionCreate, current_user: dict = Depends(get_current_user)):
+    """Создать направление"""
+    user_id = current_user['user_id']
+    existing = supabase.table('business_directions').select('sort_order').eq('user_id', user_id).order('sort_order', desc=True).limit(1).execute()
+    next_order = (existing.data[0]['sort_order'] + 1) if existing.data else 1
+
+    try:
+        result = supabase.table('business_directions').insert({
+            'user_id': user_id,
+            'name': body.name,
+            'icon': body.icon,
+            'color': body.color,
+            'sort_order': next_order
+        }).execute()
+    except Exception:
+        raise HTTPException(status_code=400, detail='Направление с таким названием уже есть')
+    return result.data[0]
+
+
+@app.put('/v1/directions/{direction_id}')
+async def update_direction(direction_id: str, body: DirectionUpdate, current_user: dict = Depends(get_current_user)):
+    """Редактировать направление"""
+    user_id = current_user['user_id']
+    existing = supabase.table('business_directions').select('id').eq('id', direction_id).eq('user_id', user_id).execute()
+    if not existing.data:
+        raise HTTPException(status_code=404, detail='Направление не найдено')
+
+    update_data = {k: v for k, v in body.dict().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail='Нечего обновлять')
+
+    result = supabase.table('business_directions').update(update_data).eq('id', direction_id).execute()
+    return result.data[0]
+
+
+@app.delete('/v1/directions/{direction_id}')
+async def delete_direction(direction_id: str, current_user: dict = Depends(get_current_user)):
+    """Удалить направление (операции сохранятся, ссылка обнулится)"""
+    user_id = current_user['user_id']
+    result = supabase.table('business_directions').delete().eq('id', direction_id).eq('user_id', user_id).execute()
+    if not result.data:
+        raise HTTPException(status_code=404, detail='Направление не найдено')
+    return {'ok': True}
 
 
 # ==========================================
