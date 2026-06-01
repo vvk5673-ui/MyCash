@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=25">
+    <link rel="stylesheet" href="style.css?v=26">
 </head>
 <body>
 
@@ -85,6 +85,11 @@
                                 <input type="date" id="periodTo" class="form-input" style="flex:1;font-size:13px;padding:8px 10px;min-height:36px">
                                 <button onclick="applyCustomPeriod()" style="padding:8px 12px;border:none;border-radius:10px;background:var(--accent);color:white;font-size:13px;font-weight:600;cursor:pointer;min-height:36px">OK</button>
                             </div>
+                        </div>
+                        <!-- Переключатель разреза: по статьям / по направлениям -->
+                        <div style="display:flex;gap:6px;margin-bottom:14px">
+                            <button class="period-btn active" id="dashGroupArticle" onclick="setDashGroup('article')" style="flex:1">По статьям</button>
+                            <button class="period-btn" id="dashGroupDirection" onclick="setDashGroup('direction')" style="flex:1">По направлениям</button>
                         </div>
                         <canvas id="pieChart" width="220" height="220" style="max-width:220px;display:none"></canvas>
                         <div id="dashBars"></div>
@@ -534,7 +539,7 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="api.js?v=25"></script>
-    <script src="app.js?v=25"></script>
+    <script src="api.js?v=26"></script>
+    <script src="app.js?v=26"></script>
 </body>
 </html>

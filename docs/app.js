@@ -652,6 +652,37 @@ function updateSummary() {
 let customFrom = null;
 let customTo = null;
 let dashTab = 'expense'; // 'expense' или 'income'
+let dashGroupBy = 'article'; // 'article' (по статьям) или 'direction' (по направлениям)
+
+// Ключ/имя/иконка группы для операции в аналитике (зависит от dashGroupBy)
+function dashGroupOf(op) {
+    if (dashGroupBy === 'direction') {
+        const d = op.direction_id ? getDirectionById(op.direction_id) : null;
+        return {
+            key: op.direction_id || 'none',
+            name: d ? d.name : 'Без направления',
+            icon: (d && d.icon) ? d.icon : 'compass'
+        };
+    }
+    // по статьям ДДС (fallback на старую категорию для операций без article_id)
+    const a = op.article_id ? getArticleById(op.article_id) : null;
+    return {
+        key: op.article_id || ('cat:' + (op.category || '')),
+        name: a ? a.name : (op.category || 'Без статьи'),
+        icon: (a && a.icon && a.icon !== 'tag') ? a.icon : 'tag'
+    };
+}
+
+// Переключатель «По статьям / По направлениям»
+function setDashGroup(mode) {
+    dashGroupBy = mode;
+    haptic('light');
+    const ba = document.getElementById('dashGroupArticle');
+    const bd = document.getElementById('dashGroupDirection');
+    if (ba) ba.classList.toggle('active', mode === 'article');
+    if (bd) bd.classList.toggle('active', mode === 'direction');
+    updateDashboard();
+}
 
 function setPeriod(period, btn) {
     currentPeriod = period;
@@ -1249,10 +1280,16 @@ function updateDashboard() {
     }
     document.getElementById('dashboardInline').style.display = 'block';
 
-    const cats = {};
-    dashExpenses.forEach(op => { cats[op.category] = (cats[op.category] || 0) + op.amount; });
-    const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
-    const total = sorted.reduce((s, [_, v]) => s + v, 0);
+    // Группировка операций по выбранному измерению (статьи / направления)
+    const groups = {};   // key → { name, icon, amount, ops: [] }
+    dashExpenses.forEach(op => {
+        const g = dashGroupOf(op);
+        if (!groups[g.key]) groups[g.key] = { name: g.name, icon: g.icon, amount: 0, ops: [] };
+        groups[g.key].amount += op.amount;
+        groups[g.key].ops.push(op);
+    });
+    const sorted = Object.values(groups).sort((a, b) => b.amount - a.amount);
+    const total = sorted.reduce((s, g) => s + g.amount, 0);
 
     // Обновить итого справа от табов
     const totalLabel = document.getElementById('dashTotalLabel');
@@ -1273,20 +1310,20 @@ function updateDashboard() {
     }
     barsContainer.style.width = '100%';
 
-    const maxAmount = sorted[0] ? sorted[0][1] : 1;
+    const maxAmount = sorted[0] ? sorted[0].amount : 1;
 
-    barsContainer.innerHTML = sorted.map(([cat, amount], i) => {
+    barsContainer.innerHTML = sorted.map((g, i) => {
+        const amount = g.amount;
         const pct = Math.round(amount / total * 100);
         const barWidth = Math.round((amount / maxAmount) * 100);
         const color = chartColors[i % chartColors.length];
-        const catObj = (isExpense ? EXPENSE_CATS : INCOME_CATS).find(c => c.name === cat);
-        const icon = catObj ? lucideIcon(catObj.icon, 18, catObj.color) : lucideIcon('package', 18, '#8E8E93');
+        const icon = lucideIcon(g.icon, 18, color);
 
         return `<div style="margin-bottom:12px;cursor:pointer" onclick="toggleCatOps(${i})">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
                 <div style="display:flex;align-items:center;gap:6px">
                     <span style="font-size:16px">${icon}</span>
-                    <span style="font-size:13px;font-weight:500">${cat}</span>
+                    <span style="font-size:13px;font-weight:500">${esc(g.name)}</span>
                     <span class="dash-legend-arrow" id="dashArrow${i}" style="font-size:12px;color:var(--text2);transition:transform 0.2s">›</span>
                 </div>
                 <div style="display:flex;align-items:baseline;gap:4px">
@@ -1299,12 +1336,12 @@ function updateDashboard() {
             </div>
         </div>
         <div class="dash-cat-ops" id="dashCatOps${i}">${
-            dashExpenses.filter(op => op.category === cat).map(op => {
+            g.ops.map(op => {
                 const dateStr = formatDate(op.date);
                 const comment = op.comment ? esc(op.comment) + ' · ' : '';
                 const wallet = op.wallet || '💳 Карта';
                 return `<div class="dash-cat-op" onclick="event.stopPropagation(); openEdit('${op.id}')" style="cursor:pointer">
-                    <span class="dash-cat-op-left">${comment}${dateStr} · ${wallet}</span>
+                    <span class="dash-cat-op-left">${comment}${dateStr} · ${esc(wallet)}</span>
                     <div style="display:flex;align-items:center;gap:8px">
                         <span class="dash-cat-op-amount" style="color:${isExpense ? 'var(--red)' : 'var(--green)'}">${isExpense ? '-' : '+'}${fmt(op.amount)} ₽</span>
                         <i data-lucide="pencil" style="width:14px;height:14px;color:var(--text2);flex-shrink:0"></i>
@@ -2261,7 +2298,7 @@ Object.assign(window, {
     openEdit, openModal, openWalletEdit, quickSave, renderEditArticles,
     renderEditWallets, selectEditWallet, selectEditArticle,
     saveEdit, saveExtended, saveWalletEdit, selectExtCat,
-    selectWallet, selectWalletColor, setDashTab, setEditType, setPeriod,
+    selectWallet, selectWalletColor, setDashTab, setDashGroup, setEditType, setPeriod,
     setTableMode, setType, shareApp, showUpgrade, stopVoice, swapTransfer,
     switchTab, toggleCatOps, toggleExtended, updateAmountDisplay, acceptOffer, skipOffer,
     swipeStart, swipeMove, swipeEnd,
