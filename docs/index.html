@@ -307,6 +307,27 @@
                 <button class="type-btn transfer-btn" onclick="setType('transfer')">Перевод</button>
             </div>
 
+            <!-- Статьи ДДС (для расхода/дохода) — тап по статье = сохранение -->
+            <div id="articlesArea">
+                <div class="form-label" style="margin:4px 4px 8px">Статья — нажмите, чтобы сохранить</div>
+                <div class="quick-cats" id="quickArticles"></div>
+            </div>
+
+            <!-- Перевод между кошельками (для типа «Перевод») -->
+            <div id="transferArea" style="display:none">
+                <div class="form-group">
+                    <label class="form-label">Перевод между кошельками</label>
+                    <div class="transfer-row">
+                        <div class="transfer-wallet" id="transferFrom" onclick="cycleTransfer('from')"></div>
+                        <div class="transfer-arrow">→</div>
+                        <div class="transfer-wallet" id="transferTo" onclick="cycleTransfer('to')"></div>
+                    </div>
+                    <button class="more-btn" onclick="swapTransfer()" style="margin:0;padding:8px">↔ Поменять</button>
+                    <div style="font-size:11px;color:var(--text2);text-align:center;margin-top:4px">Нажмите на кошелёк, чтобы выбрать другой</div>
+                </div>
+                <button class="save-btn" onclick="saveTransfer()">Сохранить перевод</button>
+            </div>
+
             <!-- Кнопка "Подробнее" (необязательные поля) -->
             <button class="more-btn" onclick="toggleExtended()">Подробнее ▾</button>
 
@@ -332,27 +353,6 @@
                     <label class="form-label">Комментарий</label>
                     <input class="form-input" type="text" id="commentInput" placeholder="Необязательно">
                 </div>
-            </div>
-
-            <!-- Статьи ДДС (для расхода/дохода) — тап по статье = сохранение -->
-            <div id="articlesArea">
-                <div class="form-label" style="margin:4px 4px 8px">Статья — нажмите, чтобы сохранить</div>
-                <div class="quick-cats" id="quickArticles"></div>
-            </div>
-
-            <!-- Перевод между кошельками (для типа «Перевод») -->
-            <div id="transferArea" style="display:none">
-                <div class="form-group">
-                    <label class="form-label">Перевод между кошельками</label>
-                    <div class="transfer-row">
-                        <div class="transfer-wallet" id="transferFrom" onclick="cycleTransfer('from')"></div>
-                        <div class="transfer-arrow">→</div>
-                        <div class="transfer-wallet" id="transferTo" onclick="cycleTransfer('to')"></div>
-                    </div>
-                    <button class="more-btn" onclick="swapTransfer()" style="margin:0;padding:8px">↔ Поменять</button>
-                    <div style="font-size:11px;color:var(--text2);text-align:center;margin-top:4px">Нажмите на кошелёк, чтобы выбрать другой</div>
-                </div>
-                <button class="save-btn" onclick="saveTransfer()">Сохранить перевод</button>
             </div>
         </div>
     </div>
@@ -444,7 +444,7 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="api.js?v=16"></script>
-    <script src="app.js?v=16"></script>
+    <script src="api.js?v=17"></script>
+    <script src="app.js?v=17"></script>
 </body>
 </html>

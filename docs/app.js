@@ -766,6 +766,18 @@ function renderQuickArticles() {
     const box = document.getElementById('quickArticles');
     if (!box) return;
     if (!arts.length) {
+        // Статьи ещё не загрузились — пробуем дозагрузить с сервера и перерисовать
+        const online = (typeof API !== 'undefined' && API.isOnline());
+        if (online && !Refs._reloading) {
+            Refs._reloading = true;
+            box.innerHTML = '<div style="padding:12px;color:var(--text2);font-size:13px;text-align:center;grid-column:1/-1">Загружаю статьи…</div>';
+            loadReferences().then(function() {
+                Refs._reloading = false;
+                const overlay = document.getElementById('modalOverlay');
+                if (overlay && overlay.classList.contains('active')) renderQuickArticles();
+            });
+            return;
+        }
         box.innerHTML = '<div style="padding:12px;color:var(--text2);font-size:13px;text-align:center;grid-column:1/-1">Статьи не загружены.<br>Откройте приложение при наличии интернета.</div>';
         return;
     }
