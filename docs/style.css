@@ -704,11 +704,18 @@ body {
     flex-wrap: wrap;
     gap: 6px;
 }
-/* Статьи в редактировании — компактной сеткой 2 в ряд */
-#editArticleGrid {
+/* Статьи (в редактировании и в форме ввода) — компактной сеткой 2 в ряд */
+#editArticleGrid, #quickArticles {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
+    margin-bottom: 10px;
+}
+/* Чип-статья: текст по центру, перенос длинных названий */
+#editArticleGrid .cat-chip, #quickArticles .cat-chip {
+    text-align: center;
+    overflow-wrap: anywhere;
+    line-height: 1.2;
 }
 .cat-chip {
     padding: 6px 12px;

@@ -484,7 +484,13 @@ function renderOperations() {
         }
 
         const dateStr = formatDate(op.date);
-        const subtitle = (op.comment ? esc(op.comment) + ' · ' : '') + dateStr + ' · ' + esc(walletText);
+        // Подпись: назначение платежа · комментарий · дата · кошелёк
+        const parts = [];
+        if (op.purpose) parts.push(esc(op.purpose));
+        if (op.comment) parts.push(esc(op.comment));
+        parts.push(dateStr);
+        parts.push(esc(walletText));
+        const subtitle = parts.join(' · ');
 
         return `
             <div class="op-item" data-id="${op.id}"
@@ -781,16 +787,10 @@ function renderQuickArticles() {
         box.innerHTML = '<div style="padding:12px;color:var(--text2);font-size:13px;text-align:center;grid-column:1/-1">Статьи не загружены.<br>Откройте приложение при наличии интернета.</div>';
         return;
     }
-    // Цвет иконки: если у статьи стоит светлый дефолт (#F2F2F7) — берём заметный по типу
-    const fallbackColor = currentType === 'income' ? '#34C759' : '#FF3B30';
+    // Единый стиль со страницей редактирования — текстовые пилюли (cat-chip) в 2 ряда
     box.innerHTML = arts.map(function(a) {
-        const c = (a.color && a.color.toLowerCase() !== '#f2f2f7') ? a.color : fallbackColor;
-        return '<button class="quick-cat" onclick="quickSaveArticle(\'' + a.id + '\')">' +
-            '<div class="quick-cat-icon">' + lucideIcon(a.icon || 'tag', 22, c) + '</div>' +
-            '<div class="quick-cat-name">' + esc(a.name) + '</div>' +
-            '</button>';
+        return '<button class="cat-chip" onclick="quickSaveArticle(\'' + a.id + '\')">' + esc(a.name) + '</button>';
     }).join('');
-    refreshIcons();
 }
 
 // Сохранение операции по тапу на статью (с учётом полей из «Подробнее»)
