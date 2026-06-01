@@ -769,9 +769,12 @@ function renderQuickArticles() {
         box.innerHTML = '<div style="padding:12px;color:var(--text2);font-size:13px;text-align:center;grid-column:1/-1">Статьи не загружены.<br>Откройте приложение при наличии интернета.</div>';
         return;
     }
+    // Цвет иконки: если у статьи стоит светлый дефолт (#F2F2F7) — берём заметный по типу
+    const fallbackColor = currentType === 'income' ? '#34C759' : '#FF3B30';
     box.innerHTML = arts.map(function(a) {
+        const c = (a.color && a.color.toLowerCase() !== '#f2f2f7') ? a.color : fallbackColor;
         return '<button class="quick-cat" onclick="quickSaveArticle(\'' + a.id + '\')">' +
-            '<div class="quick-cat-icon">' + lucideIcon(a.icon || 'tag', 22, a.color || '#007AFF') + '</div>' +
+            '<div class="quick-cat-icon">' + lucideIcon(a.icon || 'tag', 22, c) + '</div>' +
             '<div class="quick-cat-name">' + esc(a.name) + '</div>' +
             '</button>';
     }).join('');
