@@ -28,23 +28,8 @@
     <div class="section-title" style="margin:16px 20px 8px">Мои финансы</div>
     <div class="balance-card" style="margin-top:0">
         <div class="balance-total" id="balanceTotal">0 ₽</div>
-        <div class="wallets-row" id="walletsRow">
-            <div class="wallet-badge" id="walletBadge0">
-                <div class="wallet-badge-icon" id="walletIcon0"><i data-lucide="credit-card" style="width:22px;height:22px;color:#007AFF"></i></div>
-                <div class="wallet-badge-name" id="walletName0">Карта</div>
-                <div class="wallet-badge-amount" id="walletCard">0 ₽</div>
-            </div>
-            <div class="wallet-badge" id="walletBadge1">
-                <div class="wallet-badge-icon" id="walletIcon1"><i data-lucide="banknote" style="width:22px;height:22px;color:#34C759"></i></div>
-                <div class="wallet-badge-name" id="walletName1">Наличка</div>
-                <div class="wallet-badge-amount" id="walletCash">0 ₽</div>
-            </div>
-            <div class="wallet-add-btn" onclick="showUpgrade()">
-                <span style="font-size:18px">＋</span>
-                <span style="font-size:9px;color:var(--text2);line-height:1.2">до 10<br>карт</span>
-                <span style="font-size:9px;color:var(--accent);font-weight:600">Pro</span>
-            </div>
-        </div>
+        <!-- Кошельки заполняются динамически из Refs.wallets (см. renderWalletsRow) -->
+        <div class="wallets-row" id="walletsRow"></div>
     </div>
 
     <!-- Блок: Список операций (на главной) -->
@@ -174,25 +159,8 @@
 
             <!-- Мои кошельки -->
             <div style="font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:16px 4px 8px">Мои кошельки</div>
-            <div style="background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px">
-                <div onclick="openWalletEdit(0)" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer">
-                    <span id="profileWalletIcon0"><i data-lucide="credit-card" style="width:20px;height:20px;color:#007AFF"></i></span>
-                    <span style="flex:1;font-size:14px" id="profileWalletName0">Карта</span>
-                    <span style="font-size:13px;color:var(--text2)" id="profileWalletAmount0">0 ₽</span>
-                    <span style="color:var(--text2)">›</span>
-                </div>
-                <div onclick="openWalletEdit(1)" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer">
-                    <span id="profileWalletIcon1"><i data-lucide="banknote" style="width:20px;height:20px;color:#34C759"></i></span>
-                    <span style="flex:1;font-size:14px" id="profileWalletName1">Наличка</span>
-                    <span style="font-size:13px;color:var(--text2)" id="profileWalletAmount1">0 ₽</span>
-                    <span style="color:var(--text2)">›</span>
-                </div>
-                <div onclick="showUpgrade()" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;opacity:0.6">
-                    <span style="font-size:18px">＋</span>
-                    <span style="flex:1;font-size:14px;color:var(--text2)">Добавить кошелёк</span>
-                    <span style="font-size:11px;color:var(--accent);font-weight:600;background:var(--bg);padding:3px 8px;border-radius:8px">до 10 · Pro</span>
-                </div>
-            </div>
+            <!-- Список кошельков заполняется динамически (см. renderProfileWallets) -->
+            <div id="profileWalletsList" style="background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px"></div>
 
             <!-- Баннер демо-данных в профиле -->
             <div class="demo-banner" id="demoBannerProfile">
@@ -467,7 +435,7 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="api.js?v=12"></script>
-    <script src="app.js?v=12"></script>
+    <script src="api.js?v=13"></script>
+    <script src="app.js?v=13"></script>
 </body>
 </html>

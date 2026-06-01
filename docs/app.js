@@ -161,6 +161,8 @@ async function loadReferences() {
             контрагенты: Refs.contragents.length,
             кошельки: Refs.wallets.length
         });
+        // Перерисовываем UI — теперь кошельки берутся с сервера
+        if (typeof renderAll === 'function') renderAll();
         return true;
     } catch (e) {
         console.warn('Не удалось загрузить справочники:', e);
@@ -185,6 +187,70 @@ function articlesForType(type) {
     const grp = Refs.groups.find(function(g) { return g.code === wantCode; });
     if (!grp) return Refs.articles.filter(function(a) { return !a.is_archived; });
     return Refs.articles.filter(function(a) { return a.group_id === grp.id && !a.is_archived; });
+}
+
+// Стандартный набор кошельков (как на сервере) — фоллбек, если справочники не загрузились
+const SERVER_DEFAULT_WALLETS = [
+    { name: 'Счёт №1', icon: 'credit-card',  color: '#007AFF', initial_balance: 0 },
+    { name: 'Счёт №2', icon: 'credit-card',  color: '#5856D6', initial_balance: 0 },
+    { name: 'Наличка', icon: 'wallet',       color: '#34C759', initial_balance: 0 },
+    { name: 'Касса',   icon: 'shopping-bag', color: '#FF9500', initial_balance: 0 },
+];
+
+// Активный список кошельков: с сервера (если загружены) либо стандартный набор
+function getActiveWallets() {
+    if (Refs.loaded && Refs.wallets.length) return Refs.wallets;
+    return SERVER_DEFAULT_WALLETS;
+}
+
+// Баланс по каждому кошельку: начальный остаток + операции (ключ — имя кошелька)
+function computeWalletBalances() {
+    const wallets = getActiveWallets();
+    const bal = {};
+    wallets.forEach(function(w) { bal[w.name] = Number(w.initial_balance) || 0; });
+    operations.forEach(function(op) {
+        if (op.type === 'income' && bal[op.wallet] != null) {
+            bal[op.wallet] += op.amount;
+        } else if (op.type === 'expense' && bal[op.wallet] != null) {
+            bal[op.wallet] -= op.amount;
+        } else if (op.type === 'transfer') {
+            if (bal[op.walletTo] != null) bal[op.walletTo] += op.amount;
+            if (bal[op.walletFrom] != null) bal[op.walletFrom] -= op.amount;
+        }
+    });
+    return bal;
+}
+
+// Рендер плашек кошельков на главном экране
+function renderWalletsRow() {
+    const wallets = getActiveWallets();
+    const bal = computeWalletBalances();
+    const row = document.getElementById('walletsRow');
+    if (!row) return;
+    row.innerHTML = wallets.map(function(w) {
+        return '<div class="wallet-badge">' +
+            '<div class="wallet-badge-icon">' + lucideIcon(w.icon || 'wallet', 22, w.color || '#007AFF') + '</div>' +
+            '<div class="wallet-badge-name">' + esc(w.name) + '</div>' +
+            '<div class="wallet-badge-amount">' + fmt(bal[w.name] || 0) + ' ₽</div>' +
+            '</div>';
+    }).join('');
+    refreshIcons();
+}
+
+// Рендер списка кошельков в профиле
+function renderProfileWallets() {
+    const wallets = getActiveWallets();
+    const bal = computeWalletBalances();
+    const box = document.getElementById('profileWalletsList');
+    if (!box) return;
+    box.innerHTML = wallets.map(function(w) {
+        return '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)">' +
+            '<span>' + lucideIcon(w.icon || 'wallet', 20, w.color || '#007AFF') + '</span>' +
+            '<span style="flex:1;font-size:14px">' + esc(w.name) + '</span>' +
+            '<span style="font-size:13px;color:var(--text2)">' + fmt(bal[w.name] || 0) + ' ₽</span>' +
+            '</div>';
+    }).join('');
+    refreshIcons();
 }
 
 // === ДЕМО-ДАННЫЕ ===
@@ -235,7 +301,8 @@ function generateDemoData() {
             type: d.type,
             amount: d.amount,
             category: d.category,
-            wallet: d.wallet,
+            // Сопоставляем демо со стандартными кошельками сервера
+            wallet: (d.wallet === '💳 Карта' ? 'Счёт №1' : 'Наличка'),
             comment: d.comment,
             date: new Date(y, m, day, 10 + i % 12, i * 7 % 60).toISOString(),
             _demo: true
@@ -291,27 +358,12 @@ function renderAll() {
 
 // === БАЛАНС ПО КОШЕЛЬКАМ ===
 function updateBalance() {
-    let cardBalance = walletBalances['💳 Карта'] || 0;
-    let cashBalance = walletBalances['💵 Наличка'] || 0;
-
-    // Считаем по операциям
-    operations.forEach(op => {
-        if (op.type === 'income') {
-            if (op.wallet === '💳 Карта') cardBalance += op.amount;
-            else cashBalance += op.amount;
-        } else if (op.type === 'expense') {
-            if (op.wallet === '💳 Карта') cardBalance -= op.amount;
-            else cashBalance -= op.amount;
-        } else if (op.type === 'transfer') {
-            if (op.walletFrom === '💳 Карта') { cardBalance -= op.amount; cashBalance += op.amount; }
-            else { cashBalance -= op.amount; cardBalance += op.amount; }
-        }
-    });
-
-    const total = cardBalance + cashBalance;
+    const bal = computeWalletBalances();
+    let total = 0;
+    Object.keys(bal).forEach(function(name) { total += bal[name]; });
     document.getElementById('balanceTotal').textContent = fmt(total) + ' ₽';
-    document.getElementById('walletCard').textContent = fmt(cardBalance) + ' ₽';
-    document.getElementById('walletCash').textContent = fmt(cashBalance) + ' ₽';
+    // Плашки кошельков рендерятся динамически
+    renderWalletsRow();
 }
 
 // === ИТОГИ ЗА ПЕРИОД ===
@@ -536,7 +588,14 @@ function openModal() {
     document.getElementById('extendedForm').classList.remove('active');
     currentType = 'expense';
     selectedCategory = '';
-    selectedWallet = Storage.load('mycash_last_wallet') || WALLETS[0];
+    // Дефолтный кошелёк: последний использованный (если ещё существует) иначе первый активный
+    const wallets = getActiveWallets();
+    const walletNames = wallets.map(function(w) { return w.name; });
+    const lastWallet = Storage.load('mycash_last_wallet');
+    selectedWallet = (lastWallet && walletNames.indexOf(lastWallet) >= 0) ? lastWallet : (walletNames[0] || '');
+    // Дефолтные кошельки для перевода
+    transferFrom = walletNames[0] || '';
+    transferTo = walletNames[1] || walletNames[0] || '';
     renderWalletSwitch();
     renderQuickCats();
     setTimeout(() => document.getElementById('amountInput').focus(), 300);
@@ -565,9 +624,11 @@ function updateAmountDisplay() {
 
 function renderWalletSwitch() {
     const container = document.getElementById('walletSwitch');
-    container.innerHTML = WALLETS.map(w =>
-        `<button class="wallet-btn ${w === selectedWallet ? 'active' : ''}" onclick="selectWallet('${w}')">${w}</button>`
-    ).join('');
+    const wallets = getActiveWallets();
+    container.innerHTML = wallets.map(function(w) {
+        const active = w.name === selectedWallet ? 'active' : '';
+        return '<button class="wallet-btn ' + active + '" onclick="selectWallet(\'' + w.name.replace(/'/g, "\\'") + '\')">' + esc(w.name) + '</button>';
+    }).join('');
 }
 
 function selectWallet(w) {
@@ -675,6 +736,8 @@ function updateExtType() {
     if (currentType === 'transfer') {
         catGroup.style.display = 'none';
         transferGroup.style.display = 'block';
+        document.getElementById('transferFrom').textContent = transferFrom;
+        document.getElementById('transferTo').textContent = transferTo;
     } else {
         catGroup.style.display = 'block';
         transferGroup.style.display = 'none';
@@ -1605,15 +1668,8 @@ function switchTab(tab, btn) {
             ? tg.initDataUnsafe.user.first_name : 'Пользователь';
         document.getElementById('profileName').textContent = name;
         document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
-        // Обновить кошельки в профиле
-        walletSettings.forEach((ws, i) => {
-            const iconEl = document.getElementById('profileWalletIcon' + i);
-            const nameEl = document.getElementById('profileWalletName' + i);
-            const amountEl = document.getElementById('profileWalletAmount' + i);
-            if (iconEl) iconEl.textContent = ws.icon;
-            if (nameEl) nameEl.textContent = ws.name;
-            if (amountEl) amountEl.textContent = document.getElementById(i === 0 ? 'walletCard' : 'walletCash').textContent;
-        });
+        // Обновить кошельки в профиле (динамически из справочника)
+        renderProfileWallets();
     }
     // Прокрутить вверх и обновить иконки
     window.scrollTo(0, 0);
