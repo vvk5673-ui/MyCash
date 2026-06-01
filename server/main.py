@@ -257,35 +257,34 @@ async def get_operations(
     user_id = current_user['user_id']
     now = datetime.now()
 
-    # Определяем диапазон дат
-    if period == 'today':
-        start = datetime(now.year, now.month, now.day)
-        end = start.replace(hour=23, minute=59, second=59)
-    elif period == 'week':
-        start = now - __import__('datetime').timedelta(days=7)
-        end = now
-    elif period == 'year':
-        y = year or now.year
-        start = datetime(y, 1, 1)
-        end = datetime(y, 12, 31, 23, 59, 59)
-    else:  # month
-        y = year or now.year
-        m = month or now.month
-        start = datetime(y, m, 1)
-        # Последний день месяца
-        if m == 12:
-            end = datetime(y + 1, 1, 1) - __import__('datetime').timedelta(seconds=1)
-        else:
-            end = datetime(y, m + 1, 1) - __import__('datetime').timedelta(seconds=1)
+    # Базовый запрос
+    query = supabase.table('operations').select('*').eq('user_id', user_id)
 
-    # Запрос операций
-    result = supabase.table('operations') \
-        .select('*') \
-        .eq('user_id', user_id) \
-        .gte('date', start.isoformat()) \
-        .lte('date', end.isoformat()) \
-        .order('date', desc=True) \
-        .execute()
+    # period='all' — без фильтра дат (нужно фронту для полной синхронизации).
+    # Иначе фильтруем по выбранному диапазону.
+    if period != 'all':
+        if period == 'today':
+            start = datetime(now.year, now.month, now.day)
+            end = start.replace(hour=23, minute=59, second=59)
+        elif period == 'week':
+            start = now - __import__('datetime').timedelta(days=7)
+            end = now
+        elif period == 'year':
+            y = year or now.year
+            start = datetime(y, 1, 1)
+            end = datetime(y, 12, 31, 23, 59, 59)
+        else:  # month
+            y = year or now.year
+            m = month or now.month
+            start = datetime(y, m, 1)
+            # Последний день месяца
+            if m == 12:
+                end = datetime(y + 1, 1, 1) - __import__('datetime').timedelta(seconds=1)
+            else:
+                end = datetime(y, m + 1, 1) - __import__('datetime').timedelta(seconds=1)
+        query = query.gte('date', start.isoformat()).lte('date', end.isoformat())
+
+    result = query.order('date', desc=True).execute()
 
     operations = result.data or []
 

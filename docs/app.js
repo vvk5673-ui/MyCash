@@ -148,8 +148,11 @@ async function loadReferences() {
         if (walletsRes && walletsRes.wallets) {
             Refs.wallets = walletsRes.wallets;
             // Маппинг "чистое имя кошелька" → uuid (для отправки операций на сервер)
+            // и обратный uuid → полное имя (для загрузки операций с сервера)
+            window.walletNameById = {};
             Refs.wallets.forEach(function(w) {
                 window.walletIdMap[window.cleanWalletName(w.name)] = w.id;
+                window.walletNameById[w.id] = w.name;
             });
         }
         Refs.loaded = true;
@@ -508,6 +511,57 @@ function generateDemoData() {
     });
 }
 
+// === СИНХРОНИЗАЦИЯ С СЕРВЕРОМ (сервер — единый источник правды) ===
+
+// Преобразовать операцию из формата сервера во фронтовый.
+// Сервер хранит кошелёк как wallet_id (uuid) → переводим в имя кошелька.
+function mapServerOp(s) {
+    const byId = window.walletNameById || {};
+    return {
+        id: s.id,                 // uuid (строка) — он же серверный id
+        _server_id: s.id,
+        type: s.type,
+        amount: Number(s.amount) || 0,
+        category: s.category || '',
+        wallet: s.wallet_id ? (byId[s.wallet_id] || '') : '',
+        walletFrom: s.wallet_from_id ? (byId[s.wallet_from_id] || '') : '',
+        walletTo: s.wallet_to_id ? (byId[s.wallet_to_id] || '') : '',
+        comment: s.comment || '',
+        purpose: s.purpose || '',
+        date: s.date,
+        article_id: s.article_id || null,
+        direction_id: s.direction_id || null,
+        contragent_id: s.contragent_id || null,
+        _demo: !!s.is_demo
+    };
+}
+
+// Загрузить операции с сервера и сделать их текущим списком.
+// Вызывается при старте в онлайне — десктоп и телефон видят одно и то же.
+async function loadServerOperations() {
+    if (typeof API === 'undefined' || !API.isOnline()) return false;
+    try {
+        const res = await API.getServerOperations();
+        if (!res || !Array.isArray(res.operations)) return false;
+        operations = res.operations.map(mapServerOp);
+        isDemo = false;
+        Storage.save('mycash_ops', operations);
+        Storage.save('mycash_is_demo', false);
+        // Убираем баннеры демо — данные настоящие, с сервера
+        const b1 = document.getElementById('demoBanner');
+        const b2 = document.getElementById('demoBannerProfile');
+        if (b1) b1.classList.remove('active');
+        if (b2) b2.classList.remove('active');
+        renderAll();
+        console.log('Операции загружены с сервера:', operations.length);
+        return true;
+    } catch (e) {
+        console.warn('Не удалось загрузить операции с сервера:', e);
+        return false;
+    }
+}
+window.loadServerOperations = loadServerOperations;
+
 // === ИНИЦИАЛИЗАЦИЯ ===
 function init() {
     const data = Storage.load('mycash_ops');
@@ -693,11 +747,11 @@ function renderOperations() {
 
         return `
             <div class="op-item" data-id="${op.id}"
-                 onclick="openEdit(${op.id})"
+                 onclick="openEdit('${op.id}')"
                  ontouchstart="swipeStart(event)" ontouchmove="swipeMove(event)" ontouchend="swipeEnd(event)">
                 <div class="op-swipe-actions">
-                    <button class="op-swipe-btn edit" onclick="event.stopPropagation(); openEdit(${op.id})"><i data-lucide="pencil" style="width:16px;height:16px;color:white"></i><br>Изменить</button>
-                    <button class="op-swipe-btn delete" onclick="event.stopPropagation(); deleteOperation(${op.id})"><i data-lucide="trash-2" style="width:16px;height:16px;color:white"></i><br>Удалить</button>
+                    <button class="op-swipe-btn edit" onclick="event.stopPropagation(); openEdit('${op.id}')"><i data-lucide="pencil" style="width:16px;height:16px;color:white"></i><br>Изменить</button>
+                    <button class="op-swipe-btn delete" onclick="event.stopPropagation(); deleteOperation('${op.id}')"><i data-lucide="trash-2" style="width:16px;height:16px;color:white"></i><br>Удалить</button>
                 </div>
                 <div class="op-icon ${iconClass}">${iconHtml}</div>
                 <div class="op-info">
@@ -762,10 +816,10 @@ document.addEventListener('touchstart', function(e) {
 function deleteOperation(id) {
     const doDelete = () => {
         // Запоминаем _server_id перед удалением (для отправки на сервер)
-        const op = operations.find(function(o) { return o.id === id; });
+        const op = operations.find(function(o) { return String(o.id) === String(id); });
         const serverId = op && op._server_id;
 
-        operations = operations.filter(op => op.id !== id);
+        operations = operations.filter(op => String(op.id) !== String(id));
         Storage.save('mycash_ops', operations);
         haptic('success');
         renderAll();
@@ -1214,7 +1268,7 @@ function updateDashboard() {
                 const dateStr = formatDate(op.date);
                 const comment = op.comment ? esc(op.comment) + ' · ' : '';
                 const wallet = op.wallet || '💳 Карта';
-                return `<div class="dash-cat-op" onclick="event.stopPropagation(); openEdit(${op.id})" style="cursor:pointer">
+                return `<div class="dash-cat-op" onclick="event.stopPropagation(); openEdit('${op.id}')" style="cursor:pointer">
                     <span class="dash-cat-op-left">${comment}${dateStr} · ${wallet}</span>
                     <div style="display:flex;align-items:center;gap:8px">
                         <span class="dash-cat-op-amount" style="color:${isExpense ? 'var(--red)' : 'var(--green)'}">${isExpense ? '-' : '+'}${fmt(op.amount)} ₽</span>
@@ -1824,7 +1878,7 @@ function openEdit(id) {
     // Не открывать если был свайп
     if (swiped) return;
 
-    const op = operations.find(o => o.id === id);
+    const op = operations.find(o => String(o.id) === String(id));
     if (!op) return;
 
     editingOpId = id;
@@ -1923,7 +1977,7 @@ function saveEdit() {
     if (!v.ok) { haptic('error'); return; }
     const amount = v.amount;
 
-    const op = operations.find(o => o.id === editingOpId);
+    const op = operations.find(o => String(o.id) === String(editingOpId));
     if (!op) return;
 
     const art = editArticleId ? getArticleById(editArticleId) : null;
@@ -1971,10 +2025,10 @@ function deleteFromEdit() {
     if (!editingOpId) return;
     const id = editingOpId;
     const doDelete = () => {
-        const op = operations.find(function(o) { return o.id === id; });
+        const op = operations.find(function(o) { return String(o.id) === String(id); });
         const serverId = op && op._server_id;
 
-        operations = operations.filter(op => op.id !== id);
+        operations = operations.filter(op => String(op.id) !== String(id));
         Storage.save('mycash_ops', operations);
         haptic('success');
         document.getElementById('editOverlay').classList.remove('active');
@@ -2118,6 +2172,10 @@ window.getWalletId = function(name) {
             console.log('API: онлайн-режим, пользователь:', user.first_name);
             // Загружаем все справочники с сервера (кошельки, статьи, направления, контрагенты)
             await loadReferences();
+            // Досылаем на сервер операции, добавленные ранее в оффлайне (если были)
+            try { await API.syncOfflineData(); } catch (e) {}
+            // Затем операции с сервера — единый источник правды (синхрон между устройствами)
+            await loadServerOperations();
         } else {
             console.log('API: оффлайн-режим (localStorage)');
         }

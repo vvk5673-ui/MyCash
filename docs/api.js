@@ -168,6 +168,17 @@ async function getOperations(period, year, month) {
     };
 }
 
+// Загрузить ВСЕ операции строго с сервера (без оффлайн-подмены).
+// Возвращает {operations, summary} или null, если оффлайн/ошибка.
+async function getServerOperations() {
+    if (mode !== 'online') return null;
+    try {
+        return await request('GET', '/v1/operations?period=all');
+    } catch (e) {
+        return null;
+    }
+}
+
 async function createOperation(opData) {
     clearCache();
 
@@ -570,6 +581,7 @@ function getMode() {
 return {
     auth,
     getOperations,
+    getServerOperations,
     createOperation,
     updateOperation,
     deleteOperation,
