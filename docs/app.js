@@ -115,6 +115,78 @@ let transferFrom = '💳 Карта';
 let transferTo = '💵 Наличка';
 let walletBalances = { '💳 Карта': 0, '💵 Наличка': 0 };
 
+// === СПРАВОЧНИКИ С СЕРВЕРА (структура ДДС, грузятся при старте — loadReferences) ===
+const Refs = {
+    groups: [],          // [{id, code, name, sort_order}] — Поступление/Выбытие
+    activityKinds: [],   // [{id, code, name, sort_order}] — Операционная/Инвестиционная/...
+    articles: [],        // [{id, name, description, group_id, activity_kind_id, ...}]
+    directions: [],      // [{id, name, icon, color, ...}]
+    contragents: [],     // [{id, name, type, ...}]
+    wallets: [],         // [{id, name, icon, color, initial_balance, balance}]
+    loaded: false
+};
+window.Refs = Refs;
+
+// Загрузить все справочники с сервера в память (Refs). Без интернета — тихо выходит.
+async function loadReferences() {
+    if (typeof API === 'undefined' || !API.isOnline()) return false;
+    try {
+        const [refs, articles, directions, contragents, walletsRes] = await Promise.all([
+            API.getRefs(),
+            API.getArticles(),
+            API.getDirections(),
+            API.getContragents(),
+            API.getWallets()
+        ]);
+        if (refs) {
+            Refs.groups = refs.groups || [];
+            Refs.activityKinds = refs.activity_kinds || [];
+        }
+        if (articles) Refs.articles = articles.articles || [];
+        if (directions) Refs.directions = directions.directions || [];
+        if (contragents) Refs.contragents = contragents.contragents || [];
+        if (walletsRes && walletsRes.wallets) {
+            Refs.wallets = walletsRes.wallets;
+            // Маппинг "чистое имя кошелька" → uuid (для отправки операций на сервер)
+            Refs.wallets.forEach(function(w) {
+                window.walletIdMap[window.cleanWalletName(w.name)] = w.id;
+            });
+        }
+        Refs.loaded = true;
+        console.log('Справочники загружены:', {
+            группы: Refs.groups.length,
+            виды: Refs.activityKinds.length,
+            статьи: Refs.articles.length,
+            направления: Refs.directions.length,
+            контрагенты: Refs.contragents.length,
+            кошельки: Refs.wallets.length
+        });
+        return true;
+    } catch (e) {
+        console.warn('Не удалось загрузить справочники:', e);
+        return false;
+    }
+}
+window.loadReferences = loadReferences;
+
+// Хелперы для статей: id статьи по имени, имя по id, фильтр по типу (расход/доход)
+function getArticleById(id) {
+    return Refs.articles.find(function(a) { return a.id === id; }) || null;
+}
+function getDirectionById(id) {
+    return Refs.directions.find(function(d) { return d.id === id; }) || null;
+}
+function getContragentById(id) {
+    return Refs.contragents.find(function(c) { return c.id === id; }) || null;
+}
+// Статьи, подходящие под тип операции: expense → группа "Выбытие" (outflow), income → "Поступление" (inflow)
+function articlesForType(type) {
+    const wantCode = type === 'income' ? 'inflow' : 'outflow';
+    const grp = Refs.groups.find(function(g) { return g.code === wantCode; });
+    if (!grp) return Refs.articles.filter(function(a) { return !a.is_archived; });
+    return Refs.articles.filter(function(a) { return a.group_id === grp.id && !a.is_archived; });
+}
+
 // === ДЕМО-ДАННЫЕ ===
 function generateDemoData() {
     const now = new Date();
@@ -1601,19 +1673,8 @@ window.getWalletId = function(name) {
         const user = await API.auth(tg.initData);
         if (user) {
             console.log('API: онлайн-режим, пользователь:', user.first_name);
-            // Подгружаем кошельки с сервера и строим маппинг имя → uuid
-            try {
-                const serverWallets = await API.getWallets();
-                if (serverWallets && Array.isArray(serverWallets)) {
-                    serverWallets.forEach(function(w) {
-                        // Ключ — чистое имя без эмодзи ("Карта", "Наличка")
-                        window.walletIdMap[window.cleanWalletName(w.name)] = w.id;
-                    });
-                    console.log('Загружены кошельки с сервера:', Object.keys(window.walletIdMap));
-                }
-            } catch (e) {
-                console.warn('Не удалось загрузить кошельки с сервера:', e);
-            }
+            // Загружаем все справочники с сервера (кошельки, статьи, направления, контрагенты)
+            await loadReferences();
         } else {
             console.log('API: оффлайн-режим (localStorage)');
         }

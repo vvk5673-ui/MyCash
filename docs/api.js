@@ -274,6 +274,138 @@ async function updateWallet(walletId, data) {
 }
 
 // ==========================================
+// СПРАВОЧНИКИ ДДС (статьи, контрагенты, направления, группы/виды)
+// ==========================================
+
+// Глобальные справочники: группы (Поступление/Выбытие) + виды деятельности
+async function getRefs() {
+    const cached = getCached('refs');
+    if (cached) return cached;
+    if (mode === 'online') {
+        try {
+            const result = await request('GET', '/v1/refs');
+            setCache('refs', result);
+            return result;
+        } catch (e) {}
+    }
+    return null;
+}
+
+// --- Статьи ДДС ---
+async function getArticles() {
+    const cached = getCached('articles');
+    if (cached) return cached;
+    if (mode === 'online') {
+        try {
+            const result = await request('GET', '/v1/articles');
+            setCache('articles', result);
+            return result;
+        } catch (e) {}
+    }
+    return null;
+}
+
+async function createArticle(data) {
+    clearCache();
+    if (mode === 'online') {
+        try { return await request('POST', '/v1/articles', data); } catch (e) { throw e; }
+    }
+    throw new Error('offline');
+}
+
+async function updateArticle(id, data) {
+    clearCache();
+    if (mode === 'online') {
+        try { return await request('PUT', '/v1/articles/' + id, data); } catch (e) { throw e; }
+    }
+    throw new Error('offline');
+}
+
+async function deleteArticle(id) {
+    clearCache();
+    if (mode === 'online') {
+        try { return await request('DELETE', '/v1/articles/' + id); } catch (e) { throw e; }
+    }
+    throw new Error('offline');
+}
+
+// --- Контрагенты ---
+async function getContragents() {
+    const cached = getCached('contragents');
+    if (cached) return cached;
+    if (mode === 'online') {
+        try {
+            const result = await request('GET', '/v1/contragents');
+            setCache('contragents', result);
+            return result;
+        } catch (e) {}
+    }
+    return null;
+}
+
+async function createContragent(data) {
+    clearCache();
+    if (mode === 'online') {
+        try { return await request('POST', '/v1/contragents', data); } catch (e) { throw e; }
+    }
+    throw new Error('offline');
+}
+
+async function updateContragent(id, data) {
+    clearCache();
+    if (mode === 'online') {
+        try { return await request('PUT', '/v1/contragents/' + id, data); } catch (e) { throw e; }
+    }
+    throw new Error('offline');
+}
+
+async function deleteContragent(id) {
+    clearCache();
+    if (mode === 'online') {
+        try { return await request('DELETE', '/v1/contragents/' + id); } catch (e) { throw e; }
+    }
+    throw new Error('offline');
+}
+
+// --- Направления ---
+async function getDirections() {
+    const cached = getCached('directions');
+    if (cached) return cached;
+    if (mode === 'online') {
+        try {
+            const result = await request('GET', '/v1/directions');
+            setCache('directions', result);
+            return result;
+        } catch (e) {}
+    }
+    return null;
+}
+
+async function createDirection(data) {
+    clearCache();
+    if (mode === 'online') {
+        try { return await request('POST', '/v1/directions', data); } catch (e) { throw e; }
+    }
+    throw new Error('offline');
+}
+
+async function updateDirection(id, data) {
+    clearCache();
+    if (mode === 'online') {
+        try { return await request('PUT', '/v1/directions/' + id, data); } catch (e) { throw e; }
+    }
+    throw new Error('offline');
+}
+
+async function deleteDirection(id) {
+    clearCache();
+    if (mode === 'online') {
+        try { return await request('DELETE', '/v1/directions/' + id); } catch (e) { throw e; }
+    }
+    throw new Error('offline');
+}
+
+// ==========================================
 // ДАШБОРД
 // ==========================================
 
@@ -443,6 +575,19 @@ return {
     deleteOperation,
     getWallets,
     updateWallet,
+    getRefs,
+    getArticles,
+    createArticle,
+    updateArticle,
+    deleteArticle,
+    getContragents,
+    createContragent,
+    updateContragent,
+    deleteContragent,
+    getDirections,
+    createDirection,
+    updateDirection,
+    deleteDirection,
     getDashboard,
     getProfile,
     clearDemo,
