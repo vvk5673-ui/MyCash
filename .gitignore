@@ -2,6 +2,9 @@
 .env
 .env.local
 .env.production
+.secrets/
+*_sa.json
+service-account*.json
 
 # Зависимости
 node_modules/
