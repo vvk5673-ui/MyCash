@@ -424,36 +424,36 @@ body {
     background: var(--card);
     border-radius: 20px 20px 0 0;
     width: 100%;
-    padding: 16px 20px 24px;
-    max-height: 90vh;
+    padding: 10px 16px 18px;
+    max-height: 92vh;
     overflow-y: auto;
     animation: slideUp 0.3s ease;
 }
 .edit-title {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 700;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
-.edit-buttons { display: flex; gap: 10px; margin-top: 16px; }
+.edit-buttons { display: flex; gap: 8px; margin-top: 10px; }
 .edit-save-btn {
     flex: 1;
-    padding: 16px;
+    padding: 12px;
     border: none;
-    border-radius: 14px;
-    font-size: 16px;
+    border-radius: 12px;
+    font-size: 15px;
     font-weight: 600;
     color: white;
     background: var(--accent);
     cursor: pointer;
-    min-height: 52px;
+    min-height: 44px;
 }
 .edit-save-btn:active { opacity: 0.8; }
 .edit-delete-btn {
-    padding: 16px 20px;
+    padding: 12px 16px;
     border: none;
-    border-radius: 14px;
-    font-size: 16px;
+    border-radius: 12px;
+    font-size: 15px;
     font-weight: 600;
     color: white;
     background: var(--red);
@@ -540,8 +540,8 @@ body {
     background: var(--card);
     border-radius: 20px 20px 0 0;
     width: 100%;
-    padding: 16px 20px 24px;
-    max-height: 90vh;
+    padding: 10px 16px 18px;
+    max-height: 92vh;
     overflow-y: auto;
     animation: slideUp 0.3s ease;
 }
@@ -553,23 +553,23 @@ body {
     width: 36px; height: 5px;
     background: var(--border);
     border-radius: 3px;
-    margin: 0 auto 16px;
+    margin: 0 auto 8px;
 }
 
-/* Поле суммы — крупное */
+/* Поле суммы */
 .amount-input-wrap {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 .amount-display {
-    font-size: 42px;
+    font-size: 32px;
     font-weight: 700;
     letter-spacing: -1px;
     color: var(--text);
-    min-height: 52px;
+    min-height: 40px;
 }
 .amount-display.placeholder { color: var(--text2); }
-.amount-currency { font-size: 24px; color: var(--text2); margin-left: 4px; }
+.amount-currency { font-size: 18px; color: var(--text2); margin-left: 4px; }
 .amount-real-input {
     position: absolute;
     opacity: 0;
@@ -582,18 +582,18 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 8px;
-    margin-bottom: 20px;
+    gap: 6px;
+    margin-bottom: 10px;
 }
 .wallet-btn {
-    padding: 8px 20px;
-    border-radius: 20px;
+    padding: 6px 14px;
+    border-radius: 16px;
     border: 1px solid var(--border);
     background: var(--card);
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
     transition: all 0.2s;
-    min-height: 36px;
+    min-height: 32px;
 }
 .wallet-btn.active {
     background: var(--accent);
@@ -605,49 +605,48 @@ body {
 .quick-cats {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 10px;
-    margin-bottom: 16px;
+    gap: 6px;
+    margin-bottom: 10px;
 }
 .quick-cat {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
     cursor: pointer;
-    padding: 8px 0;
-    border-radius: 12px;
+    padding: 5px 0;
+    border-radius: 10px;
     border: none;
     background: none;
     transition: all 0.15s;
-    min-height: 44px;
     min-width: 0;
     width: 100%;
 }
 .quick-cat:active { background: var(--bg); transform: scale(0.93); }
 .quick-cat-icon {
-    width: 44px; height: 44px;
+    width: 36px; height: 36px;
     border-radius: 50%;
     background: var(--bg);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 18px;
 }
-.quick-cat-name { font-size: 11px; color: var(--text2); text-align: center; overflow-wrap: anywhere; width: 100%; line-height: 1.2; }
+.quick-cat-name { font-size: 10px; color: var(--text2); text-align: center; overflow-wrap: anywhere; width: 100%; line-height: 1.15; }
 
 /* Кнопка "Подробнее" */
 .more-btn {
     display: block;
     width: 100%;
     text-align: center;
-    padding: 12px;
+    padding: 8px;
     color: var(--accent);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     background: none;
     border: none;
     cursor: pointer;
-    min-height: 44px;
+    min-height: 36px;
 }
 
 /* === РАСШИРЕННАЯ ФОРМА === */
@@ -658,62 +657,68 @@ body {
     display: flex;
     background: var(--bg);
     border-radius: 12px;
-    padding: 4px;
-    margin-bottom: 16px;
+    padding: 3px;
+    margin-bottom: 10px;
 }
 .type-btn {
     flex: 1;
-    padding: 10px;
+    padding: 7px;
     border: none;
-    border-radius: 10px;
-    font-size: 14px;
+    border-radius: 9px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     background: transparent;
     color: var(--text2);
     transition: all 0.2s;
-    min-height: 44px;
+    min-height: 34px;
 }
 .type-btn.active.expense-btn { background: var(--red); color: white; }
 .type-btn.active.income-btn { background: var(--green); color: white; }
 .type-btn.active.transfer-btn { background: var(--accent); color: white; }
 
-.form-group { margin-bottom: 14px; }
+.form-group { margin-bottom: 9px; }
 .form-label {
-    font-size: 13px; font-weight: 600;
+    font-size: 12px; font-weight: 600;
     color: var(--text2);
-    margin-bottom: 6px;
+    margin-bottom: 3px;
     display: block;
 }
 .form-input {
     width: 100%;
-    padding: 12px 16px;
+    padding: 9px 12px;
     border: 1px solid var(--border);
-    border-radius: 12px;
-    font-size: 16px;
+    border-radius: 10px;
+    font-size: 14px;
     background: var(--bg);
     color: var(--text);
     outline: none;
     -webkit-appearance: none;
-    min-height: 44px;
+    min-height: 38px;
 }
 .form-input:focus { border-color: var(--accent); }
 
-/* Категории в расширенной форме */
+/* Чипы (кошельки/статьи) в расширенной форме и редактировании */
 .cat-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
+}
+/* Статьи в редактировании — компактной сеткой 2 в ряд */
+#editArticleGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
 }
 .cat-chip {
-    padding: 8px 16px;
-    border-radius: 20px;
+    padding: 6px 12px;
+    border-radius: 16px;
     border: 1px solid var(--border);
     background: var(--card);
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
     transition: all 0.2s;
-    min-height: 36px;
+    min-height: 30px;
 }
 .cat-chip.active {
     background: var(--accent);
@@ -745,16 +750,16 @@ body {
 
 .save-btn {
     width: 100%;
-    padding: 16px;
+    padding: 12px;
     border: none;
-    border-radius: 14px;
-    font-size: 17px;
+    border-radius: 12px;
+    font-size: 15px;
     font-weight: 600;
     color: white;
     background: var(--accent);
     cursor: pointer;
-    margin-top: 12px;
-    min-height: 52px;
+    margin-top: 8px;
+    min-height: 44px;
     transition: opacity 0.15s;
 }
 .save-btn:active { opacity: 0.8; }
