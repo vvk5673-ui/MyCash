@@ -582,23 +582,42 @@ function openModal() {
     haptic('light');
     document.getElementById('modalOverlay').classList.add('active');
     document.getElementById('amountInput').value = '';
-    document.getElementById('amountDisplay').textContent = '0 ';
     document.getElementById('amountDisplay').innerHTML = '0 <span class="amount-currency">₽</span>';
     document.getElementById('amountDisplay').classList.add('placeholder');
     document.getElementById('extendedForm').classList.remove('active');
-    currentType = 'expense';
-    selectedCategory = '';
+    // Сброс необязательных полей
+    document.getElementById('purposeInput').value = '';
+    document.getElementById('commentInput').value = '';
+    document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
     // Дефолтный кошелёк: последний использованный (если ещё существует) иначе первый активный
-    const wallets = getActiveWallets();
-    const walletNames = wallets.map(function(w) { return w.name; });
+    const walletNames = getActiveWallets().map(function(w) { return w.name; });
     const lastWallet = Storage.load('mycash_last_wallet');
     selectedWallet = (lastWallet && walletNames.indexOf(lastWallet) >= 0) ? lastWallet : (walletNames[0] || '');
     // Дефолтные кошельки для перевода
     transferFrom = walletNames[0] || '';
     transferTo = walletNames[1] || walletNames[0] || '';
     renderWalletSwitch();
-    renderQuickCats();
+    populateFormSelects();
+    setType('expense');
     setTimeout(() => document.getElementById('amountInput').focus(), 300);
+}
+
+// Заполнить выпадающие списки направлений и контрагентов в форме
+function populateFormSelects() {
+    const dirSel = document.getElementById('directionSelect');
+    if (dirSel) {
+        dirSel.innerHTML = '<option value="">— не указано —</option>' +
+            Refs.directions.filter(function(d) { return !d.is_archived; }).map(function(d) {
+                return '<option value="' + d.id + '">' + esc(d.name) + '</option>';
+            }).join('');
+    }
+    const cgSel = document.getElementById('contragentSelect');
+    if (cgSel) {
+        cgSel.innerHTML = '<option value="">— не указано —</option>' +
+            Refs.contragents.filter(function(c) { return !c.is_archived; }).map(function(c) {
+                return '<option value="' + c.id + '">' + esc(c.name) + '</option>';
+            }).join('');
+    }
 }
 
 function closeModal(e) {
@@ -697,7 +716,12 @@ async function sendOperationToServer(op) {
             wallet_from_id: walletFromId,
             wallet_to_id: walletToId,
             comment: op.comment || '',
-            date: op.date
+            date: op.date,
+            // Новые поля структуры ДДС
+            article_id: op.article_id || null,
+            direction_id: op.direction_id || null,
+            contragent_id: op.contragent_id || null,
+            purpose: op.purpose || ''
         };
 
         const result = await API.createOperation(payload);
@@ -713,37 +737,110 @@ async function sendOperationToServer(op) {
 
 // === РАСШИРЕННАЯ ФОРМА ===
 function toggleExtended() {
-    const form = document.getElementById('extendedForm');
-    form.classList.toggle('active');
-    if (form.classList.contains('active')) {
-        document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
-        document.getElementById('commentInput').value = '';
-        updateExtType();
-    }
+    document.getElementById('extendedForm').classList.toggle('active');
 }
 
 function setType(type) {
     currentType = type;
     haptic('light');
     document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('.' + type + '-btn').classList.add('active');
-    updateExtType();
-}
-
-function updateExtType() {
-    const catGroup = document.getElementById('extCatGroup');
-    const transferGroup = document.getElementById('transferGroup');
-    if (currentType === 'transfer') {
-        catGroup.style.display = 'none';
-        transferGroup.style.display = 'block';
+    const btn = document.querySelector('.' + type + '-btn');
+    if (btn) btn.classList.add('active');
+    const articlesArea = document.getElementById('articlesArea');
+    const transferArea = document.getElementById('transferArea');
+    if (type === 'transfer') {
+        articlesArea.style.display = 'none';
+        transferArea.style.display = 'block';
         document.getElementById('transferFrom').textContent = transferFrom;
         document.getElementById('transferTo').textContent = transferTo;
     } else {
-        catGroup.style.display = 'block';
-        transferGroup.style.display = 'none';
-        renderExtCats();
+        articlesArea.style.display = 'block';
+        transferArea.style.display = 'none';
+        renderQuickArticles();
     }
-    renderQuickCats();
+}
+
+// Рендер статей ДДС (отфильтрованных по типу) — тап = сохранение
+function renderQuickArticles() {
+    const arts = articlesForType(currentType);
+    const box = document.getElementById('quickArticles');
+    if (!box) return;
+    if (!arts.length) {
+        box.innerHTML = '<div style="padding:12px;color:var(--text2);font-size:13px;text-align:center;grid-column:1/-1">Статьи не загружены.<br>Откройте приложение при наличии интернета.</div>';
+        return;
+    }
+    box.innerHTML = arts.map(function(a) {
+        return '<button class="quick-cat" onclick="quickSaveArticle(\'' + a.id + '\')">' +
+            '<div class="quick-cat-icon">' + lucideIcon(a.icon || 'tag', 22, a.color || '#007AFF') + '</div>' +
+            '<div class="quick-cat-name">' + esc(a.name) + '</div>' +
+            '</button>';
+    }).join('');
+    refreshIcons();
+}
+
+// Сохранение операции по тапу на статью (с учётом полей из «Подробнее»)
+function quickSaveArticle(articleId) {
+    const v = validateAmount(document.getElementById('amountInput').value);
+    if (!v.ok) {
+        haptic('error');
+        const disp = document.getElementById('amountDisplay');
+        disp.style.color = 'var(--red)';
+        setTimeout(function() { disp.style.color = ''; }, 500);
+        return;
+    }
+    const article = getArticleById(articleId);
+    if (!article) { haptic('error'); return; }
+    // Тип операции определяется группой статьи (Поступление=доход / Выбытие=расход)
+    const grp = Refs.groups.find(function(g) { return g.id === article.group_id; });
+    const type = (grp && grp.code === 'inflow') ? 'income' : 'expense';
+    const dateVal = document.getElementById('dateInput').value;
+
+    const op = {
+        id: Date.now(),
+        type: type,
+        amount: v.amount,
+        category: article.name,               // для совместимости со старым отображением
+        article_id: article.id,
+        direction_id: document.getElementById('directionSelect').value || null,
+        contragent_id: document.getElementById('contragentSelect').value || null,
+        purpose: document.getElementById('purposeInput').value || '',
+        wallet: selectedWallet,
+        comment: document.getElementById('commentInput').value || '',
+        date: dateVal ? (dateVal + 'T12:00:00') : new Date().toISOString()
+    };
+    operations.unshift(op);
+    Storage.save('mycash_ops', operations);
+    Storage.save('mycash_last_wallet', selectedWallet);
+    haptic('success');
+    document.getElementById('modalOverlay').classList.remove('active');
+    renderAll();
+    sendOperationToServer(op);
+}
+
+// Сохранение перевода между кошельками
+function saveTransfer() {
+    const v = validateAmount(document.getElementById('amountInput').value);
+    if (!v.ok) { haptic('error'); return; }
+    if (transferFrom === transferTo) { haptic('error'); alert('Выберите разные кошельки для перевода'); return; }
+    const dateVal = document.getElementById('dateInput').value;
+    const op = {
+        id: Date.now(),
+        type: 'transfer',
+        amount: v.amount,
+        category: 'Перевод',
+        wallet: transferFrom,
+        walletFrom: transferFrom,
+        walletTo: transferTo,
+        purpose: document.getElementById('purposeInput').value || '',
+        comment: document.getElementById('commentInput').value || '',
+        date: (dateVal || new Date().toISOString().split('T')[0]) + 'T12:00:00'
+    };
+    operations.unshift(op);
+    Storage.save('mycash_ops', operations);
+    haptic('success');
+    document.getElementById('modalOverlay').classList.remove('active');
+    renderAll();
+    sendOperationToServer(op);
 }
 
 // Общая функция рендера категорий (для ввода и редактирования)
@@ -767,6 +864,22 @@ function selectExtCat(cat) {
 
 function swapTransfer() {
     [transferFrom, transferTo] = [transferTo, transferFrom];
+    document.getElementById('transferFrom').textContent = transferFrom;
+    document.getElementById('transferTo').textContent = transferTo;
+    haptic('light');
+}
+
+// Перебор кошельков для перевода (тап по кошельку → следующий)
+function cycleTransfer(which) {
+    const names = getActiveWallets().map(function(w) { return w.name; });
+    if (!names.length) return;
+    if (which === 'from') {
+        const i = names.indexOf(transferFrom);
+        transferFrom = names[(i + 1) % names.length];
+    } else {
+        const i = names.indexOf(transferTo);
+        transferTo = names[(i + 1) % names.length];
+    }
     document.getElementById('transferFrom').textContent = transferFrom;
     document.getElementById('transferTo').textContent = transferTo;
     haptic('light');
@@ -1783,7 +1896,8 @@ Object.assign(window, {
     selectWallet, selectWalletColor, setDashTab, setEditType, setPeriod,
     setTableMode, setType, shareApp, showUpgrade, stopVoice, swapTransfer,
     switchTab, toggleCatOps, toggleExtended, updateAmountDisplay, acceptOffer, skipOffer,
-    swipeStart, swipeMove, swipeEnd
+    swipeStart, swipeMove, swipeEnd,
+    quickSaveArticle, saveTransfer, cycleTransfer
 });
 
 // Восстановить вкладку из хэша URL
