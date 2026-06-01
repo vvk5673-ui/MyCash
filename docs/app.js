@@ -267,6 +267,15 @@ const REF_META = {
 let currentRefKind = null;   // 'articles' | 'directions' | 'contragents'
 let editingRefId = null;     // null = создаём новый
 let refArticleType = 'expense';
+let refBusy = false;         // защита от двойного нажатия «Сохранить»/«Скрыть»
+
+// Понятный текст ошибки по сообщению из API
+function refErrorText(e) {
+    const m = (e && e.message) || '';
+    if (m === 'offline') return 'Нет связи с сервером. Проверьте интернет и попробуйте снова.';
+    if (m === 'unauthorized') return 'Сессия истекла. Закройте и откройте приложение заново.';
+    return m || 'Неизвестная ошибка';
+}
 
 // Обновить счётчики справочников в Профиле (только не скрытые)
 function updateRefCounts() {
@@ -401,10 +410,12 @@ function setRefArticleType(type) {
 
 // Сохранить (создать или обновить) элемент справочника
 async function saveRefForm() {
+    if (refBusy) return;                       // не даём двойной запрос
     const kind = currentRefKind;
     const name = document.getElementById('refFormName').value.trim();
     if (!name) { haptic('error'); document.getElementById('refFormName').focus(); return; }
 
+    refBusy = true;
     try {
         if (kind === 'articles') {
             const inGrp = Refs.groups.find(function(g) { return g.code === 'inflow'; });
@@ -428,17 +439,21 @@ async function saveRefForm() {
         updateRefCounts();
     } catch (e) {
         haptic('error');
-        alert('Не удалось сохранить: ' + (e.message || 'ошибка'));
+        alert('Не удалось сохранить: ' + refErrorText(e));
+    } finally {
+        refBusy = false;
     }
 }
 
 // Скрыть элемент (is_archived=true) — старые операции остаются целыми
 async function archiveRefItem(id) {
+    if (refBusy) return;
     const kind = currentRefKind;
     const targetId = id || editingRefId;
     if (!targetId) return;
     if (!confirm('Скрыть из списков выбора? Старые операции с этим элементом останутся целыми.')) return;
 
+    refBusy = true;
     try {
         if (kind === 'articles') await API.updateArticle(targetId, { is_archived: true });
         else if (kind === 'directions') await API.updateDirection(targetId, { is_archived: true });
@@ -450,7 +465,9 @@ async function archiveRefItem(id) {
         updateRefCounts();
     } catch (e) {
         haptic('error');
-        alert('Не удалось скрыть: ' + (e.message || 'ошибка'));
+        alert('Не удалось скрыть: ' + refErrorText(e));
+    } finally {
+        refBusy = false;
     }
 }
 

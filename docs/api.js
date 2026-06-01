@@ -48,31 +48,31 @@ async function request(method, endpoint, body) {
         options.body = JSON.stringify(body);
     }
 
+    // Шаг 1. Сам запрос. Если fetch упал — это РЕАЛЬНЫЙ обрыв связи → оффлайн.
+    let response;
     try {
-        const response = await fetch(BASE_URL + endpoint, options);
-
-        if (response.status === 401) {
-            authToken = null;
-            throw new Error('unauthorized');
-        }
-        if (response.status === 429) {
-            const data = await response.json();
-            throw new Error('limit:' + (data.detail || 'Лимит превышен'));
-        }
-        if (!response.ok) {
-            const data = await response.json().catch(() => ({}));
-            throw new Error(data.detail || 'Ошибка сервера');
-        }
-
-        return await response.json();
+        response = await fetch(BASE_URL + endpoint, options);
     } catch (e) {
-        if (e.message === 'unauthorized' || e.message.startsWith('limit:')) {
-            throw e;
-        }
-        // Сеть недоступна — переключаемся в оффлайн
         mode = 'offline';
         throw new Error('offline');
     }
+
+    // Шаг 2. Ответ получен — связь есть, mode НЕ трогаем.
+    // Ошибки сервера (4xx/5xx) пробрасываем с реальным текстом, а не как «offline».
+    if (response.status === 401) {
+        authToken = null;
+        throw new Error('unauthorized');
+    }
+    if (response.status === 429) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error('limit:' + (data.detail || 'Лимит превышен'));
+    }
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.detail || 'Ошибка сервера');
+    }
+
+    return await response.json();
 }
 
 // Кэширование
