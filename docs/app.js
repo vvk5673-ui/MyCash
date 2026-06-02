@@ -86,21 +86,32 @@ function lucideIcon(name, size, color) {
     return '<i data-lucide="' + name + '" style="width:' + size + 'px;height:' + size + 'px;color:' + color + '"></i>';
 }
 
-// Обновить все Lucide-иконки на странице
+// Обновить все Lucide-иконки на странице.
+// Отказоустойчиво: один кривой вызов не должен гасить весь набор, и любой значок,
+// который Lucide не преобразовал в svg, получает запасную букву — значки НИКОГДА не пропадают.
 function refreshIcons() {
-    if (window.lucide) {
-        lucide.createIcons();
-    } else {
-        // Фоллбек: если Lucide не загрузился — первая буква
-        document.querySelectorAll('i[data-lucide]').forEach(el => {
-            if (!el.querySelector('svg')) {
-                const name = el.getAttribute('data-lucide') || '';
-                el.textContent = name.charAt(0).toUpperCase();
-                el.style.fontStyle = 'normal';
-                el.style.fontWeight = '600';
-            }
-        });
-    }
+    try {
+        if (window.lucide && typeof lucide.createIcons === 'function') {
+            lucide.createIcons();
+        }
+    } catch (e) { /* не мешаем рендеру: ниже всё равно поставим фоллбек */ }
+    // Любой <i data-lucide> без отрисованного svg — запасная буква в цвете значка
+    document.querySelectorAll('i[data-lucide]').forEach(el => {
+        if (!el.querySelector('svg')) {
+            const name = el.getAttribute('data-lucide') || '';
+            el.textContent = name.charAt(0).toUpperCase();
+            el.style.fontStyle = 'normal';
+            el.style.fontWeight = '600';
+        }
+    });
+}
+
+// Повторно переотрисовать значки после асинхронной загрузки/перерисовки —
+// страховка от гонки загрузки Lucide-CDN в webview Telegram (значки появлялись и пропадали)
+function refreshIconsSoon() {
+    refreshIcons();
+    setTimeout(refreshIcons, 60);
+    setTimeout(refreshIcons, 600);
 }
 const chartColors = ['#FF3B30','#FF9500','#FFCC00','#34C759','#007AFF','#5856D6','#AF52DE','#FF2D55','#00C7BE','#8E8E93'];
 
@@ -167,6 +178,7 @@ async function loadReferences() {
         });
         // Перерисовываем UI — теперь кошельки берутся с сервера
         if (typeof renderAll === 'function') renderAll();
+        refreshIconsSoon();   // страховка от гонки загрузки Lucide в webview Telegram
         return true;
     } catch (e) {
         console.warn('Не удалось загрузить справочники:', e);
@@ -675,6 +687,7 @@ async function loadServerOperations() {
         if (b1) b1.classList.remove('active');
         if (b2) b2.classList.remove('active');
         renderAll();
+        refreshIconsSoon();   // страховка от гонки загрузки Lucide в webview Telegram
         console.log('Операции загружены с сервера:', operations.length);
         return true;
     } catch (e) {
