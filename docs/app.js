@@ -122,6 +122,7 @@ let selectedCategory = '';
 let currentPeriod = 'month';
 let voiceParsedData = null;
 let isDemo = false;
+let serverIsDemo = false;   // is_demo с сервера (из ответа API.auth) — источник правды для демо-баннера
 let transferFrom = '💳 Карта';
 let transferTo = '💵 Наличка';
 let walletBalances = { '💳 Карта': 0, '💵 Наличка': 0 };
@@ -678,14 +679,14 @@ async function loadServerOperations() {
         if (!res || !Array.isArray(res.operations)) return false;
         // Операции до даты начала учёта не показываем нигде (баланс/список/аналитика/отчёт)
         operations = res.operations.map(mapServerOp).filter(isWithinAccounting);
-        isDemo = false;
+        isDemo = serverIsDemo;
         Storage.save('mycash_ops', operations);
-        Storage.save('mycash_is_demo', false);
-        // Убираем баннеры демо — данные настоящие, с сервера
+        Storage.save('mycash_is_demo', isDemo);
+        // Демо-баннер — по серверному флагу is_demo (из API.auth), а не по localStorage
         const b1 = document.getElementById('demoBanner');
         const b2 = document.getElementById('demoBannerProfile');
-        if (b1) b1.classList.remove('active');
-        if (b2) b2.classList.remove('active');
+        if (b1) b1.classList.toggle('active', isDemo);
+        if (b2) b2.classList.toggle('active', isDemo);
         renderAll();
         refreshIconsSoon();   // страховка от гонки загрузки Lucide в webview Telegram
         console.log('Операции загружены с сервера:', operations.length);
@@ -1802,19 +1803,20 @@ document.getElementById('pieChart').addEventListener('click', function(e) {
 // === ОНБОРДИНГ ===
 let onboardingStep = 0;
 
-function clearDemoData() {
+async function clearDemoData() {
     haptic();
-    operations = [];
-    isDemo = false;
-    Storage.save('mycash_ops', operations);
-    Storage.save('mycash_is_demo', false);
+    serverIsDemo = false;   // сервер снимет is_demo — баннер должен исчезнуть
+    try {
+        await API.clearDemo();           // ручка /v1/user/clear-demo
+        await loadReferences();          // справочники/счета
+        await loadServerOperations();    // демо-операций не останется + снимет баннер
+        renderAll();
+    } catch (e) {
+        alert('Не удалось очистить демо. Нужен интернет, попробуйте снова.');
+    }
+    // Страховка на случай оффлайна — спрятать баннер
     document.getElementById('demoBanner').classList.remove('active');
     document.getElementById('demoBannerProfile').classList.remove('active');
-
-    // Показываем запрос остатков
-    onboardingStep = 0;
-    showOnboardingStep();
-    document.getElementById('onboardingOverlay').classList.add('active');
 }
 
 function showOnboardingStep() {
@@ -2521,18 +2523,20 @@ function shareApp() {
 
 // Очистить все данные
 function clearAllData() {
-    const doIt = () => {
-        localStorage.clear();
-        operations = [];
-        walletBalances = { '💳 Карта': 0, '💵 Наличка': 0 };
-        Storage.save('mycash_ops', operations);
-        Storage.save('mycash_balances', walletBalances);
+    if (!confirm('Удалить все данные? Это действие нельзя отменить.')) return;
+    (async () => {
         haptic('success');
-        renderAll();
-        switchTab('home', document.querySelector('.tab-item'));
-        showOfferIfNeeded();
-    };
-    if (confirm('Удалить все данные? Это действие нельзя отменить.')) doIt();
+        try {
+            await API.clearAll();            // сервер: удалить все операции + обнулить остатки счетов + снять is_demo
+            serverIsDemo = false;
+            await loadReferences();          // счета обнулятся
+            await loadServerOperations();    // операций не останется
+            renderAll();
+            switchTab('home', document.querySelector('.tab-item'));
+        } catch (e) {
+            alert('Не удалось удалить данные. Нужен интернет, попробуйте снова.');
+        }
+    })();
 }
 
 // === СТАРТ ===
@@ -2559,6 +2563,7 @@ window.getWalletId = function(name) {
     if (tg && tg.initData) {
         const user = await API.auth(tg.initData);
         if (user) {
+            serverIsDemo = !!user.is_demo;   // демо-флаг с сервера → демо-баннер
             console.log('API: онлайн-режим, пользователь:', user.first_name);
             // Загружаем все справочники с сервера (кошельки, статьи, направления, контрагенты)
             await loadReferences();

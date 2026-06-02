@@ -461,6 +461,13 @@ async function clearDemo() {
     return null;
 }
 
+// Полный сброс на сервере: удаляет ВСЕ операции + обнуляет остатки счетов + снимает is_demo.
+// Ошибку НЕ глотаем — фронт должен знать, удалилось ли (в отличие от clearDemo)
+async function clearAll() {
+    clearCache();
+    return await request('POST', '/v1/user/clear-all');
+}
+
 async function setBalances(cardBalance, cashBalance) {
     clearCache();
     if (mode === 'online') {
@@ -606,6 +613,7 @@ return {
     getDashboard,
     getProfile,
     clearDemo,
+    clearAll,
     setBalances,
     deleteAccount,
     syncOfflineData,
