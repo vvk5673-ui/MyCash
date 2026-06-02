@@ -59,9 +59,12 @@ def verify_telegram_init_data(init_data: str) -> dict | None:
         if not hmac.compare_digest(calculated_hash, received_hash):
             return None
 
-        # Проверяем что данные не старше 1 часа
+        # Проверяем что данные не старше 24 часов.
+        # 1 час был слишком строго: Telegram Desktop переиспользует initData
+        # от момента запуска Mini App, и при долгой сессии возраст превышал час →
+        # авторизация ложно отклонялась, приложение падало в запасной режим.
         auth_date = int(parsed.get('auth_date', [0])[0])
-        if time.time() - auth_date > 3600:
+        if time.time() - auth_date > 86400:
             return None
 
         # Извлекаем данные пользователя
