@@ -132,6 +132,9 @@ class SetBalances(BaseModel):
     card_balance: float = 0
     cash_balance: float = 0
 
+class AccountingStart(BaseModel):
+    date: Optional[str] = None   # 'YYYY-MM-01' или null (учитывать всё)
+
 # --- Статьи ДДС ---
 class ArticleCreate(BaseModel):
     name: str
@@ -390,6 +393,8 @@ async def get_wallets(current_user: dict = Depends(get_current_user)):
 
     wallets = supabase.table('wallets').select('*').eq('user_id', user_id).order('sort_order').execute()
     operations = supabase.table('operations').select('type,amount,wallet_id,wallet_from_id,wallet_to_id').eq('user_id', user_id).execute()
+    user_row = supabase.table('users').select('accounting_start').eq('id', user_id).single().execute()
+    accounting_start = user_row.data.get('accounting_start') if user_row.data else None
 
     wallet_list = []
     total_balance = 0
@@ -413,7 +418,8 @@ async def get_wallets(current_user: dict = Depends(get_current_user)):
 
     return {
         'wallets': wallet_list,
-        'total_balance': total_balance
+        'total_balance': total_balance,
+        'accounting_start': accounting_start
     }
 
 
@@ -758,6 +764,14 @@ async def set_balances(body: SetBalances, current_user: dict = Depends(get_curre
             supabase.table('wallets').update({'initial_balance': body.cash_balance}).eq('id', w['id']).execute()
 
     return {'ok': True}
+
+
+@app.post('/v1/user/accounting-start')
+async def set_accounting_start(body: AccountingStart, current_user: dict = Depends(get_current_user)):
+    """Установить дату начала учёта (операции и остатки до неё не учитываются)"""
+    user_id = current_user['user_id']
+    supabase.table('users').update({'accounting_start': body.date}).eq('id', user_id).execute()
+    return {'ok': True, 'accounting_start': body.date}
 
 
 @app.delete('/v1/user/account')
