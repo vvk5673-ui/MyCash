@@ -72,7 +72,7 @@ async def cmd_start(message: types.Message):
     """Команда /start — приветствие и кнопка Mini App"""
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text="📊 Открыть MyCash",
+            text="✅ Открыть MyCash",
             web_app=WebAppInfo(url=WEBAPP_URL)
         )]
     ])
@@ -587,7 +587,7 @@ async def send_daily_reminder():
                         "Откройте MyCash и добавьте операции 👇",
                         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                             [InlineKeyboardButton(
-                                text="📊 Открыть MyCash",
+                                text="✅ Открыть MyCash",
                                 web_app=WebAppInfo(url=WEBAPP_URL)
                             )]
                         ])
