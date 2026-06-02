@@ -562,6 +562,9 @@ async function saveRefForm() {
         closeRefForm();
         renderRefList();
         updateRefCounts();
+        // Если открыто окно операции — обновить плитки статей
+        const mo = document.getElementById('modalOverlay');
+        if (mo && mo.classList.contains('active')) renderQuickArticles();
     } catch (e) {
         haptic('error');
         alert('Не удалось сохранить: ' + refErrorText(e));
@@ -588,6 +591,9 @@ async function archiveRefItem(id) {
         if (document.getElementById('refFormOverlay').classList.contains('active')) closeRefForm();
         renderRefList();
         updateRefCounts();
+        // Если открыто окно операции — обновить плитки статей
+        const mo = document.getElementById('modalOverlay');
+        if (mo && mo.classList.contains('active')) renderQuickArticles();
     } catch (e) {
         haptic('error');
         alert('Не удалось скрыть: ' + refErrorText(e));
@@ -1212,6 +1218,12 @@ function deleteOperation(id) {
 // === МОДАЛЬНОЕ ОКНО: БЫСТРЫЙ ВВОД ===
 function openModal() {
     haptic('light');
+    // Сбрасываем режим «Изменить» статьи при каждом открытии
+    articleEditMode = false;
+    const aToggle = document.getElementById('articleEditToggle');
+    const aLabel = document.getElementById('quickArticlesLabel');
+    if (aToggle) aToggle.textContent = '✏️ Изменить';
+    if (aLabel) aLabel.textContent = 'Статья — нажмите, чтобы сохранить';
     document.getElementById('modalOverlay').classList.add('active');
     document.getElementById('amountInput').value = '';
     document.getElementById('amountDisplay').innerHTML = '0 <span class="amount-currency">₽</span>';
@@ -1393,12 +1405,14 @@ function setType(type) {
 }
 
 // Рендер статей ДДС (отфильтрованных по типу) — тап = сохранение
+let articleEditMode = false;   // режим «Изменить» в окне операции (тап = редактировать статью)
+
 function renderQuickArticles() {
     const arts = articlesForType(currentType);
     const box = document.getElementById('quickArticles');
     if (!box) return;
+    // Статьи ещё не загрузились — пробуем дозагрузить с сервера и перерисовать
     if (!arts.length) {
-        // Статьи ещё не загрузились — пробуем дозагрузить с сервера и перерисовать
         const online = (typeof API !== 'undefined' && API.isOnline());
         if (online && !Refs._reloading) {
             Refs._reloading = true;
@@ -1410,13 +1424,43 @@ function renderQuickArticles() {
             });
             return;
         }
-        box.innerHTML = '<div style="padding:12px;color:var(--text2);font-size:13px;text-align:center;grid-column:1/-1">Статьи не загружены.<br>Откройте приложение при наличии интернета.</div>';
-        return;
     }
     // Единый стиль со страницей редактирования — текстовые пилюли (cat-chip) в 2 ряда
-    box.innerHTML = arts.map(function(a) {
+    let html = arts.map(function(a) {
+        if (articleEditMode) {
+            return '<button class="cat-chip cat-chip-edit" onclick="openArticleEditFromOp(\'' + a.id + '\')">✏️ ' + esc(a.name) + '</button>';
+        }
         return '<button class="cat-chip" onclick="quickSaveArticle(\'' + a.id + '\')">' + esc(a.name) + '</button>';
     }).join('');
+    // Плитка «Новая статья» — всегда в конце сетки
+    html += '<button class="cat-chip cat-chip-add" onclick="openNewArticleFromOp()">➕ Новая статья</button>';
+    box.innerHTML = html;
+}
+
+// Переключатель режима «Изменить» в окне операции
+function toggleArticleEditMode() {
+    articleEditMode = !articleEditMode;
+    haptic('light');
+    const btn = document.getElementById('articleEditToggle');
+    const lbl = document.getElementById('quickArticlesLabel');
+    if (btn) btn.textContent = articleEditMode ? '✓ Готово' : '✏️ Изменить';
+    if (lbl) lbl.textContent = articleEditMode
+        ? 'Нажмите статью, чтобы изменить или удалить'
+        : 'Статья — нажмите, чтобы сохранить';
+    renderQuickArticles();
+}
+
+// Создать новую статью прямо из окна операции (тип = текущий: доход/расход)
+function openNewArticleFromOp() {
+    currentRefKind = 'articles';
+    openRefForm(null);
+    setRefArticleType(currentType === 'income' ? 'income' : 'expense');
+}
+
+// Открыть форму статьи (изменить/удалить) из окна операции
+function openArticleEditFromOp(articleId) {
+    currentRefKind = 'articles';
+    openRefForm(articleId);
 }
 
 // Сохранение операции по тапу на статью (с учётом полей из «Подробнее»)
@@ -2727,6 +2771,7 @@ Object.assign(window, {
     switchTab, toggleCatOps, toggleExtended, updateAmountDisplay, acceptOffer, skipOffer,
     swipeStart, swipeMove, swipeEnd,
     quickSaveArticle, saveTransfer, cycleTransfer,
+    toggleArticleEditMode, openNewArticleFromOp, openArticleEditFromOp,
     openRefList, closeRefList, openRefForm, closeRefForm,
     setRefArticleType, saveRefForm, archiveRefItem,
     setDashMode, navReportMonth, toggleDdsSection

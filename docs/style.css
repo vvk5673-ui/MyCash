@@ -735,6 +735,17 @@ body {
     color: white;
     border-color: var(--accent);
 }
+/* Плитка добавления новой статьи в окне операции */
+.cat-chip.cat-chip-add {
+    border-style: dashed;
+    color: var(--accent);
+    font-weight: 600;
+}
+/* Статья в режиме «Изменить» */
+.cat-chip.cat-chip-edit {
+    border-color: var(--accent);
+    color: var(--accent);
+}
 
 /* Переводы */
 .transfer-row {
