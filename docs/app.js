@@ -342,25 +342,19 @@ function renderWalletsRow() {
     const bal = computeWalletBalances();
     const row = document.getElementById('walletsRow');
     if (!row) return;
-    row.innerHTML = wallets.map(function(w, i) {
+    row.innerHTML = wallets.map(function(w) {
         // Кошелёк кликабелен только если он реальный (с сервера, есть id) — тап открывает настройки
         const click = w.id ? ' onclick="openWalletEdit(\'' + w.id + '\')" style="cursor:pointer"' : '';
-        // Стрелки порядка (только для серверных счетов; у крайних — пустое место для ровного вида)
-        let moves = '';
-        if (w.id) {
-            const up = (i > 0)
-                ? '<span class="wallet-move" onclick="event.stopPropagation();moveWallet(\'' + w.id + '\',\'up\')">' + lucideIcon('chevron-up', 16, '#8E8E93') + '</span>'
-                : '<span class="wallet-move-empty"></span>';
-            const down = (i < wallets.length - 1)
-                ? '<span class="wallet-move" onclick="event.stopPropagation();moveWallet(\'' + w.id + '\',\'down\')">' + lucideIcon('chevron-down', 16, '#8E8E93') + '</span>'
-                : '<span class="wallet-move-empty"></span>';
-            moves = '<span class="wallet-moves">' + up + down + '</span>';
-        }
-        return '<div class="wallet-line"' + click + '>' +
+        const wid = w.id ? ' data-wid="' + w.id + '"' : '';
+        // Хваталка для перетаскивания (изменение порядка) — только для серверных счетов
+        const handle = w.id
+            ? '<span class="wallet-drag" onpointerdown="walletDragStart(event,\'' + w.id + '\')" onclick="event.stopPropagation()">' + lucideIcon('grip-vertical', 18, '#C7C7CC') + '</span>'
+            : '';
+        return '<div class="wallet-line"' + wid + click + '>' +
             '<span style="flex-shrink:0">' + lucideIcon(w.icon || 'wallet', 18, w.color || '#007AFF') + '</span>' +
             '<span class="wallet-line-name">' + esc(w.name) + '</span>' +
             '<span class="wallet-line-amount">' + fmt(bal[w.name] || 0) + ' ₽</span>' +
-            moves +
+            handle +
             '</div>';
     }).join('') +
     // Строка добавления нового счёта (только онлайн — счета хранятся на сервере)
@@ -2110,6 +2104,7 @@ function renderWalletColorGrid() {
 }
 
 function openWalletEdit(walletId) {
+    if (walletDragged) { walletDragged = false; return; }   // после перетаскивания не открывать настройки
     const w = (Refs.wallets || []).find(function(x) { return String(x.id) === String(walletId); });
     if (!w) { return; }
     editingWalletId = w.id;
@@ -2222,38 +2217,89 @@ async function saveWalletEdit() {
     }
 }
 
-// Передвинуть счёт в списке вверх/вниз (меняет sort_order на сервере)
-async function moveWallet(walletId, dir) {
+// === ПЕРЕТАСКИВАНИЕ СЧЕТОВ (изменение порядка) ===
+let walletDragged = false;     // было ли перемещение (чтобы не открыть настройки после drag)
+let walletDragCtx = null;
+
+function walletDragStart(e, walletId) {
     if (walletSaveBusy) return;
-    const wallets = getActiveWallets().slice();   // текущий порядок (по sort_order)
-    const idx = wallets.findIndex(function(w) { return String(w.id) === String(walletId); });
-    if (idx < 0) return;
-    const swapWith = (dir === 'up') ? idx - 1 : idx + 1;
-    if (swapWith < 0 || swapWith >= wallets.length) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const row = e.target.closest('.wallet-line');
+    const container = document.getElementById('walletsRow');
+    if (!row || !container) return;
+    walletDragged = false;
+    walletDragCtx = { row: row, container: container };
+    row.classList.add('wallet-dragging');
+    try { row.setPointerCapture(e.pointerId); } catch (err) {}
+    document.addEventListener('pointermove', walletDragMove);
+    document.addEventListener('pointerup', walletDragEnd);
+    document.addEventListener('pointercancel', walletDragEnd);
+    haptic('light');
+}
+
+function walletDragMove(e) {
+    if (!walletDragCtx) return;
+    e.preventDefault();
+    walletDragged = true;
+    const ctx = walletDragCtx;
+    const rows = Array.prototype.slice.call(ctx.container.querySelectorAll('.wallet-line[data-wid]'));
+    const y = e.clientY;
+    for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        if (r === ctx.row) continue;
+        const rect = r.getBoundingClientRect();
+        if (y < rect.top + rect.height / 2) {
+            if (r.previousElementSibling !== ctx.row) ctx.container.insertBefore(ctx.row, r);
+            return;
+        }
+    }
+    // ниже всех счетов — перед строкой «Добавить счёт» (или в конец)
+    const addRow = ctx.container.querySelector('.wallet-line-add');
+    if (addRow) {
+        if (addRow.previousElementSibling !== ctx.row) ctx.container.insertBefore(ctx.row, addRow);
+    } else {
+        ctx.container.appendChild(ctx.row);
+    }
+}
+
+async function walletDragEnd() {
+    if (!walletDragCtx) return;
+    const ctx = walletDragCtx;
+    walletDragCtx = null;
+    ctx.row.classList.remove('wallet-dragging');
+    document.removeEventListener('pointermove', walletDragMove);
+    document.removeEventListener('pointerup', walletDragEnd);
+    document.removeEventListener('pointercancel', walletDragEnd);
+
+    if (!walletDragged) return;   // не было перемещения — ничего не делаем
+
+    // Новый порядок id из DOM → sort_order = позиция
+    const ids = Array.prototype.slice
+        .call(ctx.container.querySelectorAll('.wallet-line[data-wid]'))
+        .map(function(r) { return r.getAttribute('data-wid'); });
 
     if (typeof API === 'undefined' || !API.isOnline()) {
         haptic('error');
         alert('Перемещение счетов работает только онлайн.');
+        await loadReferences();   // вернуть прежний порядок
         return;
     }
-
-    // Меняем местами в массиве, затем нормализуем sort_order = позиция
-    const tmp = wallets[idx];
-    wallets[idx] = wallets[swapWith];
-    wallets[swapWith] = tmp;
-    haptic('light');
 
     walletSaveBusy = true;
     try {
         const updates = [];
-        wallets.forEach(function(w, i) {
-            if (w.sort_order !== i) updates.push(API.updateWallet(w.id, { sort_order: i }));
+        ids.forEach(function(id, i) {
+            const w = (Refs.wallets || []).find(function(x) { return String(x.id) === String(id); });
+            if (w && w.sort_order !== i) updates.push(API.updateWallet(id, { sort_order: i }));
         });
         await Promise.all(updates);
-        await loadReferences();   // перечитать счета в новом порядке (внутри renderAll)
+        await loadReferences();
+        haptic('success');
     } catch (e) {
         haptic('error');
-        alert('Не удалось переместить: ' + (e && e.message ? e.message : 'ошибка'));
+        alert('Не удалось сохранить порядок: ' + (e && e.message ? e.message : 'ошибка'));
+        await loadReferences();
     } finally {
         walletSaveBusy = false;
     }
@@ -2673,7 +2719,7 @@ Object.assign(window, {
     clearDemoData, closeEdit, closeModal, closeUpgrade, closeVoiceConfirm,
     closeWalletEdit, confirmVoice, deleteFromEdit, deleteOperation, deleteWallet,
     focusAmount, haptic, openCustomPeriod,
-    openEdit, openModal, openWalletEdit, openNewWallet, moveWallet, quickSave, renderEditArticles,
+    openEdit, openModal, openWalletEdit, openNewWallet, walletDragStart, quickSave, renderEditArticles,
     renderEditWallets, selectEditWallet, selectEditArticle,
     saveEdit, saveExtended, saveWalletEdit, selectExtCat,
     selectWallet, selectWalletColor, setDashTab, setDashGroup, setEditType, setPeriod,
