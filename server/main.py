@@ -222,11 +222,18 @@ async def auth_telegram(body: AuthRequest):
         seed_result = seed_user_defaults(supabase, user['id'])
         wallet_ids = seed_result['wallet_id_by_name']
 
+        # Карта «название статьи → id» — чтобы демо-операции привязались
+        # к реальным статьям ДДС (для Отчёта ДДС и аналитики по статьям)
+        user_articles = supabase.table('dds_articles') \
+            .select('id, name').eq('user_id', user['id']).execute().data
+        article_id_by_name = {a['name']: a['id'] for a in (user_articles or [])}
+
         # Создаём демо-данные на первых двух кошельках (Счёт №1 + Наличка)
         demo_ops = generate_demo_operations(
             user['id'],
             wallet_ids.get('Счёт №1'),
-            wallet_ids.get('Наличка')
+            wallet_ids.get('Наличка'),
+            article_id_by_name
         )
         if demo_ops:
             supabase.table('operations').insert(demo_ops).execute()
