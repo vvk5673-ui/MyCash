@@ -2081,7 +2081,7 @@ const WALLET_COLORS = [
     { name: 'Розовый', color: '#FF2D55' },
     { name: 'Фиолетовый', color: '#AF52DE' },
     { name: 'Бирюзовый', color: '#5AC8FA' },
-    { name: 'Жёлтый', color: '#FF9F0A' }
+    { name: 'Жёлтый', color: '#FFCC00' }
 ];
 
 let editingWalletId = null;   // id редактируемого счёта (с сервера)
