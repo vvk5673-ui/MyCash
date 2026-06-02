@@ -42,15 +42,15 @@ body {
     margin: 16px;
     background: var(--card);
     border-radius: var(--radius);
-    padding: 20px;
+    padding: 14px;
     box-shadow: var(--shadow);
 }
 .balance-total {
-    font-size: 36px;
+    font-size: 28px;
     font-weight: 700;
     letter-spacing: -1px;
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
 }
 .wallets-row {
     display: block;
@@ -60,13 +60,13 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 9px 2px;
+    padding: 6px 2px;
     border-bottom: 1px solid var(--border);
 }
 .wallet-line:last-child { border-bottom: none; }
 .wallet-line-name { flex: 1; font-size: 14px; }
 .wallet-line-amount { font-size: 14px; font-weight: 600; }
-.wallet-drag { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin-left: 4px; color: #C7C7CC; cursor: grab; flex-shrink: 0; touch-action: none; }
+.wallet-drag { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin-left: 4px; color: #C7C7CC; cursor: grab; flex-shrink: 0; touch-action: none; }
 .wallet-drag:active { cursor: grabbing; }
 .wallet-line.wallet-dragging { opacity: 0.55; background: var(--bg); border-radius: 8px; }
 .wallet-badge {
