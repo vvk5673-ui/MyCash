@@ -14,7 +14,7 @@ from aiogram.types import (
 )
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from config import BOT_TOKEN, ADMIN_TELEGRAM_ID
+from config import BOT_TOKEN, ADMIN_TELEGRAM_ID, WEBHOOK_SECRET
 from database import supabase
 
 log = logging.getLogger(__name__)
@@ -742,9 +742,14 @@ async def setup_bot_commands():
 
 
 async def setup_webhook(webhook_url: str):
-    """Устанавливаем webhook для Telegram"""
+    """Устанавливаем webhook для Telegram.
+
+    Передаём secret_token — Telegram будет слать его в заголовке
+    X-Telegram-Bot-Api-Secret-Token при каждом обновлении. Эндпоинт
+    /bot/webhook сверяет этот заголовок и отбрасывает чужие запросы.
+    """
     await bot.delete_webhook(drop_pending_updates=True)
-    await bot.set_webhook(webhook_url)
+    await bot.set_webhook(webhook_url, secret_token=WEBHOOK_SECRET)
     log.info(f"Webhook установлен: {webhook_url}")
 
 

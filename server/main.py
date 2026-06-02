@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 import logging
+import hmac
 from contextlib import asynccontextmanager
 
 from logger import setup_logging
@@ -16,7 +17,7 @@ from logger import setup_logging
 # чтобы их логи тоже попали в файл
 setup_logging()
 
-from config import HOST, PORT, BOT_TOKEN
+from config import HOST, PORT, BOT_TOKEN, WEBHOOK_SECRET
 from database import supabase
 from auth import verify_telegram_init_data, create_jwt_token
 from middleware import get_current_user
@@ -799,7 +800,15 @@ async def health():
 
 @app.post('/bot/webhook')
 async def telegram_webhook(request: Request):
-    """Принимаем обновления от Telegram"""
+    """Принимаем обновления от Telegram.
+
+    Сверяем секретный токен из заголовка X-Telegram-Bot-Api-Secret-Token.
+    Если он не совпадает с нашим WEBHOOK_SECRET — это чужой запрос, отбрасываем.
+    """
+    received_secret = request.headers.get('X-Telegram-Bot-Api-Secret-Token', '')
+    if not hmac.compare_digest(received_secret, WEBHOOK_SECRET):
+        raise HTTPException(status_code=403, detail='Неверный секрет вебхука')
+
     update_data = await request.json()
     await process_webhook_update(update_data)
     return {'ok': True}
