@@ -686,6 +686,168 @@ function setDashGroup(mode) {
     updateDashboard();
 }
 
+// === ОТЧЁТ ДДС (виды деятельности × месяц) ===
+let dashMode = 'charts';      // 'charts' (графики) | 'report' (отчёт ДДС)
+let reportMonth = null;       // Date — 1-е число выбранного месяца отчёта
+let ddsCollapsed = {};        // id вида деятельности → true, если раздел свёрнут
+const RU_MONTHS = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                   'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+
+function startOfThisMonth() {
+    const n = new Date();
+    return new Date(n.getFullYear(), n.getMonth(), 1);
+}
+
+// Переключатель режима: Графики / Отчёт ДДС
+function setDashMode(mode) {
+    dashMode = mode;
+    haptic('light');
+    const bc = document.getElementById('dashModeCharts');
+    const br = document.getElementById('dashModeReport');
+    if (bc) bc.classList.toggle('active', mode === 'charts');
+    if (br) br.classList.toggle('active', mode === 'report');
+    updateDashboard();
+}
+
+// Листание месяцев отчёта
+function navReportMonth(delta) {
+    if (!reportMonth) reportMonth = startOfThisMonth();
+    reportMonth = new Date(reportMonth.getFullYear(), reportMonth.getMonth() + delta, 1);
+    haptic('light');
+    renderDdsReport();
+}
+
+function toggleDdsSection(id) {
+    ddsCollapsed[id] = !ddsCollapsed[id];
+    haptic('light');
+    renderDdsReport();
+}
+
+// Вид деятельности операции (через её статью). null — если статьи/вида нет
+function activityKindOf(op) {
+    const a = op.article_id ? getArticleById(op.article_id) : null;
+    if (a && a.activity_kind_id) {
+        const k = Refs.activityKinds.find(function(x) { return x.id === a.activity_kind_id; });
+        if (k) return k;
+    }
+    return null;
+}
+
+// Суммарный остаток ВСЕХ счетов на дату (учитываются операции строго ДО dateExcl).
+// Переводы между своими счетами общий остаток не меняют.
+function totalBalanceBefore(dateExcl) {
+    let total = 0;
+    getActiveWallets().forEach(function(w) { total += Number(w.initial_balance) || 0; });
+    operations.forEach(function(op) {
+        if (new Date(op.date) >= dateExcl) return;
+        if (op.type === 'income') total += op.amount;
+        else if (op.type === 'expense') total -= op.amount;
+    });
+    return total;
+}
+
+// Остаток по каждому счёту на дату (операции строго ДО dateExcl)
+function walletBalancesBefore(dateExcl) {
+    const bal = {};
+    getActiveWallets().forEach(function(w) { bal[w.name] = Number(w.initial_balance) || 0; });
+    operations.forEach(function(op) {
+        if (new Date(op.date) >= dateExcl) return;
+        if (op.type === 'income' && bal[op.wallet] != null) bal[op.wallet] += op.amount;
+        else if (op.type === 'expense' && bal[op.wallet] != null) bal[op.wallet] -= op.amount;
+        else if (op.type === 'transfer') {
+            if (bal[op.walletTo] != null) bal[op.walletTo] += op.amount;
+            if (bal[op.walletFrom] != null) bal[op.walletFrom] -= op.amount;
+        }
+    });
+    return bal;
+}
+
+// Построение отчёта ДДС за выбранный месяц
+function renderDdsReport() {
+    const body = document.getElementById('ddsReportBody');
+    if (!body) return;
+    if (!reportMonth) reportMonth = startOfThisMonth();
+    const start = new Date(reportMonth.getFullYear(), reportMonth.getMonth(), 1);
+    const end = new Date(reportMonth.getFullYear(), reportMonth.getMonth() + 1, 1);
+
+    const monthLabel = document.getElementById('ddsReportMonth');
+    if (monthLabel) monthLabel.textContent = RU_MONTHS[start.getMonth()] + ' ' + start.getFullYear();
+
+    // Остатки на начало месяца
+    const startTotal = totalBalanceBefore(start);
+    const startByWallet = walletBalancesBefore(start);
+
+    // Разделы по видам деятельности (без технической — переводы в потоки не входят)
+    const kinds = (Refs.activityKinds || []).slice()
+        .filter(function(k) { return k.code !== 'technical'; })
+        .sort(function(a, b) { return (a.sort_order || 0) - (b.sort_order || 0); });
+
+    const sections = {};   // id вида → { name, order, flow, arts: {ключ: {name, amount}} }
+    kinds.forEach(function(k) { sections[k.id] = { name: k.name, order: k.sort_order || 0, flow: 0, arts: {} }; });
+    const NOKEY = '__none__';
+    sections[NOKEY] = { name: 'Без статьи', order: 999, flow: 0, arts: {} };
+
+    // Операции месяца, сгруппированные по виду деятельности → статье
+    operations.forEach(function(op) {
+        const d = new Date(op.date);
+        if (d < start || d >= end) return;
+        if (op.type === 'transfer') return;   // переводы — техническая операция, в потоки не входят
+        const signed = op.type === 'income' ? op.amount : -op.amount;
+        const k = activityKindOf(op);
+        const secId = (k && sections[k.id]) ? k.id : NOKEY;
+        const sec = sections[secId];
+        const art = op.article_id ? getArticleById(op.article_id) : null;
+        const artKey = op.article_id || ('cat:' + (op.category || ''));
+        const artName = art ? art.name : (op.category || 'Без статьи');
+        if (!sec.arts[artKey]) sec.arts[artKey] = { name: artName, amount: 0 };
+        sec.arts[artKey].amount += signed;
+        sec.flow += signed;
+    });
+
+    const change = Object.keys(sections).reduce(function(s, id) { return s + sections[id].flow; }, 0);
+    const endTotal = startTotal + change;
+    const endByWallet = walletBalancesBefore(end);
+
+    const fmtSigned = function(v) { return (v >= 0 ? '+' : '−') + fmt(Math.abs(v)) + ' ₽'; };
+    const wallets = getActiveWallets();
+    let html = '';
+
+    // Денег на начало + разбивка по счетам
+    html += '<div class="dds-row dds-row-total"><span>Денег на начало</span><span>' + fmt(startTotal) + ' ₽</span></div>';
+    wallets.forEach(function(w) {
+        html += '<div class="dds-row dds-row-sub"><span>' + esc(w.name) + '</span><span>' + fmt(startByWallet[w.name] || 0) + ' ₽</span></div>';
+    });
+
+    // Разделы по видам деятельности
+    const orderedIds = Object.keys(sections).sort(function(a, b) { return sections[a].order - sections[b].order; });
+    orderedIds.forEach(function(id) {
+        const sec = sections[id];
+        const arts = Object.keys(sec.arts).map(function(k) { return sec.arts[k]; });
+        if (arts.length === 0) return;   // пустой раздел не показываем
+        const collapsed = !!ddsCollapsed[id];
+        const flowColor = sec.flow >= 0 ? 'var(--green)' : 'var(--red)';
+        html += '<div class="dds-row dds-row-section" onclick="toggleDdsSection(\'' + id + '\')">' +
+            '<span><span class="dds-arrow" style="' + (collapsed ? '' : 'transform:rotate(90deg)') + '">›</span>' + esc(sec.name) + '</span>' +
+            '<span style="color:' + flowColor + '">' + fmtSigned(sec.flow) + '</span></div>';
+        if (!collapsed) {
+            arts.sort(function(a, b) { return Math.abs(b.amount) - Math.abs(a.amount); });
+            arts.forEach(function(a) {
+                const c = a.amount >= 0 ? 'var(--green)' : 'var(--red)';
+                html += '<div class="dds-row dds-row-art"><span>' + esc(a.name) + '</span><span style="color:' + c + '">' + fmtSigned(a.amount) + '</span></div>';
+            });
+        }
+    });
+
+    // Изменение за месяц + денег на конец + разбивка по счетам
+    html += '<div class="dds-row dds-row-total"><span>Изменение за месяц</span><span style="color:' + (change >= 0 ? 'var(--green)' : 'var(--red)') + '">' + fmtSigned(change) + '</span></div>';
+    html += '<div class="dds-row dds-row-total"><span>Денег на конец</span><span>' + fmt(endTotal) + ' ₽</span></div>';
+    wallets.forEach(function(w) {
+        html += '<div class="dds-row dds-row-sub"><span>' + esc(w.name) + '</span><span>' + fmt(endByWallet[w.name] || 0) + ' ₽</span></div>';
+    });
+
+    body.innerHTML = html;
+}
+
 function setPeriod(period, btn) {
     currentPeriod = period;
     customFrom = null;
@@ -1272,6 +1434,18 @@ function saveExtended() {
 let dashExpenses = []; // сохраняем для раскрытия категорий
 
 function updateDashboard() {
+    // Режим отчёта ДДС — рисуем отчёт, графики прячем
+    if (dashMode === 'report') {
+        const inline = document.getElementById('dashboardInline');
+        if (inline) inline.style.display = 'none';
+        const rw = document.getElementById('ddsReportWrap');
+        if (rw) rw.style.display = 'block';
+        renderDdsReport();
+        return;
+    }
+    const rw0 = document.getElementById('ddsReportWrap');
+    if (rw0) rw0.style.display = 'none';
+
     const filtered = filterByPeriod(operations);
     const isExpense = dashTab === 'expense';
     dashExpenses = filtered.filter(op => op.type === (isExpense ? 'expense' : 'income'));
@@ -2301,7 +2475,8 @@ Object.assign(window, {
     swipeStart, swipeMove, swipeEnd,
     quickSaveArticle, saveTransfer, cycleTransfer,
     openRefList, closeRefList, openRefForm, closeRefForm,
-    setRefArticleType, saveRefForm, archiveRefItem
+    setRefArticleType, saveRefForm, archiveRefItem,
+    setDashMode, navReportMonth, toggleDdsSection
 });
 
 // Восстановить вкладку из хэша URL

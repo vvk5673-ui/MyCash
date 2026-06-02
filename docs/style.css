@@ -916,6 +916,61 @@ body {
     padding: 8px;
 }
 
+/* === ОТЧЁТ ДДС === */
+.dds-report-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+.dds-report-month {
+    font-size: 15px;
+    font-weight: 700;
+}
+.dds-nav-btn {
+    width: 40px;
+    height: 36px;
+    border: none;
+    background: var(--bg);
+    border-radius: 10px;
+    font-size: 20px;
+    color: var(--text);
+    cursor: pointer;
+    line-height: 1;
+}
+.dds-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 4px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+}
+.dds-row span:last-child { flex-shrink: 0; white-space: nowrap; }
+.dds-row-total { font-weight: 700; }
+.dds-row-section {
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 11px 10px;
+    margin-top: 10px;
+    border-bottom: none;
+}
+.dds-row-sub {
+    color: var(--text2);
+    font-size: 13px;
+    padding-left: 16px;
+}
+.dds-row-art { padding-left: 16px; }
+.dds-arrow {
+    display: inline-block;
+    transition: transform 0.2s;
+    color: var(--text2);
+    margin-right: 2px;
+}
+
 /* === ЭКРАН-ОФФЕР === */
 .offer-overlay {
     display: none;
