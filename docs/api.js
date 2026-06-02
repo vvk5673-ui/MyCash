@@ -280,6 +280,12 @@ async function updateWallet(walletId, data) {
     return await request('PUT', '/v1/wallets/' + walletId, data);
 }
 
+// Сохранить дату начала учёта (общая настройка пользователя)
+async function setAccountingStart(date) {
+    clearCache();
+    return await request('POST', '/v1/user/accounting-start', { date: date });
+}
+
 // ==========================================
 // СПРАВОЧНИКИ ДДС (статьи, контрагенты, направления, группы/виды)
 // ==========================================
@@ -583,6 +589,7 @@ return {
     deleteOperation,
     getWallets,
     updateWallet,
+    setAccountingStart,
     getRefs,
     getArticles,
     createArticle,

@@ -155,6 +155,7 @@ async function loadReferences() {
                 window.walletNameById[w.id] = w.name;
             });
         }
+        if (walletsRes) setAccountingStartFromServer(walletsRes.accounting_start);
         Refs.loaded = true;
         console.log('Справочники загружены:', {
             группы: Refs.groups.length,
@@ -563,7 +564,8 @@ async function loadServerOperations() {
     try {
         const res = await API.getServerOperations();
         if (!res || !Array.isArray(res.operations)) return false;
-        operations = res.operations.map(mapServerOp);
+        // Операции до даты начала учёта не показываем нигде (баланс/список/аналитика/отчёт)
+        operations = res.operations.map(mapServerOp).filter(isWithinAccounting);
         isDemo = false;
         Storage.save('mycash_ops', operations);
         Storage.save('mycash_is_demo', false);
@@ -690,12 +692,28 @@ function setDashGroup(mode) {
 let dashMode = 'charts';      // 'charts' (графики) | 'report' (отчёт ДДС)
 let reportMonth = null;       // Date — 1-е число выбранного месяца отчёта
 let ddsCollapsed = {};        // id вида деятельности → true, если раздел свёрнут
+let accountingStart = null;     // Date — начало учёта (1-е число месяца) или null
+let accountingStartStr = null;  // 'YYYY-MM-DD' — исходная строка с сервера
 const RU_MONTHS = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
                    'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
 
 function startOfThisMonth() {
     const n = new Date();
     return new Date(n.getFullYear(), n.getMonth(), 1);
+}
+
+function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+
+// Установить дату начала учёта из ответа сервера ('YYYY-MM-DD' или null)
+function setAccountingStartFromServer(str) {
+    accountingStartStr = str || null;
+    accountingStart = str ? new Date(str + 'T00:00:00') : null;
+}
+
+// Попадает ли операция в учётный период (>= даты начала учёта)
+function isWithinAccounting(op) {
+    if (!accountingStart) return true;
+    return new Date(op.date) >= accountingStart;
 }
 
 // Переключатель режима: Графики / Отчёт ДДС
@@ -712,7 +730,10 @@ function setDashMode(mode) {
 // Листание месяцев отчёта
 function navReportMonth(delta) {
     if (!reportMonth) reportMonth = startOfThisMonth();
-    reportMonth = new Date(reportMonth.getFullYear(), reportMonth.getMonth() + delta, 1);
+    const next = new Date(reportMonth.getFullYear(), reportMonth.getMonth() + delta, 1);
+    // Не листаем раньше месяца начала учёта — там данных нет
+    if (accountingStart && next < startOfMonth(accountingStart)) return;
+    reportMonth = next;
     haptic('light');
     renderDdsReport();
 }
@@ -2031,6 +2052,8 @@ function openWalletEdit(walletId) {
 
     document.getElementById('walletEditName').value = w.name || '';
     document.getElementById('walletEditBalance').value = Number(w.initial_balance) || 0;
+    const accInput = document.getElementById('walletEditAccStart');
+    if (accInput) accInput.value = accountingStartStr ? accountingStartStr.slice(0, 7) : '';
 
     // Палитра цветов значка (data-color — надёжное сравнение: style.background браузер нормализует в rgb)
     document.getElementById('walletColorGrid').innerHTML = WALLET_COLORS.map(function(c) {
@@ -2068,6 +2091,11 @@ async function saveWalletEdit() {
     if (!newName) { haptic('error'); return; }
     const newBalance = parseFloat(document.getElementById('walletEditBalance').value) || 0;
 
+    // Дата начала учёта (общая для всех счетов): месяц из поля → 'YYYY-MM-01'
+    const accInput = document.getElementById('walletEditAccStart');
+    const newAccStr = (accInput && accInput.value) ? accInput.value + '-01' : null;
+    const accChanged = (newAccStr !== accountingStartStr);
+
     // Остаток и настройки счёта храним на сервере (единый источник) — без сети сохранить нельзя
     if (typeof API === 'undefined' || !API.isOnline()) {
         haptic('error');
@@ -2082,7 +2110,9 @@ async function saveWalletEdit() {
             color: editWalletColor,
             initial_balance: newBalance
         });
-        await loadReferences();   // перечитать счета с сервера (внутри вызывает renderAll)
+        if (accChanged) await API.setAccountingStart(newAccStr);
+        await loadReferences();   // перечитать счета + дату начала учёта (внутри вызывает renderAll)
+        if (accChanged) await loadServerOperations();   // перефильтровать операции под новую дату
         haptic('success');
         closeWalletEdit();
     } catch (e) {
