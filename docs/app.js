@@ -733,17 +733,9 @@ function activityKindOf(op) {
     return null;
 }
 
-// Суммарный остаток ВСЕХ счетов на дату (учитываются операции строго ДО dateExcl).
-// Переводы между своими счетами общий остаток не меняют.
-function totalBalanceBefore(dateExcl) {
-    let total = 0;
-    getActiveWallets().forEach(function(w) { total += Number(w.initial_balance) || 0; });
-    operations.forEach(function(op) {
-        if (new Date(op.date) >= dateExcl) return;
-        if (op.type === 'income') total += op.amount;
-        else if (op.type === 'expense') total -= op.amount;
-    });
-    return total;
+// Сумма значений объекта вида {имя счёта: число}
+function sumValues(obj) {
+    return Object.keys(obj).reduce(function(s, k) { return s + obj[k]; }, 0);
 }
 
 // Остаток по каждому счёту на дату (операции строго ДО dateExcl)
@@ -773,9 +765,14 @@ function renderDdsReport() {
     const monthLabel = document.getElementById('ddsReportMonth');
     if (monthLabel) monthLabel.textContent = RU_MONTHS[start.getMonth()] + ' ' + start.getFullYear();
 
-    // Остатки на начало месяца
-    const startTotal = totalBalanceBefore(start);
+    // Остатки на начало месяца (итог = сумма по счетам — согласованно с главным экраном)
     const startByWallet = walletBalancesBefore(start);
+    const startTotal = sumValues(startByWallet);
+
+    // Множество имён счетов: операции по «чужому» счёту (старое демо) в деньги не входят —
+    // так же, как на главном экране, иначе итог не сойдётся с разбивкой по счетам
+    const walletNames = {};
+    getActiveWallets().forEach(function(w) { walletNames[w.name] = true; });
 
     // Разделы по видам деятельности (без технической — переводы в потоки не входят)
     const kinds = (Refs.activityKinds || []).slice()
@@ -792,6 +789,7 @@ function renderDdsReport() {
         const d = new Date(op.date);
         if (d < start || d >= end) return;
         if (op.type === 'transfer') return;   // переводы — техническая операция, в потоки не входят
+        if (!walletNames[op.wallet]) return;  // счёт не из списка — игнорируем (согласованность с остатками)
         const signed = op.type === 'income' ? op.amount : -op.amount;
         const k = activityKindOf(op);
         const secId = (k && sections[k.id]) ? k.id : NOKEY;
@@ -805,8 +803,8 @@ function renderDdsReport() {
     });
 
     const change = Object.keys(sections).reduce(function(s, id) { return s + sections[id].flow; }, 0);
-    const endTotal = startTotal + change;
     const endByWallet = walletBalancesBefore(end);
+    const endTotal = sumValues(endByWallet);   // = startTotal + change (сходится с разбивкой по счетам)
 
     const fmtSigned = function(v) { return (v >= 0 ? '+' : '−') + fmt(Math.abs(v)) + ' ₽'; };
     const wallets = getActiveWallets();
