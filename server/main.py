@@ -751,6 +751,26 @@ async def clear_demo(current_user: dict = Depends(get_current_user)):
     return {'ok': True}
 
 
+@app.post('/v1/user/clear-all')
+async def clear_all(current_user: dict = Depends(get_current_user)):
+    """Полный сброс данных к пустому старту.
+
+    Удаляет ВСЕ операции (демо и реальные) и обнуляет остатки всех счетов.
+    Сами счета, статьи, направления и аккаунт сохраняются — остаётся
+    чистая структура без данных. Снимает метку «демо».
+    """
+    user_id = current_user['user_id']
+
+    # Удаляем все операции пользователя
+    supabase.table('operations').delete().eq('user_id', user_id).execute()
+    # Обнуляем начальные остатки всех счетов
+    supabase.table('wallets').update({'initial_balance': 0}).eq('user_id', user_id).execute()
+    # Снимаем метку демо
+    supabase.table('users').update({'is_demo': False}).eq('id', user_id).execute()
+
+    return {'ok': True}
+
+
 @app.post('/v1/user/set-balances')
 async def set_balances(body: SetBalances, current_user: dict = Depends(get_current_user)):
     """Установить начальные остатки (онбординг)"""
