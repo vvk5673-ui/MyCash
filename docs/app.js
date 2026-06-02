@@ -350,7 +350,12 @@ function renderWalletsRow() {
             '<span class="wallet-line-name">' + esc(w.name) + '</span>' +
             '<span class="wallet-line-amount">' + fmt(bal[w.name] || 0) + ' ₽</span>' +
             '</div>';
-    }).join('');
+    }).join('') +
+    // Строка добавления нового счёта (только онлайн — счета хранятся на сервере)
+    '<div class="wallet-line wallet-line-add" onclick="openNewWallet()" style="cursor:pointer;color:var(--accent)">' +
+        '<span style="flex-shrink:0">' + lucideIcon('plus', 18, '#007AFF') + '</span>' +
+        '<span class="wallet-line-name">Добавить счёт</span>' +
+        '</div>';
     refreshIcons();
 }
 
@@ -2083,6 +2088,15 @@ let editingWalletId = null;   // id редактируемого счёта (с 
 let editWalletColor = '#007AFF';
 let walletSaveBusy = false;   // защита от двойного сохранения
 
+// Отрисовать палитру цветов значка (data-color — надёжное сравнение)
+function renderWalletColorGrid() {
+    document.getElementById('walletColorGrid').innerHTML = WALLET_COLORS.map(function(c) {
+        return '<div class="wallet-color-btn ' + (c.color === editWalletColor ? 'active' : '') + '"' +
+               ' data-color="' + c.color + '" style="background:' + c.color + '"' +
+               ' onclick="selectWalletColor(\'' + c.color + '\')"></div>';
+    }).join('');
+}
+
 function openWalletEdit(walletId) {
     const w = (Refs.wallets || []).find(function(x) { return String(x.id) === String(walletId); });
     if (!w) { return; }
@@ -2090,22 +2104,41 @@ function openWalletEdit(walletId) {
     editWalletColor = w.color || '#007AFF';
     haptic('light');
 
+    document.getElementById('walletEditTitle').textContent = 'Настройки счёта';
     document.getElementById('walletEditName').value = w.name || '';
     document.getElementById('walletEditBalance').value = Number(w.initial_balance) || 0;
     const accInput = document.getElementById('walletEditAccStart');
     if (accInput) accInput.value = accountingStartStr ? accountingStartStr.slice(0, 7) : '';
+    // Режим редактирования: дата начала учёта видна, кнопка удаления активна
+    document.getElementById('walletAccStartGroup').style.display = '';
+    const delBtn = document.getElementById('walletDeleteBtn');
+    delBtn.style.display = '';
+    delBtn.style.opacity = '1';
+    delBtn.onclick = function() { deleteWallet(); };
 
-    // Палитра цветов значка (data-color — надёжное сравнение: style.background браузер нормализует в rgb)
-    document.getElementById('walletColorGrid').innerHTML = WALLET_COLORS.map(function(c) {
-        return '<div class="wallet-color-btn ' + (c.color === editWalletColor ? 'active' : '') + '"' +
-               ' data-color="' + c.color + '" style="background:' + c.color + '"' +
-               ' onclick="selectWalletColor(\'' + c.color + '\')"></div>';
-    }).join('');
-
-    // Кнопка удаления — заблокирована (Pro)
-    document.getElementById('walletDeleteBtn').onclick = function() { showUpgrade(); };
-
+    renderWalletColorGrid();
     document.getElementById('walletEditOverlay').classList.add('active');
+}
+
+// Открыть окно создания нового счёта
+function openNewWallet() {
+    haptic('light');
+    editingWalletId = null;                 // null → режим создания
+    editWalletColor = WALLET_COLORS[0].color;
+
+    document.getElementById('walletEditTitle').textContent = 'Новый счёт';
+    document.getElementById('walletEditName').value = '';
+    document.getElementById('walletEditBalance').value = 0;
+    // При создании дату начала учёта (общую) и удаление не показываем
+    document.getElementById('walletAccStartGroup').style.display = 'none';
+    document.getElementById('walletDeleteBtn').style.display = 'none';
+
+    renderWalletColorGrid();
+    document.getElementById('walletEditOverlay').classList.add('active');
+    setTimeout(function() {
+        const nameInput = document.getElementById('walletEditName');
+        if (nameInput) nameInput.focus();
+    }, 200);
 }
 
 function closeWalletEdit(e) {
@@ -2124,27 +2157,41 @@ function selectWalletColor(color) {
 
 async function saveWalletEdit() {
     if (walletSaveBusy) return;
-    const id = editingWalletId;
-    if (!id) return;
+    const id = editingWalletId;   // null → создаём новый счёт
 
     const newName = document.getElementById('walletEditName').value.trim();
     if (!newName) { haptic('error'); return; }
     const newBalance = parseFloat(document.getElementById('walletEditBalance').value) || 0;
 
-    // Дата начала учёта (общая для всех счетов): месяц из поля → 'YYYY-MM-01'
-    const accInput = document.getElementById('walletEditAccStart');
-    const newAccStr = (accInput && accInput.value) ? accInput.value + '-01' : null;
-    const accChanged = (newAccStr !== accountingStartStr);
-
     // Остаток и настройки счёта храним на сервере (единый источник) — без сети сохранить нельзя
     if (typeof API === 'undefined' || !API.isOnline()) {
         haptic('error');
-        alert('Нет связи с сервером. Настройки счёта сохраняются только онлайн — попробуйте позже.');
+        alert('Нет связи с сервером. Счета сохраняются только онлайн — попробуйте позже.');
         return;
     }
 
     walletSaveBusy = true;
     try {
+        if (!id) {
+            // Создание нового счёта
+            await API.createWallet({
+                name: newName,
+                icon: 'wallet',
+                color: editWalletColor,
+                initial_balance: newBalance
+            });
+            await loadReferences();
+            haptic('success');
+            closeWalletEdit();
+            return;
+        }
+
+        // Редактирование существующего счёта
+        // Дата начала учёта (общая для всех счетов): месяц из поля → 'YYYY-MM-01'
+        const accInput = document.getElementById('walletEditAccStart');
+        const newAccStr = (accInput && accInput.value) ? accInput.value + '-01' : null;
+        const accChanged = (newAccStr !== accountingStartStr);
+
         await API.updateWallet(id, {
             name: newName,
             color: editWalletColor,
@@ -2163,8 +2210,32 @@ async function saveWalletEdit() {
     }
 }
 
-function deleteWallet() {
-    showUpgrade();
+async function deleteWallet() {
+    if (walletSaveBusy) return;
+    const id = editingWalletId;
+    if (!id) return;
+
+    if (typeof API === 'undefined' || !API.isOnline()) {
+        haptic('error');
+        alert('Нет связи с сервером. Удаление счёта работает только онлайн.');
+        return;
+    }
+
+    if (!confirm('Удалить этот счёт? Действие нельзя отменить.')) return;
+
+    walletSaveBusy = true;
+    try {
+        await API.deleteWallet(id);
+        await loadReferences();
+        haptic('success');
+        closeWalletEdit();
+    } catch (e) {
+        haptic('error');
+        // Сервер запрещает удаление счёта с операциями (409) — показываем понятный текст
+        alert(e && e.message ? e.message : 'Не удалось удалить счёт.');
+    } finally {
+        walletSaveBusy = false;
+    }
 }
 
 // === МОДАЛКА "ОБНОВИТЬ ТАРИФ" ===
@@ -2536,7 +2607,7 @@ Object.assign(window, {
     clearDemoData, closeEdit, closeModal, closeUpgrade, closeVoiceConfirm,
     closeWalletEdit, confirmVoice, deleteFromEdit, deleteOperation, deleteWallet,
     focusAmount, haptic, openCustomPeriod,
-    openEdit, openModal, openWalletEdit, quickSave, renderEditArticles,
+    openEdit, openModal, openWalletEdit, openNewWallet, quickSave, renderEditArticles,
     renderEditWallets, selectEditWallet, selectEditArticle,
     saveEdit, saveExtended, saveWalletEdit, selectExtCat,
     selectWallet, selectWalletColor, setDashTab, setDashGroup, setEditType, setPeriod,

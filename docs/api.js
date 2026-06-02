@@ -280,6 +280,18 @@ async function updateWallet(walletId, data) {
     return await request('PUT', '/v1/wallets/' + walletId, data);
 }
 
+// Создать новый счёт
+async function createWallet(data) {
+    clearCache();
+    return await request('POST', '/v1/wallets', data);
+}
+
+// Удалить счёт (сервер вернёт 409, если по счёту есть операции)
+async function deleteWallet(walletId) {
+    clearCache();
+    return await request('DELETE', '/v1/wallets/' + walletId);
+}
+
 // Сохранить дату начала учёта (общая настройка пользователя)
 async function setAccountingStart(date) {
     clearCache();
@@ -596,6 +608,8 @@ return {
     deleteOperation,
     getWallets,
     updateWallet,
+    createWallet,
+    deleteWallet,
     setAccountingStart,
     getRefs,
     getArticles,
