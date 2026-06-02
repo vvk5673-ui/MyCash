@@ -853,69 +853,6 @@ body {
 .btn-confirm { background: var(--green); color: white; }
 .btn-edit { background: var(--bg); color: var(--text); }
 
-/* === МОДАЛКА ОНБОРДИНГА (запрос остатков) === */
-.onboarding-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.3);
-    z-index: 300;
-    backdrop-filter: blur(4px);
-    align-items: center;
-    justify-content: center;
-}
-.onboarding-overlay.active { display: flex; }
-.onboarding-card {
-    background: var(--card);
-    border-radius: 20px;
-    padding: 28px 24px;
-    margin: 16px;
-    width: 100%;
-    max-width: 360px;
-    animation: slideUp 0.3s ease;
-    text-align: center;
-}
-.onboarding-emoji { font-size: 48px; margin-bottom: 12px; }
-.onboarding-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-.onboarding-text { font-size: 14px; color: var(--text2); margin-bottom: 20px; line-height: 1.5; }
-.onboarding-input {
-    width: 100%;
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    font-size: 20px;
-    font-weight: 600;
-    text-align: center;
-    background: var(--bg);
-    color: var(--text);
-    outline: none;
-    -webkit-appearance: none;
-    margin-bottom: 12px;
-    min-height: 52px;
-}
-.onboarding-input:focus { border-color: var(--accent); }
-.onboarding-btn {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 14px;
-    font-size: 16px;
-    font-weight: 600;
-    color: white;
-    background: var(--accent);
-    cursor: pointer;
-    min-height: 48px;
-}
-.onboarding-skip {
-    background: none;
-    border: none;
-    color: var(--text2);
-    font-size: 14px;
-    margin-top: 12px;
-    cursor: pointer;
-    padding: 8px;
-}
-
 /* === ОТЧЁТ ДДС === */
 .dds-report-nav {
     display: flex;

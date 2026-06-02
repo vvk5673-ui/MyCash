@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=33">
+    <link rel="stylesheet" href="style.css?v=34">
 </head>
 <body>
 
@@ -406,18 +406,6 @@
         </div>
     </div>
 
-    <!-- Модалка онбординга: запрос остатков -->
-    <div class="onboarding-overlay" id="onboardingOverlay">
-        <div class="onboarding-card">
-            <div class="onboarding-emoji" id="onbEmoji">💳</div>
-            <div class="onboarding-title" id="onbTitle">Сколько на карте?</div>
-            <div class="onboarding-text" id="onbText">Введите текущий остаток на банковской карте</div>
-            <input class="onboarding-input" type="number" id="onbInput" inputmode="numeric" placeholder="0">
-            <button class="onboarding-btn" id="onbBtn" onclick="onboardingNext()">Далее</button>
-            <button class="onboarding-skip" onclick="onboardingSkip()">Пропустить</button>
-        </div>
-    </div>
-
     <!-- Модалка редактирования операции -->
     <div class="edit-overlay" id="editOverlay" onclick="closeEdit(event)">
         <div class="edit-modal" onclick="event.stopPropagation()">
@@ -560,7 +548,7 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=33"></script>
-    <script src="app.js?v=33"></script>
+    <script src="api.js?v=34"></script>
+    <script src="app.js?v=34"></script>
 </body>
 </html>

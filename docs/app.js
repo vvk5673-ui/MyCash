@@ -57,7 +57,6 @@ const Storage = {
 };
 
 // === ДАННЫЕ ===
-const WALLETS = ['💳 Карта', '💵 Наличка'];
 const EXPENSE_CATS = [
     { name: 'Продукты', icon: 'shopping-cart', color: '#FF3B30' },
     { name: 'Кафе', icon: 'coffee', color: '#FF9500' },
@@ -117,7 +116,7 @@ const chartColors = ['#FF3B30','#FF9500','#FFCC00','#34C759','#007AFF','#5856D6'
 
 let operations = [];
 let currentType = 'expense';
-let selectedWallet = WALLETS[0];
+let selectedWallet = '';   // имя счёта; ставится из справочника счетов при рендере формы
 let selectedCategory = '';
 let currentPeriod = 'month';
 let voiceParsedData = null;
@@ -125,7 +124,6 @@ let isDemo = false;
 let serverIsDemo = false;   // is_demo с сервера (из ответа API.auth) — источник правды для демо-баннера
 let transferFrom = '💳 Карта';
 let transferTo = '💵 Наличка';
-let walletBalances = { '💳 Карта': 0, '💵 Наличка': 0 };
 
 // === СПРАВОЧНИКИ С СЕРВЕРА (структура ДДС, грузятся при старте — loadReferences) ===
 const Refs = {
@@ -702,11 +700,6 @@ window.loadServerOperations = loadServerOperations;
 function init() {
     const data = Storage.load('mycash_ops');
     const demoFlag = Storage.load('mycash_is_demo');
-    const balances = Storage.load('mycash_balances');
-
-    if (balances) {
-        walletBalances = balances;
-    }
 
     if (!data || data.length === 0) {
         // Первый запуск — демо-данные
@@ -1800,9 +1793,7 @@ document.getElementById('pieChart').addEventListener('click', function(e) {
     }
 });
 
-// === ОНБОРДИНГ ===
-let onboardingStep = 0;
-
+// === ОЧИСТКА ДЕМО-ДАННЫХ ===
 async function clearDemoData() {
     haptic();
     serverIsDemo = false;   // сервер снимет is_demo — баннер должен исчезнуть
@@ -1817,46 +1808,6 @@ async function clearDemoData() {
     // Страховка на случай оффлайна — спрятать баннер
     document.getElementById('demoBanner').classList.remove('active');
     document.getElementById('demoBannerProfile').classList.remove('active');
-}
-
-function showOnboardingStep() {
-    if (onboardingStep === 0) {
-        document.getElementById('onbEmoji').textContent = '💳';
-        document.getElementById('onbTitle').textContent = 'Сколько на карте?';
-        document.getElementById('onbText').textContent = 'Введите текущий остаток на банковской карте';
-        document.getElementById('onbInput').value = '';
-        document.getElementById('onbBtn').textContent = 'Далее';
-    } else if (onboardingStep === 1) {
-        document.getElementById('onbEmoji').textContent = '💵';
-        document.getElementById('onbTitle').textContent = 'А наличных?';
-        document.getElementById('onbText').textContent = 'Введите сколько наличных денег';
-        document.getElementById('onbInput').value = '';
-        document.getElementById('onbBtn').textContent = 'Готово';
-    }
-}
-
-function onboardingNext() {
-    const val = parseFloat(document.getElementById('onbInput').value) || 0;
-    haptic('success');
-
-    if (onboardingStep === 0) {
-        walletBalances['💳 Карта'] = val;
-        onboardingStep = 1;
-        showOnboardingStep();
-    } else {
-        walletBalances['💵 Наличка'] = val;
-        Storage.save('mycash_balances', walletBalances);
-        document.getElementById('onboardingOverlay').classList.remove('active');
-        renderAll();
-    }
-}
-
-function onboardingSkip() {
-    walletBalances = { '💳 Карта': 0, '💵 Наличка': 0 };
-    Storage.save('mycash_balances', walletBalances);
-    document.getElementById('onboardingOverlay').classList.remove('active');
-    haptic('light');
-    renderAll();
 }
 
 // === ГОЛОСОВОЙ ВВОД ===
@@ -2128,41 +2079,9 @@ const WALLET_COLORS = [
     { name: 'Жёлтый', color: '#FF9F0A' }
 ];
 
-// Настройки кошельков (сохраняются в localStorage)
-let walletSettings = Storage.load('mycash_wallet_settings') || [
-    { name: 'Карта', icon: '💳', color: '#F2F2F7' },
-    { name: 'Наличка', icon: '💵', color: '#F2F2F7' }
-];
 let editingWalletId = null;   // id редактируемого счёта (с сервера)
 let editWalletColor = '#007AFF';
 let walletSaveBusy = false;   // защита от двойного сохранения
-
-// Маппинг кошельков на Lucide-иконки
-const WALLET_ICON_MAP = {
-    '💳': { lucide: 'credit-card', color: '#007AFF' },
-    '💵': { lucide: 'banknote', color: '#34C759' }
-};
-
-function walletLucideIcon(emoji, size) {
-    const mapped = WALLET_ICON_MAP[emoji];
-    if (mapped) return lucideIcon(mapped.lucide, size || 22, mapped.color);
-    return lucideIcon('wallet', size || 22, '#007AFF');
-}
-
-function applyWalletSettings() {
-    walletSettings.forEach((ws, i) => {
-        const nameEl = document.getElementById('walletName' + i);
-        const iconEl = document.getElementById('walletIcon' + i);
-        const badgeEl = document.getElementById('walletBadge' + i);
-        if (nameEl) nameEl.textContent = ws.name;
-        if (iconEl) iconEl.innerHTML = walletLucideIcon(ws.icon, 22);
-        if (badgeEl) badgeEl.style.background = ws.color;
-    });
-    // Обновить WALLETS массив для совместимости
-    WALLETS[0] = walletSettings[0].icon + ' ' + walletSettings[0].name;
-    WALLETS[1] = walletSettings[1].icon + ' ' + walletSettings[1].name;
-    refreshIcons();
-}
 
 function openWalletEdit(walletId) {
     const w = (Refs.wallets || []).find(function(x) { return String(x.id) === String(walletId); });
@@ -2577,7 +2496,6 @@ window.getWalletId = function(name) {
     }
 })();
 
-applyWalletSettings();
 init();
 refreshIcons();
 showOfferIfNeeded();
@@ -2617,7 +2535,7 @@ Object.assign(window, {
     anCarEnd, anCarMove, anCarStart, applyCustomPeriod, clearAllData,
     clearDemoData, closeEdit, closeModal, closeUpgrade, closeVoiceConfirm,
     closeWalletEdit, confirmVoice, deleteFromEdit, deleteOperation, deleteWallet,
-    focusAmount, haptic, onboardingNext, onboardingSkip, openCustomPeriod,
+    focusAmount, haptic, openCustomPeriod,
     openEdit, openModal, openWalletEdit, quickSave, renderEditArticles,
     renderEditWallets, selectEditWallet, selectEditArticle,
     saveEdit, saveExtended, saveWalletEdit, selectExtCat,
