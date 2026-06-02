@@ -276,12 +276,8 @@ async function getWallets() {
 
 async function updateWallet(walletId, data) {
     clearCache();
-    if (mode === 'online') {
-        try {
-            return await request('PUT', '/v1/wallets/' + walletId, data);
-        } catch (e) {}
-    }
-    return null;
+    // Ошибки сервера/обрыва пробрасываем наверх — saveWalletEdit покажет понятное сообщение
+    return await request('PUT', '/v1/wallets/' + walletId, data);
 }
 
 // ==========================================

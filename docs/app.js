@@ -231,7 +231,9 @@ function renderWalletsRow() {
     const row = document.getElementById('walletsRow');
     if (!row) return;
     row.innerHTML = wallets.map(function(w) {
-        return '<div class="wallet-line">' +
+        // Кошелёк кликабелен только если он реальный (с сервера, есть id) — тап открывает настройки
+        const click = w.id ? ' onclick="openWalletEdit(\'' + w.id + '\')" style="cursor:pointer"' : '';
+        return '<div class="wallet-line"' + click + '>' +
             '<span style="flex-shrink:0">' + lucideIcon(w.icon || 'wallet', 18, w.color || '#007AFF') + '</span>' +
             '<span class="wallet-line-name">' + esc(w.name) + '</span>' +
             '<span class="wallet-line-amount">' + fmt(bal[w.name] || 0) + ' ₽</span>' +
@@ -1800,15 +1802,16 @@ function updateExpenseTable() {
 }
 
 // === РЕДАКТИРОВАНИЕ КОШЕЛЬКА ===
+// Цвета значка счёта (яркие — в новой модели color = цвет иконки, не фон карточки)
 const WALLET_COLORS = [
-    { name: 'Серый', color: '#F2F2F7' },
-    { name: 'Синий', color: '#D6E4FF' },
-    { name: 'Зелёный', color: '#D4EDDA' },
-    { name: 'Оранжевый', color: '#FFE8CC' },
-    { name: 'Розовый', color: '#FFD6E0' },
-    { name: 'Фиолетовый', color: '#E8DAEF' },
-    { name: 'Жёлтый', color: '#FFF9C4' },
-    { name: 'Голубой', color: '#D1ECF1' }
+    { name: 'Синий', color: '#007AFF' },
+    { name: 'Индиго', color: '#5856D6' },
+    { name: 'Зелёный', color: '#34C759' },
+    { name: 'Оранжевый', color: '#FF9500' },
+    { name: 'Розовый', color: '#FF2D55' },
+    { name: 'Фиолетовый', color: '#AF52DE' },
+    { name: 'Бирюзовый', color: '#5AC8FA' },
+    { name: 'Жёлтый', color: '#FF9F0A' }
 ];
 
 // Настройки кошельков (сохраняются в localStorage)
@@ -1816,8 +1819,9 @@ let walletSettings = Storage.load('mycash_wallet_settings') || [
     { name: 'Карта', icon: '💳', color: '#F2F2F7' },
     { name: 'Наличка', icon: '💵', color: '#F2F2F7' }
 ];
-let editingWalletIdx = -1;
-let editWalletColor = '#F2F2F7';
+let editingWalletId = null;   // id редактируемого счёта (с сервера)
+let editWalletColor = '#007AFF';
+let walletSaveBusy = false;   // защита от двойного сохранения
 
 // Маппинг кошельков на Lucide-иконки
 const WALLET_ICON_MAP = {
@@ -1846,21 +1850,22 @@ function applyWalletSettings() {
     refreshIcons();
 }
 
-function openWalletEdit(idx) {
-    editingWalletIdx = idx;
-    const ws = walletSettings[idx];
-    editWalletColor = ws.color;
+function openWalletEdit(walletId) {
+    const w = (Refs.wallets || []).find(function(x) { return String(x.id) === String(walletId); });
+    if (!w) { return; }
+    editingWalletId = w.id;
+    editWalletColor = w.color || '#007AFF';
     haptic('light');
 
-    document.getElementById('walletEditName').value = ws.name;
-    document.getElementById('walletEditBalance').value = walletBalances[WALLETS[idx]] || 0;
+    document.getElementById('walletEditName').value = w.name || '';
+    document.getElementById('walletEditBalance').value = Number(w.initial_balance) || 0;
 
-    // Цвета
-    document.getElementById('walletColorGrid').innerHTML = WALLET_COLORS.map(c =>
-        `<div class="wallet-color-btn ${c.color === editWalletColor ? 'active' : ''}"
-             style="background:${c.color}"
-             onclick="selectWalletColor('${c.color}')"></div>`
-    ).join('');
+    // Палитра цветов значка (data-color — надёжное сравнение: style.background браузер нормализует в rgb)
+    document.getElementById('walletColorGrid').innerHTML = WALLET_COLORS.map(function(c) {
+        return '<div class="wallet-color-btn ' + (c.color === editWalletColor ? 'active' : '') + '"' +
+               ' data-color="' + c.color + '" style="background:' + c.color + '"' +
+               ' onclick="selectWalletColor(\'' + c.color + '\')"></div>';
+    }).join('');
 
     // Кнопка удаления — заблокирована (Pro)
     document.getElementById('walletDeleteBtn').onclick = function() { showUpgrade(); };
@@ -1871,57 +1876,49 @@ function openWalletEdit(idx) {
 function closeWalletEdit(e) {
     if (e && e.target && e.target !== e.currentTarget) return;
     document.getElementById('walletEditOverlay').classList.remove('active');
-    editingWalletIdx = -1;
+    editingWalletId = null;
 }
 
 function selectWalletColor(color) {
     editWalletColor = color;
     haptic('light');
-    document.querySelectorAll('.wallet-color-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.style.background === color);
+    document.querySelectorAll('.wallet-color-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-color') === color);
     });
 }
 
-function saveWalletEdit() {
-    const idx = editingWalletIdx;
-    if (idx < 0) return;
+async function saveWalletEdit() {
+    if (walletSaveBusy) return;
+    const id = editingWalletId;
+    if (!id) return;
 
     const newName = document.getElementById('walletEditName').value.trim();
     if (!newName) { haptic('error'); return; }
-
     const newBalance = parseFloat(document.getElementById('walletEditBalance').value) || 0;
-    const oldWalletKey = WALLETS[idx];
 
-    // Обновляем настройки
-    walletSettings[idx].name = newName;
-    walletSettings[idx].color = editWalletColor;
-    Storage.save('mycash_wallet_settings', walletSettings);
-
-    // Обновляем WALLETS
-    const newWalletKey = walletSettings[idx].icon + ' ' + newName;
-
-    // Переименовываем кошелёк в операциях
-    if (oldWalletKey !== newWalletKey) {
-        operations.forEach(op => {
-            if (op.wallet === oldWalletKey) op.wallet = newWalletKey;
-            if (op.walletFrom === oldWalletKey) op.walletFrom = newWalletKey;
-            if (op.walletTo === oldWalletKey) op.walletTo = newWalletKey;
-        });
-        Storage.save('mycash_ops', operations);
-
-        // Переносим баланс
-        walletBalances[newWalletKey] = newBalance;
-        if (oldWalletKey !== newWalletKey) delete walletBalances[oldWalletKey];
-    } else {
-        walletBalances[oldWalletKey] = newBalance;
+    // Остаток и настройки счёта храним на сервере (единый источник) — без сети сохранить нельзя
+    if (typeof API === 'undefined' || !API.isOnline()) {
+        haptic('error');
+        alert('Нет связи с сервером. Настройки счёта сохраняются только онлайн — попробуйте позже.');
+        return;
     }
-    Storage.save('mycash_balances', walletBalances);
 
-    WALLETS[idx] = newWalletKey;
-    applyWalletSettings();
-    haptic('success');
-    closeWalletEdit();
-    renderAll();
+    walletSaveBusy = true;
+    try {
+        await API.updateWallet(id, {
+            name: newName,
+            color: editWalletColor,
+            initial_balance: newBalance
+        });
+        await loadReferences();   // перечитать счета с сервера (внутри вызывает renderAll)
+        haptic('success');
+        closeWalletEdit();
+    } catch (e) {
+        haptic('error');
+        alert('Не удалось сохранить: ' + (e && e.message ? e.message : 'ошибка'));
+    } finally {
+        walletSaveBusy = false;
+    }
 }
 
 function deleteWallet() {
