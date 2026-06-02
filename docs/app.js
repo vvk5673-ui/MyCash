@@ -185,6 +185,106 @@ function getDirectionById(id) {
 function getContragentById(id) {
     return Refs.contragents.find(function(c) { return c.id === id; }) || null;
 }
+
+// === ВНЕШНИЙ ВИД СТАТЕЙ ДДС (иконка + цвет) ===
+// Справочник по точному имени 31 стандартной статьи. Цвет закреплён за смыслом —
+// статья выглядит одинаково и в аналитике, и в Отчёте ДДС. Цвета разнесены по оттенкам,
+// чтобы соседние полоски в аналитике не сливались.
+const ARTICLE_VISUALS = {
+    // Операционная — поступления
+    'Выручка от продаж товаров':              { icon: 'shopping-cart',   color: '#007AFF' },
+    'Выручка от услуг':                       { icon: 'handshake',       color: '#5AC8FA' },
+    'Возвраты от поставщиков':                { icon: 'undo-2',          color: '#34C759' },
+    'Прочие операционные поступления':        { icon: 'circle-plus',     color: '#30B0C7' },
+    // Операционная — выбытия
+    'Закупка товаров для перепродажи':        { icon: 'package',         color: '#FF9500' },
+    'Закупка сырья и материалов':             { icon: 'boxes',           color: '#FF6B22' },
+    'Аренда помещения':                       { icon: 'building-2',      color: '#FF3B30' },
+    'Коммунальные услуги':                    { icon: 'plug-zap',        color: '#FFCC00' },
+    'Связь и интернет':                       { icon: 'wifi',            color: '#00C7BE' },
+    'Зарплата сотрудникам':                   { icon: 'users',           color: '#5856D6' },
+    'Налоги и взносы':                        { icon: 'landmark',        color: '#8E8E93' },
+    'Реклама и маркетинг':                    { icon: 'megaphone',       color: '#FF2D55' },
+    'Транспортные расходы':                   { icon: 'truck',           color: '#A2845E' },
+    'Командировки':                           { icon: 'plane',           color: '#AF52DE' },
+    'Профессиональные услуги':                { icon: 'briefcase',       color: '#634C9F' },
+    'Канцелярия и расходники':                { icon: 'pen-tool',        color: '#C7B299' },
+    'Банковские комиссии':                    { icon: 'percent',         color: '#64748B' },
+    'Обучение и развитие':                    { icon: 'graduation-cap',  color: '#0EA5E9' },
+    'Прочие операционные расходы':            { icon: 'ellipsis',        color: '#98989D' },
+    // Инвестиционная
+    'Продажа ОС':                             { icon: 'archive',         color: '#16A34A' },
+    'Возврат кредитов и займов':              { icon: 'hand-coins',      color: '#22C55E' },
+    'Прочие поступления от инвест. операций': { icon: 'trending-up',     color: '#14B8A6' },
+    'Покупка ОС':                             { icon: 'monitor',         color: '#6366F1' },
+    'Ремонт ОС':                              { icon: 'wrench',          color: '#F97316' },
+    'Выдача кредитов и займов':               { icon: 'send',            color: '#EF4444' },
+    // Финансовая
+    'Получение кредитов и займов':            { icon: 'banknote',        color: '#10B981' },
+    'Вклады от собственников':                { icon: 'piggy-bank',      color: '#0D9488' },
+    'Оплаты по кредитам и займам':            { icon: 'credit-card',     color: '#DC2626' },
+    'Дивиденды':                              { icon: 'coins',           color: '#D97706' },
+    // Техническая (переводы между счетами)
+    'Доход — Перевод между счетами':          { icon: 'arrow-left-right', color: '#007AFF' },
+    'Расход — Перевод между счетами':         { icon: 'arrow-left-right', color: '#007AFF' }
+};
+
+// Палитра для запасного подбора цвета пользовательских статей (разнесённые оттенки)
+const ARTICLE_FALLBACK_COLORS = ['#007AFF', '#FF9500', '#34C759', '#5856D6', '#FF2D55',
+    '#00C7BE', '#AF52DE', '#FF3B30', '#FFCC00', '#5AC8FA', '#A2845E', '#64748B'];
+
+// Подбор иконки по ключевым словам — для статей, которых нет в справочнике (создал пользователь)
+const ARTICLE_KEYWORD_ICONS = [
+    [/перевод|между\s*счет/i,                'arrow-left-right'],
+    [/налог|взнос|сбор|пошлин/i,             'landmark'],
+    [/зарплат|сотрудник|оклад|преми|кадр/i,  'users'],
+    [/аренд/i,                               'building-2'],
+    [/реклам|маркет|продвижен|smm/i,         'megaphone'],
+    [/транспорт|бензин|топлив|такси|достав|логист/i, 'truck'],
+    [/связ|интернет|телефон|моб/i,           'wifi'],
+    [/обучен|курс|семинар|книг|трен/i,       'graduation-cap'],
+    [/команд|перел[её]т|гостиниц|отел|поездк/i, 'plane'],
+    [/комисс/i,                              'percent'],
+    [/кредит|займ|долг|ссуд/i,               'hand-coins'],
+    [/ремонт|почин/i,                        'wrench'],
+    [/дивиденд/i,                            'coins'],
+    [/вклад|собственник|инвест/i,            'piggy-bank'],
+    [/юрист|бухгалт|консульт/i,              'briefcase'],
+    [/коммунал|электр|вода|отоплен|свет/i,   'plug-zap'],
+    [/возврат/i,                             'undo-2'],
+    [/прода|выручк/i,                        'shopping-cart'],
+    [/закуп|товар|сырь|материал|расходник/i, 'package'],
+    [/услуг/i,                               'handshake']
+];
+
+// Простой хеш строки (для стабильного выбора цвета по имени статьи)
+function articleHash(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) | 0; }
+    return Math.abs(h);
+}
+
+// Возвращает {icon, color} для статьи.
+// Приоритет: иконка/цвет, заданные на сервере → точный справочник → подбор по слову → нейтральная иконка + цвет по хешу
+function articleVisual(article) {
+    const name = (article && article.name) ? article.name : '';
+    const srvIcon = (article && article.icon && article.icon !== 'tag') ? article.icon : null;
+    const srvColor = (article && article.color) ? article.color : null;
+    const exact = ARTICLE_VISUALS[name];
+    if (exact) {
+        return { icon: srvIcon || exact.icon, color: srvColor || exact.color };
+    }
+    // пользовательская статья — подбираем иконку по ключевому слову
+    let icon = srvIcon || 'tag';
+    if (icon === 'tag') {
+        for (let i = 0; i < ARTICLE_KEYWORD_ICONS.length; i++) {
+            if (ARTICLE_KEYWORD_ICONS[i][0].test(name)) { icon = ARTICLE_KEYWORD_ICONS[i][1]; break; }
+        }
+    }
+    const color = srvColor || ARTICLE_FALLBACK_COLORS[articleHash(name) % ARTICLE_FALLBACK_COLORS.length];
+    return { icon: icon, color: color };
+}
+
 // Статьи, подходящие под тип операции: expense → группа "Выбытие" (outflow), income → "Поступление" (inflow)
 function articlesForType(type) {
     const wantCode = type === 'income' ? 'inflow' : 'outflow';
@@ -665,15 +765,19 @@ function dashGroupOf(op) {
         return {
             key: op.direction_id || 'none',
             name: d ? d.name : 'Без направления',
-            icon: (d && d.icon) ? d.icon : 'compass'
+            icon: (d && d.icon) ? d.icon : 'compass',
+            color: (d && d.color) ? d.color : '#8E8E93'
         };
     }
     // по статьям ДДС (fallback на старую категорию для операций без article_id)
     const a = op.article_id ? getArticleById(op.article_id) : null;
+    const name = a ? a.name : (op.category || 'Без статьи');
+    const vis = articleVisual(a || { name: name });
     return {
         key: op.article_id || ('cat:' + (op.category || '')),
-        name: a ? a.name : (op.category || 'Без статьи'),
-        icon: (a && a.icon && a.icon !== 'tag') ? a.icon : 'tag'
+        name: name,
+        icon: vis.icon,
+        color: vis.color
     };
 }
 
@@ -818,7 +922,7 @@ function renderDdsReport() {
         const art = op.article_id ? getArticleById(op.article_id) : null;
         const artKey = op.article_id || ('cat:' + (op.category || ''));
         const artName = art ? art.name : (op.category || 'Без статьи');
-        if (!sec.arts[artKey]) sec.arts[artKey] = { name: artName, amount: 0 };
+        if (!sec.arts[artKey]) sec.arts[artKey] = { name: artName, amount: 0, vis: articleVisual(art || { name: artName }) };
         sec.arts[artKey].amount += signed;
         sec.flow += signed;
     });
@@ -852,7 +956,8 @@ function renderDdsReport() {
             arts.sort(function(a, b) { return Math.abs(b.amount) - Math.abs(a.amount); });
             arts.forEach(function(a) {
                 const c = a.amount >= 0 ? 'var(--green)' : 'var(--red)';
-                html += '<div class="dds-row dds-row-art"><span>' + esc(a.name) + '</span><span style="color:' + c + '">' + fmtSigned(a.amount) + '</span></div>';
+                const ic = lucideIcon(a.vis.icon, 15, a.vis.color);
+                html += '<div class="dds-row dds-row-art"><span><span class="dds-art-ic">' + ic + '</span>' + esc(a.name) + '</span><span style="color:' + c + '">' + fmtSigned(a.amount) + '</span></div>';
             });
         }
     });
@@ -865,6 +970,7 @@ function renderDdsReport() {
     });
 
     body.innerHTML = html;
+    refreshIcons();
 }
 
 function setPeriod(period, btn) {
@@ -1479,7 +1585,7 @@ function updateDashboard() {
     const groups = {};   // key → { name, icon, amount, ops: [] }
     dashExpenses.forEach(op => {
         const g = dashGroupOf(op);
-        if (!groups[g.key]) groups[g.key] = { name: g.name, icon: g.icon, amount: 0, ops: [] };
+        if (!groups[g.key]) groups[g.key] = { name: g.name, icon: g.icon, color: g.color, amount: 0, ops: [] };
         groups[g.key].amount += op.amount;
         groups[g.key].ops.push(op);
     });
@@ -1511,7 +1617,8 @@ function updateDashboard() {
         const amount = g.amount;
         const pct = Math.round(amount / total * 100);
         const barWidth = Math.round((amount / maxAmount) * 100);
-        const color = chartColors[i % chartColors.length];
+        // Цвет полоски и значка — закреплён за статьёй/направлением (одинаков на всех экранах)
+        const color = g.color || chartColors[i % chartColors.length];
         const icon = lucideIcon(g.icon, 18, color);
 
         return `<div style="margin-bottom:12px;cursor:pointer" onclick="toggleCatOps(${i})">
@@ -1548,8 +1655,7 @@ function updateDashboard() {
 
     // Легенда скрыта — всё уже в полосках выше
     document.getElementById('dashLegend').innerHTML = '';
-
-    document.getElementById('dashLegend').innerHTML = '';
+    refreshIcons();
 }
 
 function toggleCatOps(index) {

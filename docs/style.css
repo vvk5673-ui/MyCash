@@ -964,6 +964,8 @@ body {
     padding-left: 16px;
 }
 .dds-row-art { padding-left: 16px; }
+.dds-row-art > span:first-child { display: flex; align-items: center; min-width: 0; }
+.dds-art-ic { display: inline-flex; flex-shrink: 0; margin-right: 7px; }
 .dds-arrow {
     display: inline-block;
     transition: transform 0.2s;
