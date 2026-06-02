@@ -8,25 +8,16 @@ from datetime import datetime, timedelta
 def generate_demo_operations(user_id: str, card_wallet_id: str, cash_wallet_id: str) -> list:
     """
     Генерирует 17 демо-операций для нового пользователя.
-    Даты — в текущем месяце, до вчерашнего дня (чтобы фильтр "месяц"
-    их показывал, а новые операции пользователя с датой "сегодня"
-    попадали в самый верх списка).
-    Если сегодня 1-2 число месяца — демо уходят в прошлый месяц целиком.
+    Даты — всегда в ТЕКУЩЕМ месяце, на дни с 1-го по сегодняшний
+    (день = min(день_шаблона, сегодня, 28)). Так демо видны в списке
+    сразу в любой день месяца (фильтр "месяц" на фронте показывает
+    текущий месяц), при этом нет дат в будущем, а новая операция
+    пользователя за сегодня встаёт выше демо (сортировка по дате+времени).
     """
     now = datetime.now()
+    y = now.year
+    m = now.month
     today = now.day
-    if today >= 3:
-        y = now.year
-        m = now.month
-        max_day = today - 1
-    elif now.month == 1:
-        y = now.year - 1
-        m = 12
-        max_day = 28
-    else:
-        y = now.year
-        m = now.month - 1
-        max_day = 28
 
     demo = [
         {'type': 'income', 'amount': 80000, 'category': 'Зарплата', 'wallet_id': card_wallet_id, 'comment': '', 'day': 1},
@@ -50,8 +41,8 @@ def generate_demo_operations(user_id: str, card_wallet_id: str, cash_wallet_id: 
 
     operations = []
     for i, d in enumerate(demo):
-        # Дата: текущий месяц, указанный день
-        day = min(d['day'], 28)  # Защита от февраля
+        # Дата: текущий месяц, день шаблона, но не позже сегодня и не больше 28
+        day = min(d['day'], today, 28)
         op_date = datetime(y, m, day, 10 + i % 12, (i * 7) % 60)
 
         operations.append({
