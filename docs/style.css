@@ -66,6 +66,10 @@ body {
 .wallet-line:last-child { border-bottom: none; }
 .wallet-line-name { flex: 1; font-size: 14px; }
 .wallet-line-amount { font-size: 14px; font-weight: 600; }
+.wallet-moves { display: inline-flex; align-items: center; gap: 2px; margin-left: 8px; flex-shrink: 0; }
+.wallet-move { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; cursor: pointer; border-radius: 6px; color: var(--text2); }
+.wallet-move:active { background: var(--bg); }
+.wallet-move-empty { display: inline-block; width: 26px; height: 26px; }
 .wallet-badge {
     flex: 1;
     background: var(--bg);

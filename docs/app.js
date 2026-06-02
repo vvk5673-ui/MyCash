@@ -342,13 +342,25 @@ function renderWalletsRow() {
     const bal = computeWalletBalances();
     const row = document.getElementById('walletsRow');
     if (!row) return;
-    row.innerHTML = wallets.map(function(w) {
+    row.innerHTML = wallets.map(function(w, i) {
         // Кошелёк кликабелен только если он реальный (с сервера, есть id) — тап открывает настройки
         const click = w.id ? ' onclick="openWalletEdit(\'' + w.id + '\')" style="cursor:pointer"' : '';
+        // Стрелки порядка (только для серверных счетов; у крайних — пустое место для ровного вида)
+        let moves = '';
+        if (w.id) {
+            const up = (i > 0)
+                ? '<span class="wallet-move" onclick="event.stopPropagation();moveWallet(\'' + w.id + '\',\'up\')">' + lucideIcon('chevron-up', 16, '#8E8E93') + '</span>'
+                : '<span class="wallet-move-empty"></span>';
+            const down = (i < wallets.length - 1)
+                ? '<span class="wallet-move" onclick="event.stopPropagation();moveWallet(\'' + w.id + '\',\'down\')">' + lucideIcon('chevron-down', 16, '#8E8E93') + '</span>'
+                : '<span class="wallet-move-empty"></span>';
+            moves = '<span class="wallet-moves">' + up + down + '</span>';
+        }
         return '<div class="wallet-line"' + click + '>' +
             '<span style="flex-shrink:0">' + lucideIcon(w.icon || 'wallet', 18, w.color || '#007AFF') + '</span>' +
             '<span class="wallet-line-name">' + esc(w.name) + '</span>' +
             '<span class="wallet-line-amount">' + fmt(bal[w.name] || 0) + ' ₽</span>' +
+            moves +
             '</div>';
     }).join('') +
     // Строка добавления нового счёта (только онлайн — счета хранятся на сервере)
@@ -2210,6 +2222,43 @@ async function saveWalletEdit() {
     }
 }
 
+// Передвинуть счёт в списке вверх/вниз (меняет sort_order на сервере)
+async function moveWallet(walletId, dir) {
+    if (walletSaveBusy) return;
+    const wallets = getActiveWallets().slice();   // текущий порядок (по sort_order)
+    const idx = wallets.findIndex(function(w) { return String(w.id) === String(walletId); });
+    if (idx < 0) return;
+    const swapWith = (dir === 'up') ? idx - 1 : idx + 1;
+    if (swapWith < 0 || swapWith >= wallets.length) return;
+
+    if (typeof API === 'undefined' || !API.isOnline()) {
+        haptic('error');
+        alert('Перемещение счетов работает только онлайн.');
+        return;
+    }
+
+    // Меняем местами в массиве, затем нормализуем sort_order = позиция
+    const tmp = wallets[idx];
+    wallets[idx] = wallets[swapWith];
+    wallets[swapWith] = tmp;
+    haptic('light');
+
+    walletSaveBusy = true;
+    try {
+        const updates = [];
+        wallets.forEach(function(w, i) {
+            if (w.sort_order !== i) updates.push(API.updateWallet(w.id, { sort_order: i }));
+        });
+        await Promise.all(updates);
+        await loadReferences();   // перечитать счета в новом порядке (внутри renderAll)
+    } catch (e) {
+        haptic('error');
+        alert('Не удалось переместить: ' + (e && e.message ? e.message : 'ошибка'));
+    } finally {
+        walletSaveBusy = false;
+    }
+}
+
 async function deleteWallet() {
     if (walletSaveBusy) return;
     const id = editingWalletId;
@@ -2624,7 +2673,7 @@ Object.assign(window, {
     clearDemoData, closeEdit, closeModal, closeUpgrade, closeVoiceConfirm,
     closeWalletEdit, confirmVoice, deleteFromEdit, deleteOperation, deleteWallet,
     focusAmount, haptic, openCustomPeriod,
-    openEdit, openModal, openWalletEdit, openNewWallet, quickSave, renderEditArticles,
+    openEdit, openModal, openWalletEdit, openNewWallet, moveWallet, quickSave, renderEditArticles,
     renderEditWallets, selectEditWallet, selectEditArticle,
     saveEdit, saveExtended, saveWalletEdit, selectExtCat,
     selectWallet, selectWalletColor, setDashTab, setDashGroup, setEditType, setPeriod,

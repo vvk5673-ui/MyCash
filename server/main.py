@@ -128,6 +128,7 @@ class WalletUpdate(BaseModel):
     icon: Optional[str] = None
     color: Optional[str] = None
     initial_balance: Optional[float] = None
+    sort_order: Optional[int] = None
 
 class SetBalances(BaseModel):
     card_balance: float = 0
@@ -474,9 +475,11 @@ async def delete_wallet(wallet_id: str, current_user: dict = Depends(get_current
     if not wallet.data:
         raise HTTPException(status_code=404, detail='Счёт не найден')
 
-    # Запрет удаления, если по счёту есть операции
+    # Запрет удаления, если по счёту есть операции (в т.ч. переводы from/to)
     ops = supabase.table('operations').select('id', count='exact') \
-        .eq('user_id', user_id).eq('wallet_id', wallet_id).execute()
+        .eq('user_id', user_id) \
+        .or_(f'wallet_id.eq.{wallet_id},wallet_from_id.eq.{wallet_id},wallet_to_id.eq.{wallet_id}') \
+        .execute()
     if ops.count and ops.count > 0:
         raise HTTPException(
             status_code=409,
