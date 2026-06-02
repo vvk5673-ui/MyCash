@@ -5,9 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=40">
+    <link rel="stylesheet" href="style.css?v=41">
 </head>
 <body>
+
+    <!-- Заставка загрузки (скрывается после первой синхронизации с сервером) -->
+    <div id="splash" class="splash">
+        <img src="logo.png" alt="MyCash" class="splash-logo">
+        <div class="splash-name">MyCash</div>
+        <div class="splash-spinner"></div>
+    </div>
 
     <!-- Шапка -->
     <div class="header" style="display:flex;align-items:center;justify-content:space-between;text-align:left">
@@ -548,7 +555,7 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=40"></script>
-    <script src="app.js?v=40"></script>
+    <script src="api.js?v=41"></script>
+    <script src="app.js?v=41"></script>
 </body>
 </html>

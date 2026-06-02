@@ -853,6 +853,32 @@ body {
 .btn-confirm { background: var(--green); color: white; }
 .btn-edit { background: var(--bg); color: var(--text); }
 
+/* === ЗАСТАВКА ЗАГРУЗКИ === */
+.splash {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: var(--bg, #F2F2F7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    transition: opacity 0.35s ease;
+}
+.splash.hidden { opacity: 0; pointer-events: none; }
+.splash-logo { width: 72px; height: 72px; border-radius: 18px; }
+.splash-name { font-size: 20px; font-weight: 700; color: var(--text, #1c1c1e); }
+.splash-spinner {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 3px solid rgba(0,0,0,0.1);
+    border-top-color: var(--accent, #007AFF);
+    animation: splashspin 0.8s linear infinite;
+}
+@keyframes splashspin { to { transform: rotate(360deg); } }
+
 /* === ОТЧЁТ ДДС === */
 .dds-report-nav {
     display: flex;

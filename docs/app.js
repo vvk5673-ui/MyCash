@@ -2548,22 +2548,39 @@ window.getWalletId = function(name) {
     return window.walletIdMap[clean] || null;
 };
 
+// Скрыть заставку загрузки (после первой синхронизации с сервером или по таймауту)
+function hideSplash() {
+    const s = document.getElementById('splash');
+    if (!s || s.classList.contains('hidden')) return;
+    s.classList.add('hidden');
+    setTimeout(function() { s.style.display = 'none'; }, 350);
+}
+
 // Попытка авторизации через API + загрузка кошельков
 (async function() {
-    if (tg && tg.initData) {
-        const user = await API.auth(tg.initData);
-        if (user) {
-            serverIsDemo = !!user.is_demo;   // демо-флаг с сервера → демо-баннер
-            console.log('API: онлайн-режим, пользователь:', user.first_name);
-            // Загружаем все справочники с сервера (кошельки, статьи, направления, контрагенты)
-            await loadReferences();
-            // Досылаем на сервер операции, добавленные ранее в оффлайне (если были)
-            try { await API.syncOfflineData(); } catch (e) {}
-            // Затем операции с сервера — единый источник правды (синхрон между устройствами)
-            await loadServerOperations();
-        } else {
-            console.log('API: оффлайн-режим (localStorage)');
+    // Предохранитель: если сервер не ответил за 8 сек — всё равно показать приложение
+    const splashGuard = setTimeout(hideSplash, 8000);
+    try {
+        if (tg && tg.initData) {
+            const user = await API.auth(tg.initData);
+            if (user) {
+                serverIsDemo = !!user.is_demo;   // демо-флаг с сервера → демо-баннер
+                console.log('API: онлайн-режим, пользователь:', user.first_name);
+                // Загружаем все справочники с сервера (кошельки, статьи, направления, контрагенты)
+                await loadReferences();
+                // Досылаем на сервер операции, добавленные ранее в оффлайне (если были)
+                try { await API.syncOfflineData(); } catch (e) {}
+                // Затем операции с сервера — единый источник правды (синхрон между устройствами)
+                await loadServerOperations();
+            } else {
+                console.log('API: оффлайн-режим (localStorage)');
+            }
         }
+    } catch (e) {
+        console.warn('Ошибка первичной загрузки:', e);
+    } finally {
+        clearTimeout(splashGuard);
+        hideSplash();   // показываем готовый экран с актуальными данными
     }
 })();
 
