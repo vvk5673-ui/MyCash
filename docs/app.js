@@ -13,7 +13,7 @@ const userName = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user)
     ? tg.initDataUnsafe.user.first_name
     : '';
 if (userName) {
-    document.getElementById('headerGreeting').textContent = 'Привет, ' + userName + '! 👋';
+    document.getElementById('headerGreeting').textContent = 'Здравствуйте, ' + userName + '! 👋';
 }
 
 // Текущая дата
