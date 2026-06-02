@@ -433,17 +433,11 @@ async def get_wallets(current_user: dict = Depends(get_current_user)):
 
 @app.post('/v1/wallets')
 async def create_wallet(body: WalletCreate, current_user: dict = Depends(get_current_user)):
-    """Создать кошелёк (Pro/Макс)"""
+    """Создать кошелёк (на MVP без лимита по тарифу)"""
     user_id = current_user['user_id']
-    tariff = current_user['tariff']
 
-    # Проверяем лимит кошельков
+    # Порядковый номер нового счёта = текущее количество счетов
     existing = supabase.table('wallets').select('id', count='exact').eq('user_id', user_id).execute()
-    limits = supabase.table('tariff_limits').select('max_wallets').eq('tariff', tariff).single().execute()
-    max_wallets = limits.data['max_wallets'] if limits.data else 2
-
-    if existing.count and existing.count >= max_wallets:
-        raise HTTPException(status_code=429, detail=f'Лимит {max_wallets} кошельков для тарифа {tariff}')
 
     result = supabase.table('wallets').insert({
         'user_id': user_id,
@@ -468,6 +462,29 @@ async def update_wallet(wallet_id: str, body: WalletUpdate, current_user: dict =
     if not result.data:
         raise HTTPException(status_code=404, detail='Кошелёк не найден')
     return result.data[0]
+
+
+@app.delete('/v1/wallets/{wallet_id}')
+async def delete_wallet(wallet_id: str, current_user: dict = Depends(get_current_user)):
+    """Удалить кошелёк (только если по нему нет операций — целостность ДДС)"""
+    user_id = current_user['user_id']
+
+    # Счёт должен принадлежать пользователю
+    wallet = supabase.table('wallets').select('id').eq('id', wallet_id).eq('user_id', user_id).execute()
+    if not wallet.data:
+        raise HTTPException(status_code=404, detail='Счёт не найден')
+
+    # Запрет удаления, если по счёту есть операции
+    ops = supabase.table('operations').select('id', count='exact') \
+        .eq('user_id', user_id).eq('wallet_id', wallet_id).execute()
+    if ops.count and ops.count > 0:
+        raise HTTPException(
+            status_code=409,
+            detail=f'На счёте есть операции ({ops.count}). Сначала удалите или перенесите их.'
+        )
+
+    supabase.table('wallets').delete().eq('id', wallet_id).eq('user_id', user_id).execute()
+    return {'ok': True}
 
 
 # ==========================================
