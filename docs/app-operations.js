@@ -57,8 +57,7 @@ function renderOperations() {
         return `
             <div class="op-item" data-id="${op.id}"
                  onclick="openEdit('${op.id}')"
-                 ontouchstart="swipeStart(event)" ontouchmove="swipeMove(event)" ontouchend="swipeEnd(event)"
-                 onmousedown="swipeMouseStart(event)">
+                 ontouchstart="swipeStart(event)" ontouchmove="swipeMove(event)" ontouchend="swipeEnd(event)">
                 <div class="op-swipe-actions">
                     <button class="op-swipe-btn edit" onclick="event.stopPropagation(); openEdit('${op.id}')"><i data-lucide="pencil" style="width:16px;height:16px;color:white"></i><br>Изменить</button>
                     <button class="op-swipe-btn delete" onclick="event.stopPropagation(); deleteOperation('${op.id}')"><i data-lucide="trash-2" style="width:16px;height:16px;color:white"></i><br>Удалить</button>
@@ -80,31 +79,6 @@ let swipeStartX = 0;
 let swipeCurrentItem = null;
 let swiped = false;
 
-// --- Общая логика свайпа (используется и пальцем, и мышью) ---
-// Двигаем операцию влево на dx (отрицательное = влево), открывая кнопки.
-function swipeApply(dx) {
-    if (!swipeCurrentItem) return;
-    if (dx < -20) {
-        swiped = true;
-        const offset = Math.min(160, Math.abs(dx));
-        swipeCurrentItem.style.transform = `translateX(-${offset}px)`;
-        swipeCurrentItem.querySelector('.op-swipe-actions').style.transform = `translateX(${160 - offset}px)`;
-    }
-}
-// Завершение свайпа: дотянул дальше 80px → фиксируем открытым, иначе возвращаем
-function swipeFinish(dx) {
-    if (!swipeCurrentItem) return;
-    if (dx < -80) {
-        swipeCurrentItem.style.transform = 'translateX(-160px)';
-        swipeCurrentItem.querySelector('.op-swipe-actions').style.transform = 'translateX(0)';
-    } else {
-        swipeCurrentItem.style.transform = '';
-        swipeCurrentItem.querySelector('.op-swipe-actions').style.transform = 'translateX(160px)';
-    }
-    swipeCurrentItem = null;
-}
-
-// --- Пальцем (мобильный) ---
 function swipeStart(e) {
     swipeStartX = e.touches[0].clientX;
     swipeCurrentItem = e.currentTarget;
@@ -114,43 +88,27 @@ function swipeStart(e) {
 function swipeMove(e) {
     if (!swipeCurrentItem) return;
     const dx = e.touches[0].clientX - swipeStartX;
-    if (dx < -20) e.preventDefault();   // влево — наш жест, гасим скролл
-    swipeApply(dx);
+    if (dx < -20) {
+        swiped = true;
+        const offset = Math.min(160, Math.abs(dx));
+        swipeCurrentItem.style.transform = `translateX(-${offset}px)`;
+        swipeCurrentItem.querySelector('.op-swipe-actions').style.transform = `translateX(${160 - offset}px)`;
+        e.preventDefault();
+    }
 }
 
 function swipeEnd(e) {
     if (!swipeCurrentItem) return;
-    swipeFinish(e.changedTouches[0].clientX - swipeStartX);
-}
-
-// --- Мышью (десктоп) ---
-function swipeMouseStart(e) {
-    if (e.button !== 0) return;   // только левая кнопка
-    swipeStartX = e.clientX;
-    swipeCurrentItem = e.currentTarget;
-    swiped = false;
-    document.addEventListener('mousemove', swipeMouseMove);
-    document.addEventListener('mouseup', swipeMouseUp);
-}
-
-function swipeMouseMove(e) {
-    if (!swipeCurrentItem) return;
-    swipeApply(e.clientX - swipeStartX);
-}
-
-function swipeMouseUp(e) {
-    document.removeEventListener('mousemove', swipeMouseMove);
-    document.removeEventListener('mouseup', swipeMouseUp);
-    if (!swipeCurrentItem) return;
-    const item = swipeCurrentItem;
-    const wasSwiped = swiped;
-    swipeFinish(e.clientX - swipeStartX);
-    // Если был свайп — подавить click-открытие операции, который иначе сработает после mouseup
-    if (wasSwiped) {
-        const supp = function(ev) { ev.stopPropagation(); ev.preventDefault(); item.removeEventListener('click', supp, true); };
-        item.addEventListener('click', supp, true);
-        setTimeout(function() { item.removeEventListener('click', supp, true); }, 50);
+    const dx = e.changedTouches[0].clientX - swipeStartX;
+    if (dx < -80) {
+        // Показать кнопки редактирования и удаления
+        swipeCurrentItem.style.transform = 'translateX(-160px)';
+        swipeCurrentItem.querySelector('.op-swipe-actions').style.transform = 'translateX(0)';
+    } else {
+        swipeCurrentItem.style.transform = '';
+        swipeCurrentItem.querySelector('.op-swipe-actions').style.transform = 'translateX(160px)';
     }
+    swipeCurrentItem = null;
 }
 
 // Закрыть свайп при тапе в другое место
