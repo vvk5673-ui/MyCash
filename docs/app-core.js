@@ -88,6 +88,23 @@ function lucideIcon(name, size, color) {
     return '<i data-lucide="' + name + '" style="width:' + size + 'px;height:' + size + 'px;color:' + color + '"></i>';
 }
 
+// Фирменная картинка-логотип для известных счетов (определяем по названию).
+// Возвращает HTML <img> или null, если бренд не распознан — тогда рисуем обычную иконку.
+function brandLogo(name, size) {
+    const n = (name || '').toLowerCase().replace(/[\s\-_.]/g, '');
+    const logos = {
+        'tbank.svg?v=59': ['тбанк', 'тинькоф', 'tbank', 'tinkoff'],
+        'sber.svg?v=59': ['сбер', 'sber']
+    };
+    for (const src in logos) {
+        if (logos[src].some(function(key) { return n.indexOf(key) !== -1; })) {
+            return '<img src="' + src + '" alt="' + esc(name) + '" ' +
+                   'style="width:' + (size || 20) + 'px;height:' + (size || 20) + 'px;border-radius:6px;display:block">';
+        }
+    }
+    return null;
+}
+
 // Обновить все Lucide-иконки на странице.
 // Отказоустойчиво: один кривой вызов не должен гасить весь набор, и любой значок,
 // который Lucide не преобразовал в svg, получает запасную букву — значки НИКОГДА не пропадают.
@@ -349,7 +366,7 @@ function walletLineHtml(w, bal) {
         ? '<span class="wallet-drag" onpointerdown="walletDragStart(event,\'' + w.id + '\')" onclick="event.stopPropagation()">' + lucideIcon('grip-vertical', 18, '#C7C7CC') + '</span>'
         : '';
     return '<div class="wallet-line"' + wid + click + '>' +
-        '<span style="flex-shrink:0">' + lucideIcon(w.icon || 'wallet', 18, w.color || '#007AFF') + '</span>' +
+        '<span style="flex-shrink:0">' + (brandLogo(w.name, 20) || lucideIcon(w.icon || 'wallet', 18, w.color || '#007AFF')) + '</span>' +
         '<span class="wallet-line-name">' + esc(w.name) + '</span>' +
         '<span class="wallet-line-amount">' + fmt(bal[w.name] || 0) + ' ₽</span>' +
         handle +
