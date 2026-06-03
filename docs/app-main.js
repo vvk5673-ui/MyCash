@@ -205,7 +205,7 @@ Object.assign(window, {
     selectWallet, selectWalletColor, setDashTab, setDashGroup, setEditType, setPeriod,
     setTableMode, setType, shareApp, showUpgrade, swapTransfer,
     switchTab, toggleCatOps, toggleExtended, updateAmountDisplay, acceptOffer, skipOffer,
-    swipeStart, swipeMove, swipeEnd,
+    swipeStart, swipeMove, swipeEnd, swipeMouseStart,
     quickSaveArticle, saveTransfer, cycleTransfer,
     toggleArticleEditMode, openNewArticleFromOp, openArticleEditFromOp,
     openRefList, closeRefList, openRefForm, closeRefForm,
