@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Иконка кассы: оранжевый квадрат + кассовый чек со знаком ₽ -->
+  <rect width="48" height="48" rx="12" fill="#FF9500"/>
+  <!-- чек с зубчатым нижним краем -->
+  <path d="M15 14 q0 -2 2 -2 h14 q2 0 2 2 v20 l-3 2 -3 -2 -3 2 -3 -2 -3 2 -3 -2 z" fill="#ffffff"/>
+  <!-- строка суммы и знак рубля -->
+  <rect x="18" y="17" width="12" height="2" rx="1" fill="#FF9500"/>
+  <text x="24" y="29.5" text-anchor="middle"
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif"
+        font-size="10.5" font-weight="700" fill="#FF9500">₽</text>
+</svg>
