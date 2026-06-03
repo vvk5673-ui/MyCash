@@ -9,9 +9,19 @@
 docs/        ← ФРОНТ (Telegram Mini App, отдаётся с GitHub Pages)
   index.html   разметка + модалки (~570 строк)
   style.css    стили, Apple-минимализм (~1000 строк)
-  app.js       вся логика UI (~2860 строк) — см. карту секций ниже
+  app-core.js        логика UI 1/6: Telegram, хранилище, данные, справочники, статьи (~648)
+  app-data.js        логика UI 2/6: демо, синхронизация, инициализация, баланс, итоги, ДДС (~476)
+  app-operations.js  логика UI 3/6: список, свайп, окно ввода, быстрые категории, форма (~549)
+  app-dashboard.js   логика UI 4/6: дашборд, очистка демо, карусель, таблица расходов (~373)
+  app-wallets.js     логика UI 5/6: счета, drag, тариф, редактирование операции (~474)
+  app-main.js        логика UI 6/6: утилиты, вкладки, старт, оффер, экспорт в window (~226)
   api.js       связь с сервером + offline-fallback (~640 строк)
   logo/avatar/banner.png
+
+  ⚠️ Все app-*.js делят ОДНУ общую область видимости (классические <script>, без модулей).
+     Подключаются по порядку в index.html — порядок менять нельзя. Общие переменные
+     (operations, Refs, selectedWallet...) видны во всех файлах. Функции для onclick
+     экспортируются в window в конце app-main.js.
 
 server/      ← БЭК (FastAPI + бот, на VPS 90.156.170.88)
   main.py        FastAPI, все эндпоинты (~900) — см. список ниже
@@ -30,37 +40,40 @@ project.md   ← описание проекта, ЦА, функции
 DEPLOYMENT.md← инструкция по деплою
 ```
 
-## Карта app.js (по секциям `// === ... ===`)
+## Карта логики UI (по секциям `// === ... ===`)
 
-| Секция | ~строка | Что |
+Номера строк — внутри указанного файла (ищи маркер `// === НАЗВАНИЕ ===` или имя функции).
+
+| Файл | Секция | Что |
 |---|---|---|
-| TELEGRAM WEB APP | 4 | инициализация tg, haptic |
-| ХРАНИЛИЩЕ | 37 | localStorage/CloudStorage |
-| ДАННЫЕ | 59 | глобальные переменные, `operations` |
-| СПРАВОЧНИКИ С СЕРВЕРА | 128 | `loadReferences()`, `Refs` (wallets/articles/directions/contragents) |
-| ВНЕШНИЙ ВИД СТАТЕЙ | 200 | `articleVisual()` иконка+цвет статьи |
-| (счета) | 316 | `getActiveWallets`, `computeWalletBalances`, `renderWalletsRow` (группировка по направлениям), `walletLineHtml` |
-| СПРАВОЧНИКИ: УПРАВЛЕНИЕ | 426 | CRUD статей/направлений/контрагентов в Профиле |
-| ДЕМО-ДАННЫЕ | 647 | `generateDemoData` |
-| СИНХРОНИЗАЦИЯ С СЕРВЕРОМ | 704 | `loadServerOperations`, `mapServerOp` |
-| ИНИЦИАЛИЗАЦИЯ | 758 | `init()`, `renderAll()` |
-| БАЛАНС / ИТОГИ | 800 | `updateBalance`, `updateSummary` |
-| ОТЧЁТ ДДС | 861 | `renderDdsReport`, виды деятельности, `isWithinAccounting` (дата начала учёта) |
-| ОПЕРАЦИИ — ОТОБРАЖЕНИЕ | 1118 | `renderOperations`, сортировка |
-| СВАЙП ДЛЯ УДАЛЕНИЯ | 1189 | свайп операции |
-| МОДАЛКА БЫСТРЫЙ ВВОД | 1260 | `openModal`, `populateFormSelects` |
-| БЫСТРЫЕ КАТЕГОРИИ | 1345 | плитки статей в окне операции |
-| РАСШИРЕННАЯ ФОРМА | 1424 | полная форма операции |
-| ДАШБОРД | 1662 | графики аналитики |
-| ОЧИСТКА ДЕМО | 1893 | clearDemo/clearAll |
-| ГОЛОСОВОЙ ВВОД + ПАРСЕР | 1910 | ⚠️ возможно мёртвый код (голоса на MVP нет) |
-| КАРУСЕЛЬ АНАЛИТИКИ | 2046 | свайп страниц аналитики |
-| ТАБЛИЦА РАСХОДОВ | 2075 | Pro-таблица (заблюрена) |
-| РЕДАКТИРОВАНИЕ КОШЕЛЬКА | 2166 | `openWalletEdit`, `openNewWallet`, `saveWalletEdit`, `populateWalletDirectionSelect` |
-| ПЕРЕТАСКИВАНИЕ СЧЕТОВ | 2329 | drag `walletDragStart/Move/End` |
-| РЕДАКТИРОВАНИЕ ОПЕРАЦИИ | 2456 | правка операции |
-| УТИЛИТЫ / ТАБ-БАР / СТАРТ | 2635+ | `esc`, `fmt`, переключение вкладок, запуск |
-| ЭКСПОРТ ФУНКЦИЙ В WINDOW | 2825 | привязка функций для onclick |
+| **app-core.js** | TELEGRAM WEB APP | инициализация tg, haptic |
+| app-core.js | ХРАНИЛИЩЕ | localStorage/CloudStorage |
+| app-core.js | ДАННЫЕ | глобальные переменные, `operations` |
+| app-core.js | СПРАВОЧНИКИ С СЕРВЕРА | `loadReferences()`, `Refs` (wallets/articles/directions/contragents) |
+| app-core.js | ВНЕШНИЙ ВИД СТАТЕЙ | `articleVisual()` иконка+цвет статьи |
+| app-core.js | (счета) | `getActiveWallets`, `computeWalletBalances`, `renderWalletsRow` (группировка по направлениям), `walletLineHtml` |
+| app-core.js | СПРАВОЧНИКИ: УПРАВЛЕНИЕ | CRUD статей/направлений/контрагентов в Профиле |
+| **app-data.js** | ДЕМО-ДАННЫЕ | `generateDemoData` |
+| app-data.js | СИНХРОНИЗАЦИЯ С СЕРВЕРОМ | `loadServerOperations`, `mapServerOp` |
+| app-data.js | ИНИЦИАЛИЗАЦИЯ | `init()`, `renderAll()` |
+| app-data.js | БАЛАНС / ИТОГИ | `updateBalance`, `updateSummary` |
+| app-data.js | ОТЧЁТ ДДС | `renderDdsReport`, виды деятельности, `isWithinAccounting` (дата начала учёта) |
+| **app-operations.js** | ОПЕРАЦИИ — ОТОБРАЖЕНИЕ | `renderOperations`, сортировка |
+| app-operations.js | СВАЙП ДЛЯ УДАЛЕНИЯ | свайп операции |
+| app-operations.js | МОДАЛКА БЫСТРЫЙ ВВОД | `openModal`, `populateFormSelects` |
+| app-operations.js | БЫСТРЫЕ КАТЕГОРИИ | плитки статей в окне операции |
+| app-operations.js | РАСШИРЕННАЯ ФОРМА | полная форма операции |
+| **app-dashboard.js** | ДАШБОРД | графики аналитики |
+| app-dashboard.js | ОЧИСТКА ДЕМО | clearDemo/clearAll |
+| app-dashboard.js | КАРУСЕЛЬ АНАЛИТИКИ | свайп страниц аналитики |
+| app-dashboard.js | ТАБЛИЦА РАСХОДОВ | Pro-таблица (заблюрена) |
+| **app-wallets.js** | РЕДАКТИРОВАНИЕ КОШЕЛЬКА | `openWalletEdit`, `openNewWallet`, `saveWalletEdit`, `populateWalletDirectionSelect` |
+| app-wallets.js | ПЕРЕТАСКИВАНИЕ СЧЕТОВ | drag `walletDragStart/Move/End` |
+| app-wallets.js | МОДАЛКА «ОБНОВИТЬ ТАРИФ» | `showUpgrade`, `closeUpgrade` |
+| app-wallets.js | РЕДАКТИРОВАНИЕ ОПЕРАЦИИ | правка операции |
+| **app-main.js** | УТИЛИТЫ / ТАБ-БАР | `esc`, `fmt`, переключение вкладок |
+| app-main.js | СТАРТ / ОФФЕР | первичная загрузка, `init()`, экран-оффер |
+| app-main.js | ЭКСПОРТ ФУНКЦИЙ В WINDOW | `Object.assign(window, {...})` для onclick |
 
 ## Эндпоинты server/main.py
 
