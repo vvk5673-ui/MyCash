@@ -13,12 +13,14 @@ function opAddedTs(op) {
     return typeof op.id === 'number' ? op.id : 0;
 }
 
-// Сортировка списка: сначала по дате операции (новые сверху),
-// при одинаковой дате — последняя добавленная сверху
+// Сортировка списка: сначала по календарному дню операции (новые дни сверху),
+// внутри одного дня — последняя ДОБАВЛЕННАЯ сверху (а не по времени в поле date,
+// т.к. оно хранится по-разному: быстрый ввод пишет реальное время, форма — полдень).
 function sortOpsForList(a, b) {
-    const d = new Date(b.date) - new Date(a.date);
-    if (d !== 0) return d;
-    return opAddedTs(b) - opAddedTs(a);
+    const dayA = String(a.date).slice(0, 10);   // 'YYYY-MM-DD' без времени
+    const dayB = String(b.date).slice(0, 10);
+    if (dayA !== dayB) return dayA < dayB ? 1 : -1;   // более новый день — выше
+    return opAddedTs(b) - opAddedTs(a);               // внутри дня — последняя добавленная выше
 }
 
 function renderOperations() {
@@ -62,13 +64,15 @@ function renderOperations() {
                     <button class="op-swipe-btn edit" onclick="event.stopPropagation(); openEdit('${op.id}')"><i data-lucide="pencil" style="width:16px;height:16px;color:white"></i><br>Изменить</button>
                     <button class="op-swipe-btn delete" onclick="event.stopPropagation(); deleteOperation('${op.id}')"><i data-lucide="trash-2" style="width:16px;height:16px;color:white"></i><br>Удалить</button>
                 </div>
-                <div class="op-icon ${iconClass}">${iconHtml}</div>
-                <div class="op-info">
-                    <div class="op-category">${op.type === 'transfer' ? 'Перевод' : esc(op.category)}</div>
-                    <div class="op-comment">${subtitle}</div>
-                </div>
-                <div class="op-right">
-                    <div class="op-amount ${iconClass}">${sign}${fmt(op.amount)} ₽</div>
+                <div class="op-content">
+                    <div class="op-icon ${iconClass}">${iconHtml}</div>
+                    <div class="op-info">
+                        <div class="op-category">${op.type === 'transfer' ? 'Перевод' : esc(op.category)}</div>
+                        <div class="op-comment">${subtitle}</div>
+                    </div>
+                    <div class="op-right">
+                        <div class="op-amount ${iconClass}">${sign}${fmt(op.amount)} ₽</div>
+                    </div>
                 </div>
             </div>`;
     }).join('');
@@ -85,14 +89,18 @@ function swipeStart(e) {
     swiped = false;
 }
 
+// Двигаем только содержимое строки (.op-content) влево — кнопки прибиты к правому краю
+function swipeContent(item) {
+    return item.querySelector('.op-content');
+}
+
 function swipeMove(e) {
     if (!swipeCurrentItem) return;
     const dx = e.touches[0].clientX - swipeStartX;
     if (dx < -20) {
         swiped = true;
         const offset = Math.min(160, Math.abs(dx));
-        swipeCurrentItem.style.transform = `translateX(-${offset}px)`;
-        swipeCurrentItem.querySelector('.op-swipe-actions').style.transform = `translateX(${160 - offset}px)`;
+        swipeContent(swipeCurrentItem).style.transform = `translateX(-${offset}px)`;
         e.preventDefault();
     }
 }
@@ -102,11 +110,9 @@ function swipeEnd(e) {
     const dx = e.changedTouches[0].clientX - swipeStartX;
     if (dx < -80) {
         // Показать кнопки редактирования и удаления
-        swipeCurrentItem.style.transform = 'translateX(-160px)';
-        swipeCurrentItem.querySelector('.op-swipe-actions').style.transform = 'translateX(0)';
+        swipeContent(swipeCurrentItem).style.transform = 'translateX(-160px)';
     } else {
-        swipeCurrentItem.style.transform = '';
-        swipeCurrentItem.querySelector('.op-swipe-actions').style.transform = 'translateX(160px)';
+        swipeContent(swipeCurrentItem).style.transform = '';
     }
     swipeCurrentItem = null;
 }
@@ -115,9 +121,8 @@ function swipeEnd(e) {
 document.addEventListener('touchstart', function(e) {
     document.querySelectorAll('.op-item').forEach(item => {
         if (!item.contains(e.target)) {
-            item.style.transform = '';
-            const actions = item.querySelector('.op-swipe-actions');
-            if (actions) actions.style.transform = 'translateX(160px)';
+            const content = item.querySelector('.op-content');
+            if (content) content.style.transform = '';
         }
     });
 });

@@ -373,14 +373,23 @@ body {
 }
 .op-item {
     display: flex;
-    align-items: center;
-    padding: 14px 16px;
+    align-items: stretch;
     border-bottom: 1px solid var(--border);
     position: relative;
     overflow: hidden;
-    transition: transform 0.2s;
 }
 .op-item:last-child { border-bottom: none; }
+/* Содержимое строки — едет влево при свайпе; белый фон перекрывает кнопки под ним */
+.op-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    padding: 14px 16px;
+    background: var(--card);
+    position: relative;
+    z-index: 1;
+    transition: transform 0.2s;
+}
 .op-icon {
     width: 40px; height: 40px;
     border-radius: 12px;
@@ -406,8 +415,6 @@ body {
     position: absolute;
     right: 0; top: 0; bottom: 0;
     display: flex;
-    transform: translateX(160px);
-    transition: transform 0.2s;
 }
 .op-swipe-btn {
     width: 80px;
