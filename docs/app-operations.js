@@ -23,6 +23,12 @@ function sortOpsForList(a, b) {
     return opAddedTs(b) - opAddedTs(a);               // внутри дня — последняя добавленная выше
 }
 
+// Иконка и цвет счёта (кассы) по его названию — для бейджа в строке операции
+function walletVisual(name) {
+    const w = getActiveWallets().find(function(x) { return x.name === name; });
+    return { icon: (w && w.icon) || 'wallet', color: (w && w.color) || '#8E8E93' };
+}
+
 function renderOperations() {
     const container = document.getElementById('operationsList');
     const filtered = filterByPeriod(operations).slice().sort(sortOpsForList);
@@ -33,13 +39,12 @@ function renderOperations() {
     }
 
     container.innerHTML = filtered.map(op => {
-        const catObj = [...EXPENSE_CATS, ...INCOME_CATS].find(c => c.name === op.category);
-        let iconName = catObj ? catObj.icon : 'package';
-        let iconColor = catObj ? catObj.color : '#8E8E93';
         let iconClass = op.type;
         let sign = op.type === 'income' ? '+' : '-';
         let walletText = op.wallet || '💳 Карта';
-        let iconHtml = lucideIcon(iconName, 20, iconColor);
+        // Иконка операции = иконка кассы (счёта), по которой прошла операция
+        const wv = walletVisual(op.wallet);
+        let iconHtml = lucideIcon(wv.icon, 20, wv.color);
 
         if (op.type === 'transfer') {
             iconHtml = lucideIcon('arrow-left-right', 20, '#007AFF');
