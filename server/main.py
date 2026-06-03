@@ -525,8 +525,36 @@ async def get_articles(current_user: dict = Depends(get_current_user)):
 
 @app.post('/v1/articles')
 async def create_article(body: ArticleCreate, current_user: dict = Depends(get_current_user)):
-    """Создать статью ДДС"""
+    """Создать статью ДДС.
+
+    Если статья с таким именем уже есть, но скрыта (в архиве) — восстанавливаем её
+    с новыми параметрами (история операций сохраняется), а не выдаём ошибку.
+    Ошибка «уже есть» — только если активная статья с таким именем реально существует.
+    """
     user_id = current_user['user_id']
+
+    # Проверяем, нет ли статьи с таким именем (имя уникально в рамках пользователя)
+    same_name = supabase.table('dds_articles') \
+        .select('id,is_archived') \
+        .eq('user_id', user_id) \
+        .eq('name', body.name) \
+        .limit(1) \
+        .execute()
+    if same_name.data:
+        found = same_name.data[0]
+        if not found['is_archived']:
+            # Активная статья с таким именем — настоящий дубликат
+            raise HTTPException(status_code=400, detail='Статья с таким названием уже есть')
+        # Архивная статья — восстанавливаем её с новыми параметрами
+        restored = supabase.table('dds_articles').update({
+            'is_archived': False,
+            'description': body.description,
+            'group_id': body.group_id,
+            'activity_kind_id': body.activity_kind_id,
+            'icon': body.icon,
+            'color': body.color,
+        }).eq('id', found['id']).execute()
+        return restored.data[0]
 
     # Определяем sort_order = max + 1
     existing = supabase.table('dds_articles').select('sort_order').eq('user_id', user_id).order('sort_order', desc=True).limit(1).execute()
