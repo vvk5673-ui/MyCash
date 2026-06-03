@@ -384,6 +384,7 @@ body {
     display: flex;
     align-items: center;
     flex: 1;
+    min-width: 0;            /* чтобы длинная подпись сжималась в «…», а не выталкивала сумму */
     padding: 14px 16px;
     background: var(--card);
     position: relative;
