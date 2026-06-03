@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=48">
+    <link rel="stylesheet" href="style.css?v=49">
 </head>
 <body>
 
@@ -333,22 +333,6 @@
         </div>
     </div>
 
-    <!-- Индикатор записи голоса -->
-    <div class="recording-indicator" id="recordingIndicator">
-        <div class="rec-circle" onclick="stopVoice()">🎤</div>
-        <div class="rec-text">Слушаю... Говорите!</div>
-    </div>
-
-    <!-- Подтверждение голосового ввода -->
-    <div class="voice-confirm" id="voiceConfirm">
-        <div class="voice-confirm-text">Я правильно понял?</div>
-        <div class="voice-confirm-parsed" id="voiceParsed"></div>
-        <div class="voice-confirm-buttons">
-            <button class="btn-edit" onclick="closeVoiceConfirm()">✏️ Изменить</button>
-            <button class="btn-confirm" onclick="confirmVoice()">✅ Записать</button>
-        </div>
-    </div>
-
     <!-- Модальное окно: Быстрый ввод (2 тапа) -->
     <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
         <div class="modal" onclick="event.stopPropagation()">
@@ -566,7 +550,7 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=48"></script>
-    <script src="app.js?v=48"></script>
+    <script src="api.js?v=49"></script>
+    <script src="app.js?v=49"></script>
 </body>
 </html>

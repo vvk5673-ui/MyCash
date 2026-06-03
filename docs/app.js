@@ -119,7 +119,6 @@ let currentType = 'expense';
 let selectedWallet = '';   // имя счёта; ставится из справочника счетов при рендере формы
 let selectedCategory = '';
 let currentPeriod = 'month';
-let voiceParsedData = null;
 let isDemo = false;
 let serverIsDemo = false;   // is_demo с сервера (из ответа API.auth) — источник правды для демо-баннера
 let transferFrom = '💳 Карта';
@@ -1907,142 +1906,6 @@ async function clearDemoData() {
     document.getElementById('demoBannerProfile').classList.remove('active');
 }
 
-// === ГОЛОСОВОЙ ВВОД ===
-let recognition = null;
-
-if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRecognition();
-    recognition.lang = 'ru-RU';
-    recognition.interimResults = false;
-    recognition.continuous = false;
-
-    recognition.onresult = function(event) {
-        const text = event.results[0][0].transcript;
-        stopVoice();
-        const parsed = parseCommand(text);
-        if (parsed) {
-            voiceParsedData = parsed;
-            showVoiceConfirm(parsed);
-        }
-    };
-    recognition.onerror = function() { stopVoice(); };
-    recognition.onend = function() {
-        document.getElementById('recordingIndicator').classList.remove('active');
-    };
-}
-
-function startVoice() {
-    if (!recognition) return;
-    haptic();
-    document.getElementById('recordingIndicator').classList.add('active');
-    recognition.start();
-}
-
-function stopVoice() {
-    if (recognition) recognition.stop();
-    document.getElementById('recordingIndicator').classList.remove('active');
-}
-
-function showVoiceConfirm(data) {
-    const sign = data.type === 'income' ? 'Доход' : 'Расход';
-    document.getElementById('voiceParsed').textContent = `${sign} ${fmt(data.amount)} ₽ — ${data.category}`;
-    document.getElementById('voiceConfirm').classList.add('active');
-}
-
-function closeVoiceConfirm() {
-    document.getElementById('voiceConfirm').classList.remove('active');
-    if (voiceParsedData) {
-        openModal();
-        document.getElementById('amountInput').value = voiceParsedData.amount;
-        updateAmountDisplay();
-        currentType = voiceParsedData.type;
-    }
-}
-
-function confirmVoice() {
-    if (!voiceParsedData) return;
-    const op = {
-        id: Date.now(),
-        type: voiceParsedData.type,
-        amount: voiceParsedData.amount,
-        category: voiceParsedData.category,
-        wallet: selectedWallet,
-        comment: 'Голосовой ввод',
-        date: new Date().toISOString()
-    };
-    operations.unshift(op);
-    Storage.save('mycash_ops', operations);
-    document.getElementById('voiceConfirm').classList.remove('active');
-    voiceParsedData = null;
-    haptic('success');
-    renderAll();
-}
-
-// === ПАРСЕР ГОЛОСОВЫХ КОМАНД ===
-function parseCommand(text) {
-    text = text.toLowerCase().trim();
-    let type = null;
-    if (text.includes('расход') || text.includes('потратил') || text.includes('заплатил')) type = 'expense';
-    else if (text.includes('доход') || text.includes('получил') || text.includes('заработал')) type = 'income';
-
-    let amount = null;
-    const wordNumbers = {
-        'тысяч': 1000, 'тысячу': 1000, 'тысячи': 1000,
-        'сто': 100, 'двести': 200, 'триста': 300, 'четыреста': 400, 'пятьсот': 500,
-        'шестьсот': 600, 'семьсот': 700, 'восемьсот': 800, 'девятьсот': 900,
-        'один': 1, 'одну': 1, 'два': 2, 'две': 2, 'три': 3, 'четыре': 4, 'пять': 5,
-        'шесть': 6, 'семь': 7, 'восемь': 8, 'девять': 9, 'десять': 10,
-        'одиннадцать': 11, 'двенадцать': 12, 'тринадцать': 13, 'четырнадцать': 14,
-        'пятнадцать': 15, 'двадцать': 20, 'тридцать': 30, 'сорок': 40,
-        'пятьдесят': 50, 'шестьдесят': 60, 'семьдесят': 70, 'восемьдесят': 80,
-        'девяносто': 90
-    };
-
-    const digitMatch = text.match(/(\d[\d\s]*\d|\d+)/);
-    if (digitMatch) {
-        amount = parseInt(digitMatch[0].replace(/\s/g, ''));
-    } else {
-        const words = text.split(/\s+/);
-        let total = 0, current = 0, hasNumber = false;
-        for (const word of words) {
-            if (wordNumbers[word] !== undefined) {
-                hasNumber = true;
-                const val = wordNumbers[word];
-                if (val === 1000) {
-                    current = current === 0 ? val : current * val;
-                    total += current; current = 0;
-                } else if (val >= 100) { current += val; }
-                else { current += val; }
-            }
-        }
-        total += current;
-        if (hasNumber) amount = total;
-    }
-
-    // Ищем категорию
-    const allCats = [...EXPENSE_CATS, ...INCOME_CATS];
-    const allCatNames = allCats.map(c => c.name.toLowerCase());
-    const words = text.split(/\s+/);
-    let category = null;
-    for (const word of words) {
-        const idx = allCatNames.indexOf(word);
-        if (idx !== -1) { category = allCats[idx].name; break; }
-    }
-    if (!category) {
-        const skipWords = ['расход','доход','потратил','получил','заплатил','заработал','рублей','рубль','руб','тысяч','тысячу','тысячи','на','сто','двести','триста','четыреста','пятьсот','шестьсот','семьсот','восемьсот','девятьсот','один','одну','два','две','три','четыре','пять','шесть','семь','восемь','девять','десять','двадцать','тридцать','сорок','пятьдесят'];
-        for (let i = words.length - 1; i >= 0; i--) {
-            if (!skipWords.includes(words[i]) && isNaN(words[i]) && words[i].length > 2) {
-                category = words[i].charAt(0).toUpperCase() + words[i].slice(1);
-                break;
-            }
-        }
-    }
-
-    if (type && amount) return { type, amount, category: category || 'Прочее' };
-    return null;
-}
-
 // === КАРУСЕЛЬ АНАЛИТИКИ ===
 let anCarPage = 0;
 let anCarStartX = 0;
@@ -2825,14 +2688,14 @@ function skipOffer() {
 // === ЭКСПОРТ ФУНКЦИЙ В WINDOW (для onclick в HTML) ===
 Object.assign(window, {
     anCarEnd, anCarMove, anCarStart, applyCustomPeriod, clearAllData,
-    clearDemoData, closeEdit, closeModal, closeUpgrade, closeVoiceConfirm,
-    closeWalletEdit, confirmVoice, deleteFromEdit, deleteOperation, deleteWallet,
+    clearDemoData, closeEdit, closeModal, closeUpgrade,
+    closeWalletEdit, deleteFromEdit, deleteOperation, deleteWallet,
     focusAmount, haptic, openCustomPeriod,
     openEdit, openModal, openWalletEdit, openNewWallet, walletDragStart, quickSave, renderEditArticles,
     renderEditWallets, selectEditWallet, selectEditArticle,
     saveEdit, saveExtended, saveWalletEdit, selectExtCat,
     selectWallet, selectWalletColor, setDashTab, setDashGroup, setEditType, setPeriod,
-    setTableMode, setType, shareApp, showUpgrade, stopVoice, swapTransfer,
+    setTableMode, setType, shareApp, showUpgrade, swapTransfer,
     switchTab, toggleCatOps, toggleExtended, updateAmountDisplay, acceptOffer, skipOffer,
     swipeStart, swipeMove, swipeEnd,
     quickSaveArticle, saveTransfer, cycleTransfer,
