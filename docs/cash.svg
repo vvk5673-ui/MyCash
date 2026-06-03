@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Иконка наличных: зелёный квадрат + стопка банкнот со знаком ₽ -->
+  <rect width="48" height="48" rx="12" fill="#34C759"/>
+  <!-- задняя банкнота -->
+  <rect x="12.5" y="13" width="25" height="14" rx="3" fill="#B7ECC4"/>
+  <!-- передняя банкнота -->
+  <rect x="9" y="19.5" width="30" height="15.5" rx="3" fill="#ffffff"/>
+  <text x="24" y="27.6" text-anchor="middle"
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif"
+        font-size="11.5" font-weight="700" fill="#1F9E48">₽</text>
+</svg>

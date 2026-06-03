@@ -93,8 +93,9 @@ function lucideIcon(name, size, color) {
 function brandLogo(name, size) {
     const n = (name || '').toLowerCase().replace(/[\s\-_.]/g, '');
     const logos = {
-        'tbank.png?v=61': ['тбанк', 'тинькоф', 'tbank', 'tinkoff'],
-        'sber.png?v=61': ['сбер', 'sber']
+        'tbank.png?v=62': ['тбанк', 'тинькоф', 'tbank', 'tinkoff'],
+        'sber.png?v=62': ['сбер', 'sber'],
+        'cash.svg?v=62': ['наличк', 'наличн', 'cash']
     };
     for (const src in logos) {
         if (logos[src].some(function(key) { return n.indexOf(key) !== -1; })) {
