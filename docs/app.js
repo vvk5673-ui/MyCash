@@ -337,31 +337,73 @@ function computeWalletBalances() {
 }
 
 // Рендер кошельков на главном экране — компактным списком (по строке на кошелёк)
+// HTML одной строки счёта (используется в группах блока «Мои финансы»)
+function walletLineHtml(w, bal) {
+    // Кошелёк кликабелен только если он реальный (с сервера, есть id) — тап открывает настройки
+    const click = w.id ? ' onclick="openWalletEdit(\'' + w.id + '\')" style="cursor:pointer"' : '';
+    const wid = w.id ? ' data-wid="' + w.id + '"' : '';
+    // Хваталка для перетаскивания (изменение порядка) — только для серверных счетов
+    const handle = w.id
+        ? '<span class="wallet-drag" onpointerdown="walletDragStart(event,\'' + w.id + '\')" onclick="event.stopPropagation()">' + lucideIcon('grip-vertical', 18, '#C7C7CC') + '</span>'
+        : '';
+    return '<div class="wallet-line"' + wid + click + '>' +
+        '<span style="flex-shrink:0">' + lucideIcon(w.icon || 'wallet', 18, w.color || '#007AFF') + '</span>' +
+        '<span class="wallet-line-name">' + esc(w.name) + '</span>' +
+        '<span class="wallet-line-amount">' + fmt(bal[w.name] || 0) + ' ₽</span>' +
+        handle +
+        '</div>';
+}
+
+// Рендер кошельков на главном экране — сгруппированы по направлениям (Бизнес/Личное/...)
 function renderWalletsRow() {
     const wallets = getActiveWallets();
     const bal = computeWalletBalances();
     const row = document.getElementById('walletsRow');
     if (!row) return;
-    row.innerHTML = wallets.map(function(w) {
-        // Кошелёк кликабелен только если он реальный (с сервера, есть id) — тап открывает настройки
-        const click = w.id ? ' onclick="openWalletEdit(\'' + w.id + '\')" style="cursor:pointer"' : '';
-        const wid = w.id ? ' data-wid="' + w.id + '"' : '';
-        // Хваталка для перетаскивания (изменение порядка) — только для серверных счетов
-        const handle = w.id
-            ? '<span class="wallet-drag" onpointerdown="walletDragStart(event,\'' + w.id + '\')" onclick="event.stopPropagation()">' + lucideIcon('grip-vertical', 18, '#C7C7CC') + '</span>'
-            : '';
-        return '<div class="wallet-line"' + wid + click + '>' +
-            '<span style="flex-shrink:0">' + lucideIcon(w.icon || 'wallet', 18, w.color || '#007AFF') + '</span>' +
-            '<span class="wallet-line-name">' + esc(w.name) + '</span>' +
-            '<span class="wallet-line-amount">' + fmt(bal[w.name] || 0) + ' ₽</span>' +
-            handle +
+
+    // Активные направления в их порядке (sort_order приходит с сервера отсортированным)
+    const directions = (Refs.directions || []).filter(function(d) { return !d.is_archived; });
+
+    // Заголовок группы направления: название + подытог справа
+    function groupHead(name, subtotal) {
+        return '<div class="wallet-group-head">' +
+            '<span class="wallet-group-name">' + esc(name) + '</span>' +
+            '<span class="wallet-group-sum">' + fmt(subtotal) + ' ₽</span>' +
             '</div>';
-    }).join('') +
+    }
+
+    let html = '';
+    const usedIds = {};
+
+    // Группы по направлениям (показываем только непустые)
+    directions.forEach(function(d) {
+        const group = wallets.filter(function(w) { return w.direction_id === d.id; });
+        if (!group.length) return;
+        let subtotal = 0;
+        group.forEach(function(w) { subtotal += (bal[w.name] || 0); usedIds[w.id] = true; });
+        html += groupHead(d.name, subtotal);
+        html += group.map(function(w) { return walletLineHtml(w, bal); }).join('');
+    });
+
+    // Счета без направления (или с удалённым направлением) — отдельной группой внизу
+    const orphans = wallets.filter(function(w) { return !usedIds[w.id]; });
+    if (orphans.length) {
+        // Если направлений вообще нет — не рисуем лишний заголовок, просто список
+        if (directions.length) {
+            let subtotal = 0;
+            orphans.forEach(function(w) { subtotal += (bal[w.name] || 0); });
+            html += groupHead('Без направления', subtotal);
+        }
+        html += orphans.map(function(w) { return walletLineHtml(w, bal); }).join('');
+    }
+
     // Строка добавления нового счёта (только онлайн — счета хранятся на сервере)
-    '<div class="wallet-line wallet-line-add" onclick="openNewWallet()" style="cursor:pointer;color:var(--accent)">' +
+    html += '<div class="wallet-line wallet-line-add" onclick="openNewWallet()" style="cursor:pointer;color:var(--accent)">' +
         '<span style="flex-shrink:0">' + lucideIcon('plus', 18, '#007AFF') + '</span>' +
         '<span class="wallet-line-name">Добавить счёт</span>' +
         '</div>';
+
+    row.innerHTML = html;
     refreshIcons();
 }
 
@@ -2147,6 +2189,17 @@ function renderWalletColorGrid() {
     }).join('');
 }
 
+// Заполнить выпадающий список направлений в окне счёта (выбрать selectedId, если задан)
+function populateWalletDirectionSelect(selectedId) {
+    const sel = document.getElementById('walletEditDirection');
+    if (!sel) return;
+    const dirs = (Refs.directions || []).filter(function(d) { return !d.is_archived; });
+    sel.innerHTML = dirs.map(function(d) {
+        return '<option value="' + d.id + '">' + esc(d.name) + '</option>';
+    }).join('');
+    if (selectedId) sel.value = selectedId;
+}
+
 function openWalletEdit(walletId) {
     if (walletDragged) { walletDragged = false; return; }   // после перетаскивания не открывать настройки
     const w = (Refs.wallets || []).find(function(x) { return String(x.id) === String(walletId); });
@@ -2157,6 +2210,7 @@ function openWalletEdit(walletId) {
 
     document.getElementById('walletEditTitle').textContent = 'Настройки счёта';
     document.getElementById('walletEditName').value = w.name || '';
+    populateWalletDirectionSelect(w.direction_id);
     document.getElementById('walletEditBalance').value = Number(w.initial_balance) || 0;
     const accInput = document.getElementById('walletEditAccStart');
     if (accInput) accInput.value = accountingStartStr ? accountingStartStr.slice(0, 7) : '';
@@ -2179,6 +2233,7 @@ function openNewWallet() {
 
     document.getElementById('walletEditTitle').textContent = 'Новый счёт';
     document.getElementById('walletEditName').value = '';
+    populateWalletDirectionSelect();   // по умолчанию первое направление в списке
     document.getElementById('walletEditBalance').value = 0;
     // При создании дату начала учёта (общую) и удаление не показываем
     document.getElementById('walletAccStartGroup').style.display = 'none';
@@ -2213,6 +2268,14 @@ async function saveWalletEdit() {
     const newName = document.getElementById('walletEditName').value.trim();
     if (!newName) { haptic('error'); return; }
     const newBalance = parseFloat(document.getElementById('walletEditBalance').value) || 0;
+    // Направление обязательно (для группировки в блоке «Мои финансы»)
+    const dirSel = document.getElementById('walletEditDirection');
+    const newDirectionId = dirSel ? dirSel.value : '';
+    if (!newDirectionId) {
+        haptic('error');
+        alert('Выберите направление счёта. Добавить новое направление можно в Профиле.');
+        return;
+    }
 
     // Остаток и настройки счёта храним на сервере (единый источник) — без сети сохранить нельзя
     if (typeof API === 'undefined' || !API.isOnline()) {
@@ -2229,7 +2292,8 @@ async function saveWalletEdit() {
                 name: newName,
                 icon: 'wallet',
                 color: editWalletColor,
-                initial_balance: newBalance
+                initial_balance: newBalance,
+                direction_id: newDirectionId
             });
             await loadReferences();
             haptic('success');
@@ -2246,7 +2310,8 @@ async function saveWalletEdit() {
         await API.updateWallet(id, {
             name: newName,
             color: editWalletColor,
-            initial_balance: newBalance
+            initial_balance: newBalance,
+            direction_id: newDirectionId
         });
         if (accChanged) await API.setAccountingStart(newAccStr);
         await loadReferences();   // перечитать счета + дату начала учёта (внутри вызывает renderAll)
