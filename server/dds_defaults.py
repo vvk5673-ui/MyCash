@@ -10,12 +10,13 @@
 Функция seed_user_defaults() идемпотентна: добавляет только то, чего ещё нет.
 """
 
-# 4 базовых кошелька (как в Excel)
+# 4 базовых кошелька (как в Excel).
+# "direction" — имя направления по умолчанию (привязка счёта к направлению).
 DEFAULT_WALLETS = [
-    {"name": "Счёт №1", "icon": "credit-card", "color": "#007AFF", "initial_balance": 0, "sort_order": 1},
-    {"name": "Счёт №2", "icon": "credit-card", "color": "#5856D6", "initial_balance": 0, "sort_order": 2},
-    {"name": "Наличка", "icon": "wallet", "color": "#34C759", "initial_balance": 0, "sort_order": 3},
-    {"name": "Касса", "icon": "shopping-bag", "color": "#FF9500", "initial_balance": 0, "sort_order": 4},
+    {"name": "Счёт №1", "icon": "credit-card", "color": "#007AFF", "initial_balance": 0, "sort_order": 1, "direction": "Направление 1"},
+    {"name": "Счёт №2", "icon": "credit-card", "color": "#5856D6", "initial_balance": 0, "sort_order": 2, "direction": "Направление 1"},
+    {"name": "Наличка", "icon": "wallet", "color": "#34C759", "initial_balance": 0, "sort_order": 3, "direction": "Направление 2"},
+    {"name": "Касса", "icon": "shopping-bag", "color": "#FF9500", "initial_balance": 0, "sort_order": 4, "direction": "Направление 2"},
 ]
 
 # 2 базовых направления (пользователь может переименовать/добавить/удалить)
@@ -46,24 +47,32 @@ def seed_user_defaults(supabase, user_id: str) -> dict:
     groups = {g["code"]: g["id"] for g in supabase.table("dds_groups").select("code, id").execute().data}
     kinds = {k["code"]: k["id"] for k in supabase.table("dds_activity_kinds").select("code, id").execute().data}
 
-    # --- Кошельки ---
+    # --- Направления (создаём ДО кошельков, чтобы привязать счёт к направлению) ---
+    existing_dirs = supabase.table("business_directions").select("id, name").eq("user_id", user_id).execute().data
+    existing_dir_names = {d["name"] for d in existing_dirs}
+    dir_id_by_name = {d["name"]: d["id"] for d in existing_dirs}
+    to_add_dirs = [d for d in DEFAULT_DIRECTIONS if d["name"] not in existing_dir_names]
+    if to_add_dirs:
+        payload = [{**d, "user_id": user_id} for d in to_add_dirs]
+        inserted_dirs = supabase.table("business_directions").insert(payload).execute().data
+        for d in inserted_dirs:
+            dir_id_by_name[d["name"]] = d["id"]
+
+    # --- Кошельки (с привязкой к направлению по имени) ---
     existing_wallets = supabase.table("wallets").select("id, name").eq("user_id", user_id).execute().data
     existing_wallet_names = {w["name"] for w in existing_wallets}
     wallet_id_by_name = {w["name"]: w["id"] for w in existing_wallets}
     to_add_wallets = [w for w in DEFAULT_WALLETS if w["name"] not in existing_wallet_names]
     if to_add_wallets:
-        payload = [{**w, "user_id": user_id} for w in to_add_wallets]
+        payload = []
+        for w in to_add_wallets:
+            item = {k: v for k, v in w.items() if k != "direction"}
+            item["user_id"] = user_id
+            item["direction_id"] = dir_id_by_name.get(w.get("direction"))
+            payload.append(item)
         inserted = supabase.table("wallets").insert(payload).execute().data
         for w in inserted:
             wallet_id_by_name[w["name"]] = w["id"]
-
-    # --- Направления ---
-    existing_dirs = supabase.table("business_directions").select("name").eq("user_id", user_id).execute().data
-    existing_dir_names = {d["name"] for d in existing_dirs}
-    to_add_dirs = [d for d in DEFAULT_DIRECTIONS if d["name"] not in existing_dir_names]
-    if to_add_dirs:
-        payload = [{**d, "user_id": user_id} for d in to_add_dirs]
-        supabase.table("business_directions").insert(payload).execute()
 
     # --- Статьи ДДС ---
     existing_articles = supabase.table("dds_articles").select("name").eq("user_id", user_id).execute().data

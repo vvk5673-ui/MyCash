@@ -122,6 +122,7 @@ class WalletCreate(BaseModel):
     icon: str = 'credit-card'
     color: str = '#F2F2F7'
     initial_balance: float = 0
+    direction_id: Optional[str] = None   # направление счёта (Бизнес/Личное/...)
 
 class WalletUpdate(BaseModel):
     name: Optional[str] = None
@@ -129,6 +130,7 @@ class WalletUpdate(BaseModel):
     color: Optional[str] = None
     initial_balance: Optional[float] = None
     sort_order: Optional[int] = None
+    direction_id: Optional[str] = None   # направление счёта
 
 class SetBalances(BaseModel):
     card_balance: float = 0
@@ -446,6 +448,7 @@ async def create_wallet(body: WalletCreate, current_user: dict = Depends(get_cur
         'icon': body.icon,
         'color': body.color,
         'initial_balance': body.initial_balance,
+        'direction_id': body.direction_id,
         'sort_order': existing.count or 0
     }).execute()
     return result.data[0]
