@@ -419,14 +419,18 @@ body {
 .op-swipe-btn {
     width: 80px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 5px;
     color: white;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
+    letter-spacing: 0.2px;
     cursor: pointer;
     border: none;
 }
+.op-swipe-btn span { line-height: 1; }
 .op-swipe-btn.edit { background: var(--accent); }
 .op-swipe-btn.delete { background: var(--red); }
 

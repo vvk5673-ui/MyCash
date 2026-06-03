@@ -61,8 +61,8 @@ function renderOperations() {
                  onclick="openEdit('${op.id}')"
                  ontouchstart="swipeStart(event)" ontouchmove="swipeMove(event)" ontouchend="swipeEnd(event)">
                 <div class="op-swipe-actions">
-                    <button class="op-swipe-btn edit" onclick="event.stopPropagation(); openEdit('${op.id}')"><i data-lucide="pencil" style="width:16px;height:16px;color:white"></i><br>Изменить</button>
-                    <button class="op-swipe-btn delete" onclick="event.stopPropagation(); deleteOperation('${op.id}')"><i data-lucide="trash-2" style="width:16px;height:16px;color:white"></i><br>Удалить</button>
+                    <button class="op-swipe-btn edit" onclick="event.stopPropagation(); openEdit('${op.id}')"><i data-lucide="pencil" style="width:19px;height:19px;color:white"></i><span>Изменить</span></button>
+                    <button class="op-swipe-btn delete" onclick="event.stopPropagation(); deleteOperation('${op.id}')"><i data-lucide="trash-2" style="width:19px;height:19px;color:white"></i><span>Удалить</span></button>
                 </div>
                 <div class="op-content">
                     <div class="op-icon ${iconClass}">${iconHtml}</div>
