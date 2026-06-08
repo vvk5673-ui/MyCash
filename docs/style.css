@@ -136,13 +136,17 @@ body {
     flex-wrap: wrap;
 }
 .wallet-color-btn {
-    width: 36px; height: 36px;
-    border-radius: 50%;
+    width: 40px; height: 40px;
+    border-radius: 13px;
     border: 3px solid transparent;
+    padding: 0;
+    line-height: 0;
+    background: transparent;
     cursor: pointer;
     transition: all 0.15s;
 }
-.wallet-color-btn.active { border-color: var(--text); transform: scale(1.15); }
+.wallet-color-btn svg { display: block; border-radius: 10px; }
+.wallet-color-btn.active { border-color: var(--text); transform: scale(1.12); }
 .wallet-color-btn:active { transform: scale(0.9); }
 
 /* Карусель аналитики (категории / таблица) */

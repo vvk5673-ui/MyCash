@@ -20,12 +20,12 @@ let editingWalletId = null;   // id редактируемого счёта (с 
 let editWalletColor = '#007AFF';
 let walletSaveBusy = false;   // защита от двойного сохранения
 
-// Отрисовать палитру цветов значка (data-color — надёжное сравнение)
+// Отрисовать палитру значков-кошельков (пользователь видит сам значок в каждом цвете)
 function renderWalletColorGrid() {
     document.getElementById('walletColorGrid').innerHTML = WALLET_COLORS.map(function(c) {
         return '<div class="wallet-color-btn ' + (c.color === editWalletColor ? 'active' : '') + '"' +
-               ' data-color="' + c.color + '" style="background:' + c.color + '"' +
-               ' onclick="selectWalletColor(\'' + c.color + '\')"></div>';
+               ' data-color="' + c.color + '"' +
+               ' onclick="selectWalletColor(\'' + c.color + '\')">' + walletSquircle(c.color, 40) + '</div>';
     }).join('');
 }
 
