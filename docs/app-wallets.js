@@ -319,7 +319,6 @@ function openEdit(id) {
     // Заполняем форму
     document.getElementById('editAmount').value = op.amount;
     document.getElementById('editDate').value = op.date ? op.date.split('T')[0] : new Date().toISOString().split('T')[0];
-    document.getElementById('editComment').value = op.comment || '';
     document.getElementById('editPurpose').value = op.purpose || '';
 
     // Списки направлений и контрагентов + текущие значения
@@ -417,7 +416,6 @@ function saveEdit() {
     op.contragent_id = document.getElementById('editContragentSelect').value || null;
     op.purpose = document.getElementById('editPurpose').value || '';
     op.date = (document.getElementById('editDate').value || new Date().toISOString().split('T')[0]) + 'T12:00:00';
-    op.comment = document.getElementById('editComment').value || '';
 
     Storage.save('mycash_ops', operations);
     haptic('success');

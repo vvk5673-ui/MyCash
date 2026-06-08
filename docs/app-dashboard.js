@@ -88,10 +88,9 @@ function updateDashboard() {
         <div class="dash-cat-ops" id="dashCatOps${i}">${
             g.ops.map(op => {
                 const dateStr = formatDate(op.date);
-                const comment = op.comment ? esc(op.comment) + ' · ' : '';
                 const wallet = op.wallet || '💳 Карта';
                 return `<div class="dash-cat-op" onclick="event.stopPropagation(); openEdit('${op.id}')" style="cursor:pointer">
-                    <span class="dash-cat-op-left">${comment}${dateStr} · ${esc(wallet)}</span>
+                    <span class="dash-cat-op-left">${dateStr} · ${esc(wallet)}</span>
                     <div style="display:flex;align-items:center;gap:8px">
                         <span class="dash-cat-op-amount" style="color:${isExpense ? 'var(--red)' : 'var(--green)'}">${isExpense ? '-' : '+'}${fmt(op.amount)} ₽</span>
                         <i data-lucide="pencil" style="width:14px;height:14px;color:var(--text2);flex-shrink:0"></i>

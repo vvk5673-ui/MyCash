@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=64">
+    <link rel="stylesheet" href="style.css?v=65">
 </head>
 <body>
 
@@ -382,7 +382,7 @@
             <!-- Кнопка "Подробнее" (необязательные поля) -->
             <button class="more-btn" onclick="toggleExtended()">Подробнее ▾</button>
 
-            <!-- Расширенная форма: направление, контрагент, назначение, дата, комментарий -->
+            <!-- Расширенная форма: направление, контрагент, назначение, дата -->
             <div class="extended-form" id="extendedForm">
                 <div class="form-group">
                     <label class="form-label">Направление</label>
@@ -399,10 +399,6 @@
                 <div class="form-group">
                     <label class="form-label">Дата</label>
                     <input class="form-input" type="date" id="dateInput">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Комментарий</label>
-                    <input class="form-input" type="text" id="commentInput" placeholder="Необязательно">
                 </div>
             </div>
         </div>
@@ -456,11 +452,6 @@
             <div class="form-group">
                 <label class="form-label">Дата</label>
                 <input class="form-input" type="date" id="editDate">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Комментарий</label>
-                <input class="form-input" type="text" id="editComment" placeholder="Необязательно">
             </div>
 
             <div class="edit-buttons">
@@ -550,13 +541,13 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=64"></script>
+    <script src="api.js?v=65"></script>
     <!-- app.js разбит на 6 частей (общая область видимости, порядок подключения важен) -->
-    <script src="app-core.js?v=64"></script>
-    <script src="app-data.js?v=64"></script>
-    <script src="app-operations.js?v=64"></script>
-    <script src="app-dashboard.js?v=64"></script>
-    <script src="app-wallets.js?v=64"></script>
-    <script src="app-main.js?v=64"></script>
+    <script src="app-core.js?v=65"></script>
+    <script src="app-data.js?v=65"></script>
+    <script src="app-operations.js?v=65"></script>
+    <script src="app-dashboard.js?v=65"></script>
+    <script src="app-wallets.js?v=65"></script>
+    <script src="app-main.js?v=65"></script>
 </body>
 </html>

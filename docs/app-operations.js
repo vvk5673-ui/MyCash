@@ -53,10 +53,9 @@ function renderOperations() {
         }
 
         const dateStr = formatDate(op.date);
-        // Подпись: назначение платежа · комментарий · счёт (дата ушла вправо под сумму)
+        // Подпись: назначение платежа · счёт (дата ушла вправо под сумму)
         const parts = [];
         if (op.purpose) parts.push(esc(op.purpose));
-        if (op.comment) parts.push(esc(op.comment));
         parts.push(esc(walletText));
         const subtitle = parts.join(' · ');
 
@@ -171,7 +170,6 @@ function openModal() {
     document.getElementById('extendedForm').classList.remove('active');
     // Сброс необязательных полей
     document.getElementById('purposeInput').value = '';
-    document.getElementById('commentInput').value = '';
     document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
     // Дефолтный кошелёк: последний использованный (если ещё существует) иначе первый активный
     const walletNames = getActiveWallets().map(function(w) { return w.name; });
@@ -430,7 +428,7 @@ function quickSaveArticle(articleId) {
         contragent_id: document.getElementById('contragentSelect').value || null,
         purpose: document.getElementById('purposeInput').value || '',
         wallet: selectedWallet,
-        comment: document.getElementById('commentInput').value || '',
+        comment: '',
         date: dateVal ? (dateVal + 'T12:00:00') : new Date().toISOString()
     };
     operations.unshift(op);
@@ -457,7 +455,7 @@ function saveTransfer() {
         walletFrom: transferFrom,
         walletTo: transferTo,
         purpose: document.getElementById('purposeInput').value || '',
-        comment: document.getElementById('commentInput').value || '',
+        comment: '',
         date: (dateVal || new Date().toISOString().split('T')[0]) + 'T12:00:00'
     };
     operations.unshift(op);
@@ -525,7 +523,7 @@ function saveExtended() {
             wallet: transferFrom,
             walletFrom: transferFrom,
             walletTo: transferTo,
-            comment: document.getElementById('commentInput').value || '',
+            comment: '',
             date: (document.getElementById('dateInput').value || new Date().toISOString().split('T')[0]) + 'T12:00:00'
         };
         operations.unshift(newOp);
@@ -541,7 +539,7 @@ function saveExtended() {
             amount: amount,
             category: selectedCategory,
             wallet: selectedWallet,
-            comment: document.getElementById('commentInput').value || '',
+            comment: '',
             date: (dateVal || new Date().toISOString().split('T')[0]) + 'T12:00:00'
         };
         operations.unshift(newOp);
