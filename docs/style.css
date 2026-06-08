@@ -403,6 +403,7 @@ body {
 .op-icon.transfer { background: #E3F2FD; }
 .op-info { flex: 1; min-width: 0; }
 .op-category { font-size: 15px; font-weight: 500; }
+.op-purpose { font-size: 13px; font-weight: 400; color: var(--text2); }
 .op-comment { font-size: 12px; color: var(--text2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .op-right { text-align: right; flex-shrink: 0; margin-left: 8px; }
 .op-amount { font-size: 15px; font-weight: 600; }

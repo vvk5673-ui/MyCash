@@ -44,7 +44,7 @@ function renderOperations() {
         let walletText = op.wallet || '💳 Карта';
         // Иконка операции = иконка кассы (счёта), по которой прошла операция
         const wv = walletVisual(op.wallet);
-        let iconHtml = brandLogo(op.wallet, 28) || lucideIcon(wv.icon, 20, wv.color);
+        let iconHtml = brandLogo(op.wallet, 28) || walletSquircle(wv.color, 28);
 
         if (op.type === 'transfer') {
             iconHtml = lucideIcon('arrow-left-right', 20, '#007AFF');
@@ -53,11 +53,11 @@ function renderOperations() {
         }
 
         const dateStr = formatDate(op.date);
-        // Подпись: назначение платежа · счёт (дата ушла вправо под сумму)
-        const parts = [];
-        if (op.purpose) parts.push(esc(op.purpose));
-        parts.push(esc(walletText));
-        const subtitle = parts.join(' · ');
+        const titleText = op.type === 'transfer' ? 'Перевод' : esc(op.category);
+        // Назначение платежа — сразу после статьи (в первой строке), серым и помельче
+        const purposeHtml = op.purpose ? ' · <span class="op-purpose">' + esc(op.purpose) + '</span>' : '';
+        // Вторая строка: счёт (касса) — всегда первым
+        const subtitle = esc(walletText);
 
         return `
             <div class="op-item" data-id="${op.id}"
@@ -70,7 +70,7 @@ function renderOperations() {
                 <div class="op-content">
                     <div class="op-icon ${iconClass}">${iconHtml}</div>
                     <div class="op-info">
-                        <div class="op-category">${op.type === 'transfer' ? 'Перевод' : esc(op.category)}</div>
+                        <div class="op-category">${titleText}${purposeHtml}</div>
                         <div class="op-comment">${subtitle}</div>
                     </div>
                     <div class="op-right">

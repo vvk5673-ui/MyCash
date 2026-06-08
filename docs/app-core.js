@@ -107,6 +107,21 @@ function brandLogo(name, size) {
     return null;
 }
 
+// Нейтральный значок счёта — «кошелёк» в едином стиле с бренд-значками
+// (квадрат-сквиркл + белый кошелёк с застёжкой). Цвет квадрата = цвет счёта.
+// Inline SVG, поэтому цвет берётся динамически из палитры счёта (8 цветов).
+function walletSquircle(color, size) {
+    color = color || '#007AFF';
+    size = size || 20;
+    return '<svg viewBox="0 0 48 48" width="' + size + '" height="' + size + '" ' +
+           'style="display:block;flex-shrink:0" xmlns="http://www.w3.org/2000/svg">' +
+           '<rect width="48" height="48" rx="12" fill="' + color + '"/>' +
+           '<rect x="10" y="15" width="28" height="19" rx="4.5" fill="#fff"/>' +
+           '<path d="M28 22 h11 v6 h-11 a3 3 0 0 1 0 -6 z" fill="#fff"/>' +
+           '<circle cx="30.5" cy="25" r="2.1" fill="' + color + '"/>' +
+           '</svg>';
+}
+
 // Обновить все Lucide-иконки на странице.
 // Отказоустойчиво: один кривой вызов не должен гасить весь набор, и любой значок,
 // который Lucide не преобразовал в svg, получает запасную букву — значки НИКОГДА не пропадают.
@@ -368,7 +383,7 @@ function walletLineHtml(w, bal) {
         ? '<span class="wallet-drag" onpointerdown="walletDragStart(event,\'' + w.id + '\')" onclick="event.stopPropagation()">' + lucideIcon('grip-vertical', 18, '#C7C7CC') + '</span>'
         : '';
     return '<div class="wallet-line"' + wid + click + '>' +
-        '<span style="flex-shrink:0">' + (brandLogo(w.name, 20) || lucideIcon(w.icon || 'wallet', 18, w.color || '#007AFF')) + '</span>' +
+        '<span style="flex-shrink:0">' + (brandLogo(w.name, 20) || walletSquircle(w.color, 20)) + '</span>' +
         '<span class="wallet-line-name">' + esc(w.name) + '</span>' +
         '<span class="wallet-line-amount">' + fmt(bal[w.name] || 0) + ' ₽</span>' +
         handle +
@@ -436,7 +451,7 @@ function renderProfileWallets() {
     if (!box) return;
     box.innerHTML = wallets.map(function(w) {
         return '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)">' +
-            '<span>' + lucideIcon(w.icon || 'wallet', 20, w.color || '#007AFF') + '</span>' +
+            '<span>' + (brandLogo(w.name, 20) || walletSquircle(w.color, 20)) + '</span>' +
             '<span style="flex:1;font-size:14px">' + esc(w.name) + '</span>' +
             '<span style="font-size:13px;color:var(--text2)">' + fmt(bal[w.name] || 0) + ' ₽</span>' +
             '</div>';
