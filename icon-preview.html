@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyCash — нейтральные иконки касс (3 варианта)</title>
+<style>
+  :root { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 48px 24px 80px;
+    background: #F5F5F7; color: #1d1d1f;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .sub { color: #6e6e73; font-size: 15px; margin: 0 0 40px; line-height: 1.5; }
+  .card {
+    background: #fff; border-radius: 22px; padding: 28px 30px 32px;
+    margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.04);
+  }
+  .card h2 { font-size: 20px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .card .desc { color: #6e6e73; font-size: 14px; margin: 0 0 22px; line-height: 1.5; }
+  .grid { display: flex; flex-wrap: wrap; gap: 20px 22px; align-items: flex-start; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 78px; }
+  .item svg { width: 60px; height: 60px; display: block; }
+  .item .name { font-size: 12px; color: #86868b; text-align: center; }
+  .listrow {
+    margin-top: 24px; padding-top: 22px; border-top: 1px solid #f0f0f2;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .listrow .li-ic svg { width: 40px; height: 40px; display: block; }
+  .listrow .li-txt { display: flex; flex-direction: column; }
+  .listrow .li-title { font-size: 15px; font-weight: 500; }
+  .listrow .li-amount { font-size: 13px; color: #86868b; }
+  .listhint { font-size: 12px; color: #b0b0b5; margin-left: auto; }
+  .tag { display:inline-block; background:#f0f0f2; color:#6e6e73; font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; margin-left:8px; vertical-align:middle; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Нейтральные иконки касс — 3 варианта</h1>
+  <p class="sub">
+    Для счетов, не привязанных к банку. Один значок в стиле приложения (squircle + ₽),
+    меняется <b>только цвет фона</b>. Банки останутся реальными логотипами, Наличка и Касса — свои.
+    Выберите один из трёх вариантов внизу.
+  </p>
+
+  <div class="card" id="card1"></div>
+  <div class="card" id="card2"></div>
+  <div class="card" id="card3"></div>
+</div>
+
+<script>
+  // Палитра — свежие цвета (зелёный и оранжевый уже заняты Наличкой и Кассой)
+  const COLORS = [
+    ['#007AFF','Синий'], ['#5856D6','Индиго'], ['#AF52DE','Фиолетовый'], ['#FF2D55','Розовый'],
+    ['#FF3B30','Красный'], ['#5AC8FA','Голубой'], ['#8E8E93','Серый'], ['#A2845E','Коричневый']
+  ];
+
+  // ВАРИАНТ 1 — Монета: белый круг + ₽ цвета фона
+  function coin(c){ return `
+    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="12" fill="${c}"/>
+      <circle cx="24" cy="24" r="13" fill="#fff"/>
+      <text x="24" y="30" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="17" font-weight="700" fill="${c}">₽</text>
+    </svg>`; }
+
+  // ВАРИАНТ 2 — Кошелёк: белый кошелёк + застёжка-кружок
+  function wallet(c){ return `
+    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="12" fill="${c}"/>
+      <rect x="10" y="15" width="28" height="19" rx="4.5" fill="#fff"/>
+      <path d="M28 22 h11 v6 h-11 a3 3 0 0 1 0 -6 z" fill="#fff"/>
+      <circle cx="30.5" cy="25" r="2.1" fill="${c}"/>
+    </svg>`; }
+
+  // ВАРИАНТ 3 — Сейф: белая дверца + круглая ручка-диск
+  function safe(c){ return `
+    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" rx="12" fill="${c}"/>
+      <rect x="12" y="13" width="24" height="22" rx="4.5" fill="#fff"/>
+      <circle cx="23" cy="24" r="6" fill="none" stroke="${c}" stroke-width="2.4"/>
+      <circle cx="23" cy="24" r="1.6" fill="${c}"/>
+      <line x1="23" y1="14.5" x2="23" y2="16.5" stroke="${c}" stroke-width="2" stroke-linecap="round"/>
+      <line x1="23" y1="31.5" x2="23" y2="33.5" stroke="${c}" stroke-width="2" stroke-linecap="round"/>
+      <rect x="32.5" y="18" width="2" height="12" rx="1" fill="#fff"/>
+    </svg>`; }
+
+  const VARIANTS = [
+    { id:'card1', n:'Вариант 1', name:'Монета', glyph: coin,
+      desc:'Белый круг со знаком ₽. Самый минималистичный и универсальный — читается как «деньги» в любом цвете.' },
+    { id:'card2', n:'Вариант 2', name:'Кошелёк', glyph: wallet,
+      desc:'Силуэт кошелька с застёжкой. Тёплый, бытовой образ — «место, где лежат деньги».' },
+    { id:'card3', n:'Вариант 3', name:'Сейф', glyph: safe,
+      desc:'Дверца сейфа с круглой ручкой. Строгий, «деловой» образ — касса/хранилище средств.' },
+  ];
+
+  VARIANTS.forEach(v => {
+    const swatches = COLORS.map(([c,nm]) =>
+      `<div class="item">${v.glyph(c)}<div class="name">${nm}</div></div>`).join('');
+    const demoColor = COLORS[0][0];
+    document.getElementById(v.id).innerHTML = `
+      <h2>${v.name}<span class="tag">${v.n}</span></h2>
+      <p class="desc">${v.desc}</p>
+      <div class="grid">${swatches}</div>
+      <div class="listrow">
+        <div class="li-ic">${v.glyph('#5856D6')}</div>
+        <div class="li-txt">
+          <div class="li-title">Резервная касса</div>
+          <div class="li-amount">125 400 ₽</div>
+        </div>
+        <div class="listhint">так выглядит в списке счетов</div>
+      </div>`;
+  });
+</script>
+</body>
+</html>
