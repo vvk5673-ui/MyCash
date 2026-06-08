@@ -53,11 +53,10 @@ function renderOperations() {
         }
 
         const dateStr = formatDate(op.date);
-        // Подпись: назначение платежа · комментарий · дата · кошелёк
+        // Подпись: назначение платежа · комментарий · счёт (дата ушла вправо под сумму)
         const parts = [];
         if (op.purpose) parts.push(esc(op.purpose));
         if (op.comment) parts.push(esc(op.comment));
-        parts.push(dateStr);
         parts.push(esc(walletText));
         const subtitle = parts.join(' · ');
 
@@ -77,6 +76,7 @@ function renderOperations() {
                     </div>
                     <div class="op-right">
                         <div class="op-amount ${iconClass}">${sign}${fmt(op.amount)} ₽</div>
+                        <div class="op-date">${dateStr}</div>
                     </div>
                 </div>
             </div>`;

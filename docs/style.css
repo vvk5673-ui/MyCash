@@ -410,6 +410,7 @@ body {
 .op-amount.expense { color: var(--red); }
 .op-amount.transfer { color: var(--accent); }
 .op-wallet { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.op-date { font-size: 11px; color: var(--text2); margin-top: 3px; white-space: nowrap; }
 
 /* Свайп: две кнопки — Редактировать и Удалить */
 .op-swipe-actions {
