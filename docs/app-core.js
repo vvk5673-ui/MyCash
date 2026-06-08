@@ -94,9 +94,7 @@ function brandLogo(name, size) {
     const n = (name || '').toLowerCase().replace(/[\s\-_.]/g, '');
     const logos = {
         'tbank.png?v=63': ['тбанк', 'тинькоф', 'tbank', 'tinkoff'],
-        'sber.png?v=63': ['сбер', 'sber'],
-        'cash.svg?v=63': ['наличк', 'наличн', 'cash'],
-        'kassa.svg?v=63': ['касса', 'касс', 'kassa']
+        'sber.png?v=63': ['сбер', 'sber']
     };
     for (const src in logos) {
         if (logos[src].some(function(key) { return n.indexOf(key) !== -1; })) {
