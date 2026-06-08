@@ -210,7 +210,8 @@ Object.assign(window, {
     toggleArticleEditMode, openNewArticleFromOp, openArticleEditFromOp,
     openRefList, closeRefList, openRefForm, closeRefForm,
     setRefArticleType, saveRefForm, archiveRefItem,
-    setDashMode, navReportMonth, toggleDdsSection
+    setDashMode, navReportMonth, toggleDdsSection,
+    openBankPicker, closeBankPicker, selectBank, renderBankList
 });
 
 // Восстановить вкладку из хэша URL

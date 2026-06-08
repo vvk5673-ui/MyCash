@@ -18,7 +18,71 @@ const WALLET_COLORS = [
 
 let editingWalletId = null;   // id редактируемого счёта (с сервера)
 let editWalletColor = '#007AFF';
+let editWalletBank = null;    // выбранный банк (домен) или null = своё название
 let walletSaveBusy = false;   // защита от двойного сохранения
+
+// === ВЫБОР БАНКА ДЛЯ СЧЁТА ===
+// Обновить кнопку «Банк» и видимость блока цвета (название не трогаем)
+function setBankUI(domain) {
+    editWalletBank = domain || null;
+    const ico = document.getElementById('walletBankIco');
+    const nameLbl = document.getElementById('walletBankName');
+    const colorGroup = document.getElementById('walletColorGroup');
+    if (editWalletBank) {
+        const b = bankByDomain(editWalletBank);
+        ico.innerHTML = bankFavicon(editWalletBank, 28);
+        nameLbl.textContent = b ? b.name : editWalletBank;
+        if (colorGroup) colorGroup.style.display = 'none';
+    } else {
+        ico.innerHTML = '';
+        nameLbl.textContent = 'Выбрать банк';
+        if (colorGroup) colorGroup.style.display = '';
+    }
+}
+
+function openBankPicker() {
+    haptic('light');
+    const s = document.getElementById('bankSearch');
+    if (s) s.value = '';
+    renderBankList();
+    document.getElementById('bankPickerOverlay').classList.add('active');
+}
+
+function closeBankPicker(e) {
+    if (e && e.target && e.target !== e.currentTarget) return;
+    document.getElementById('bankPickerOverlay').classList.remove('active');
+}
+
+function renderBankList() {
+    const q = (document.getElementById('bankSearch').value || '').toLowerCase().trim();
+    const items = BANKS.filter(function(b) { return !q || b.name.toLowerCase().indexOf(q) !== -1; });
+    let html = '';
+    if (!q) {
+        html += '<div class="bank-row" onclick="selectBank(null)">' +
+                '<span class="bank-row-ico">' + walletSquircle(editWalletColor || '#8E8E93', 32) + '</span>' +
+                '<span class="bank-row-name">Без банка — своё название</span></div>';
+    }
+    html += items.map(function(b) {
+        return '<div class="bank-row" onclick="selectBank(\'' + b.domain + '\')">' +
+               '<span class="bank-row-ico">' + bankFavicon(b.domain, 32) + '</span>' +
+               '<span class="bank-row-name">' + esc(b.name) + '</span></div>';
+    }).join('');
+    if (q && !items.length) html += '<div style="padding:24px;text-align:center;color:var(--text2)">Ничего не найдено</div>';
+    document.getElementById('bankPickerList').innerHTML = html;
+}
+
+function selectBank(domain) {
+    haptic('light');
+    const nameInput = document.getElementById('walletEditName');
+    setBankUI(domain);
+    if (domain) {
+        const b = bankByDomain(domain);
+        const cur = (nameInput.value || '').trim();
+        // Автозаполнить название банком, если поле пустое или там было имя другого банка
+        if (b && (!cur || bankForName(cur))) nameInput.value = b.name;
+    }
+    closeBankPicker();
+}
 
 // Отрисовать палитру значков-кошельков (пользователь видит сам значок в каждом цвете)
 function renderWalletColorGrid() {
@@ -61,6 +125,12 @@ function openWalletEdit(walletId) {
     delBtn.style.opacity = '1';
     delBtn.onclick = function() { deleteWallet(); };
 
+    // Банк: явно из icon ('bank:домен') или распознать по названию счёта
+    const wBank = (w.icon && w.icon.indexOf('bank:') === 0)
+        ? w.icon.slice(5)
+        : (bankForName(w.name) ? bankForName(w.name).domain : null);
+    setBankUI(wBank);
+
     renderWalletColorGrid();
     document.getElementById('walletEditOverlay').classList.add('active');
 }
@@ -79,6 +149,7 @@ function openNewWallet() {
     document.getElementById('walletAccStartGroup').style.display = 'none';
     document.getElementById('walletDeleteBtn').style.display = 'none';
 
+    setBankUI(null);   // новый счёт — банк не выбран
     renderWalletColorGrid();
     document.getElementById('walletEditOverlay').classList.add('active');
     setTimeout(function() {
@@ -130,7 +201,7 @@ async function saveWalletEdit() {
             // Создание нового счёта
             await API.createWallet({
                 name: newName,
-                icon: 'wallet',
+                icon: editWalletBank ? 'bank:' + editWalletBank : 'wallet',
                 color: editWalletColor,
                 initial_balance: newBalance,
                 direction_id: newDirectionId
@@ -149,6 +220,7 @@ async function saveWalletEdit() {
 
         await API.updateWallet(id, {
             name: newName,
+            icon: editWalletBank ? 'bank:' + editWalletBank : 'wallet',
             color: editWalletColor,
             initial_balance: newBalance,
             direction_id: newDirectionId

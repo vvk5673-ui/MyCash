@@ -292,6 +292,15 @@
                 <button onclick="closeWalletEdit()" style="width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">✕</button>
             </div>
             <div class="form-group">
+                <label class="form-label">Банк</label>
+                <button type="button" class="bank-select-btn" id="walletBankBtn" onclick="openBankPicker()">
+                    <span class="bank-select-ico" id="walletBankIco"></span>
+                    <span class="bank-select-name" id="walletBankName">Выбрать банк</span>
+                    <span class="bank-select-arrow">›</span>
+                </button>
+                <div style="font-size:12px;color:var(--text2);margin-top:6px">Логотип банка появится на счёте сам. Или выберите «Без банка» и задайте своё название.</div>
+            </div>
+            <div class="form-group">
                 <label class="form-label">Название</label>
                 <input class="form-input" type="text" id="walletEditName" placeholder="Например: Сбер, Тинькофф" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
             </div>
@@ -309,8 +318,8 @@
                 <input class="form-input" type="month" id="walletEditAccStart">
                 <div style="font-size:12px;color:var(--text2);margin-top:6px">Остатки и операции до этого месяца не учитываются. Настройка общая для всех счетов.</div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Цвет карточки</label>
+            <div class="form-group" id="walletColorGroup">
+                <label class="form-label">Цвет значка</label>
                 <div class="wallet-color-grid" id="walletColorGrid"></div>
             </div>
             <div class="edit-buttons" style="margin-top:20px">
@@ -318,6 +327,17 @@
                 <button onclick="closeWalletEdit()" style="padding:16px 20px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:var(--text);background:var(--bg);cursor:pointer;min-height:52px">← Назад</button>
                 <button onclick="saveWalletEdit()" style="flex:1;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:white;background:var(--accent);cursor:pointer;min-height:52px">💾 Сохранить</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Окно выбора банка (поиск + список с логотипами) -->
+    <div class="bank-picker-overlay" id="bankPickerOverlay" onclick="closeBankPicker(event)">
+        <div class="bank-picker-modal" onclick="event.stopPropagation()">
+            <div class="bank-picker-head">
+                <input class="form-input" type="text" id="bankSearch" placeholder="Поиск банка" autocomplete="off" oninput="renderBankList()">
+                <button class="bank-picker-cancel" onclick="closeBankPicker()">Отмена</button>
+            </div>
+            <div class="bank-picker-list" id="bankPickerList"></div>
         </div>
     </div>
 

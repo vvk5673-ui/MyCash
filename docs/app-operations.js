@@ -42,9 +42,8 @@ function renderOperations() {
         let iconClass = op.type;
         let sign = op.type === 'income' ? '+' : '-';
         let walletText = op.wallet || '💳 Карта';
-        // Иконка операции = иконка кассы (счёта), по которой прошла операция
-        const wv = walletVisual(op.wallet);
-        let iconHtml = brandLogo(op.wallet, 28) || walletSquircle(wv.color, 28);
+        // Иконка операции = логотип банка / значок счёта, по которому прошла операция
+        let iconHtml = walletIconHtml(op.wallet, 28);
 
         if (op.type === 'transfer') {
             iconHtml = lucideIcon('arrow-left-right', 20, '#007AFF');

@@ -105,6 +105,96 @@ function brandLogo(name, size) {
     return null;
 }
 
+// === БАНКИ РФ (для выбора при создании счёта и авто-значка) ===
+// domain — для логотипа (фавиконка сайта банка); kw — ключевые слова для распознавания по названию счёта
+const BANKS = [
+    { name: 'Сбербанк',                 domain: 'sber.ru',          kw: ['сбер','sber'] },
+    { name: 'ВТБ',                       domain: 'vtb.ru',           kw: ['втб','vtb'] },
+    { name: 'Газпромбанк',               domain: 'gazprombank.ru',   kw: ['газпром','gazprom','гпб'] },
+    { name: 'Альфа-Банк',                domain: 'alfabank.ru',      kw: ['альфа','alfa'] },
+    { name: 'Т-Банк',                    domain: 'tbank.ru',         kw: ['тбанк','тинько','tbank','tinkoff'] },
+    { name: 'Россельхозбанк',            domain: 'rshb.ru',          kw: ['россельхоз','рсхб','rshb'] },
+    { name: 'Совкомбанк',                domain: 'sovcombank.ru',    kw: ['совком','sovcom'] },
+    { name: 'МКБ',                       domain: 'mkb.ru',           kw: ['мкб','московскийкредит','mkb'] },
+    { name: 'Росбанк',                   domain: 'rosbank.ru',       kw: ['росбанк','rosbank'] },
+    { name: 'Промсвязьбанк',             domain: 'psbank.ru',        kw: ['промсвязь','псб','psb'] },
+    { name: 'Райффайзенбанк',            domain: 'raiffeisen.ru',    kw: ['райф','raif'] },
+    { name: 'Почта Банк',                domain: 'pochtabank.ru',    kw: ['почтабанк','почтаб','pochta'] },
+    { name: 'Банк ДОМ.РФ',               domain: 'domrf.ru',         kw: ['домрф','domrf'] },
+    { name: 'Уралсиб',                   domain: 'uralsib.ru',       kw: ['уралсиб','uralsib'] },
+    { name: 'Ак Барс Банк',              domain: 'akbars.ru',        kw: ['акбарс','akbars'] },
+    { name: 'МТС Банк',                  domain: 'mtsbank.ru',       kw: ['мтс','mts'] },
+    { name: 'Озон Банк',                 domain: 'ozon.ru',          kw: ['озон','ozon'] },
+    { name: 'Яндекс Банк',               domain: 'bank.yandex.ru',   kw: ['яндекс','yandex'] },
+    { name: 'Хоум Банк',                 domain: 'homebank.ru',      kw: ['хоум','home'] },
+    { name: 'Ренессанс Банк',            domain: 'rencredit.ru',     kw: ['ренессанс','rencredit'] },
+    { name: 'ОТП Банк',                  domain: 'otpbank.ru',       kw: ['отп','otp'] },
+    { name: 'Русский Стандарт',          domain: 'rsb.ru',           kw: ['русскийстандарт','rsb'] },
+    { name: 'Банк «Санкт-Петербург»',    domain: 'bspb.ru',          kw: ['санктпетербург','спб','bspb'] },
+    { name: 'ЮниКредит Банк',            domain: 'unicreditbank.ru', kw: ['юникредит','unicredit'] },
+    { name: 'Банк Зенит',                domain: 'zenit.ru',         kw: ['зенит','zenit'] },
+    { name: 'Абсолют Банк',              domain: 'absolutbank.ru',   kw: ['абсолют','absolut'] },
+    { name: 'ВБРР',                      domain: 'vbrr.ru',          kw: ['вбрр','vbrr'] },
+    { name: 'Новикомбанк',               domain: 'novikom.ru',       kw: ['новиком','novikom'] },
+    { name: 'Банк РОССИЯ',               domain: 'abr.ru',           kw: ['банкроссия'] },
+    { name: 'Кредит Европа Банк',        domain: 'crediteurope.ru',  kw: ['кредитевропа','crediteurope'] },
+    { name: 'Точка',                     domain: 'tochka.com',       kw: ['точка','tochka'] },
+    { name: 'Модульбанк',                domain: 'modulbank.ru',     kw: ['модуль','modul'] },
+    { name: 'Бланк',                     domain: 'blanc.ru',         kw: ['бланк','blanc'] },
+    { name: 'Делобанк',                  domain: 'delo.ru',          kw: ['делобанк','delobank'] },
+    { name: 'Банк Синара',               domain: 'sinarabank.ru',    kw: ['синара','sinara'] },
+    { name: 'УБРиР',                     domain: 'ubrr.ru',          kw: ['убрир','ubrr'] },
+    { name: 'Локо-Банк',                 domain: 'lockobank.ru',     kw: ['локобанк','loko','locko'] },
+    { name: 'ТКБ Банк',                  domain: 'tkbbank.ru',       kw: ['ткб','tkb','транскапитал'] },
+    { name: 'Кубышка',                   domain: 'kubyshka.ru',      kw: ['кубышка','kubyshka'] },
+    { name: 'ЮMoney',                    domain: 'yoomoney.ru',      kw: ['юmoney','юмани','yoomoney'] }
+];
+
+function bankByDomain(domain) {
+    return BANKS.find(function(b) { return b.domain === domain; }) || null;
+}
+
+// Распознать банк по названию счёта (если банк не выбран явно)
+function bankForName(name) {
+    const n = (name || '').toLowerCase().replace(/[\s\-_.«»"]/g, '');
+    if (!n) return null;
+    return BANKS.find(function(b) { return b.kw.some(function(k) { return n.indexOf(k) !== -1; }); }) || null;
+}
+
+// Значок банка = фавиконка сайта банка (на белой скруглённой плашке)
+function bankFavicon(domain, size) {
+    size = size || 20;
+    return '<img src="https://www.google.com/s2/favicons?domain=' + domain + '&sz=128" alt="" ' +
+           'style="width:' + size + 'px;height:' + size + 'px;border-radius:7px;display:block;' +
+           'background:#fff;object-fit:contain">';
+}
+
+// Значок локального файла (наличка/касса)
+function brandImg(src, name, size) {
+    return '<img src="' + src + '" alt="' + esc(name) + '" ' +
+           'style="width:' + (size || 20) + 'px;height:' + (size || 20) + 'px;border-radius:6px;display:block">';
+}
+
+// ЕДИНАЯ функция значка счёта (используется в списке, профиле, операциях).
+// Приоритет: выбранный банк (icon='bank:домен') → наличка/касса → банк по названию → цветной кошелёк
+function walletIconHtml(name, size, w) {
+    size = size || 20;
+    if (!w && typeof getActiveWallets === 'function') {
+        w = getActiveWallets().find(function(x) { return x.name === name; });
+    }
+    const iconField = w && w.icon;
+    const color = (w && w.color) || '#8E8E93';
+    if (iconField && iconField.indexOf('bank:') === 0) {
+        return bankFavicon(iconField.slice(5), size);
+    }
+    const nn = (name || '').toLowerCase().replace(/[\s\-_.]/g, '');
+    if (nn.indexOf('налич') !== -1 || nn.indexOf('cash')  !== -1) return brandImg('cash.svg?v=63', name, size);
+    if (nn.indexOf('касс')  !== -1 || nn.indexOf('kassa') !== -1) return brandImg('kassa.svg?v=63', name, size);
+    const bank = bankForName(name);
+    if (bank) return bankFavicon(bank.domain, size);
+    return walletSquircle(color, size);
+}
+
 // Нейтральный значок счёта — «кошелёк» в едином стиле с бренд-значками
 // (квадрат-сквиркл + белый кошелёк с застёжкой). Цвет квадрата = цвет счёта.
 // Inline SVG, поэтому цвет берётся динамически из палитры счёта (8 цветов).
@@ -381,7 +471,7 @@ function walletLineHtml(w, bal) {
         ? '<span class="wallet-drag" onpointerdown="walletDragStart(event,\'' + w.id + '\')" onclick="event.stopPropagation()">' + lucideIcon('grip-vertical', 18, '#C7C7CC') + '</span>'
         : '';
     return '<div class="wallet-line"' + wid + click + '>' +
-        '<span style="flex-shrink:0">' + (brandLogo(w.name, 20) || walletSquircle(w.color, 20)) + '</span>' +
+        '<span style="flex-shrink:0">' + walletIconHtml(w.name, 20, w) + '</span>' +
         '<span class="wallet-line-name">' + esc(w.name) + '</span>' +
         '<span class="wallet-line-amount">' + fmt(bal[w.name] || 0) + ' ₽</span>' +
         handle +
@@ -449,7 +539,7 @@ function renderProfileWallets() {
     if (!box) return;
     box.innerHTML = wallets.map(function(w) {
         return '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)">' +
-            '<span>' + (brandLogo(w.name, 20) || walletSquircle(w.color, 20)) + '</span>' +
+            '<span>' + walletIconHtml(w.name, 20, w) + '</span>' +
             '<span style="flex:1;font-size:14px">' + esc(w.name) + '</span>' +
             '<span style="font-size:13px;color:var(--text2)">' + fmt(bal[w.name] || 0) + ' ₽</span>' +
             '</div>';
