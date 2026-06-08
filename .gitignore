@@ -38,3 +38,7 @@ logs/
 
 venv/
 docs/*.bak
+
+# Временные превью-страницы (только для показа, не для репозитория)
+icon-preview.html
+*-preview.html
