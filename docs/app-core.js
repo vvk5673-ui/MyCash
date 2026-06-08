@@ -187,11 +187,10 @@ function walletIconHtml(name, size, w) {
     if (iconField && iconField.indexOf('bank:') === 0) {
         return bankFavicon(iconField.slice(5), size);
     }
-    const nn = (name || '').toLowerCase().replace(/[\s\-_.]/g, '');
-    if (nn.indexOf('налич') !== -1 || nn.indexOf('cash')  !== -1) return brandImg('cash.svg?v=63', name, size);
-    if (nn.indexOf('касс')  !== -1 || nn.indexOf('kassa') !== -1) return brandImg('kassa.svg?v=63', name, size);
+    // Банк по названию (Сбер, Т-Банк и т.п.) → логотип банка
     const bank = bankForName(name);
     if (bank) return bankFavicon(bank.domain, size);
+    // Небанковский счёт (Наличка, Касса, своё название) → цветной значок-кошелёк
     return walletSquircle(color, size);
 }
 
