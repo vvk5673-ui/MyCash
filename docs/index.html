@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=88">
+    <link rel="stylesheet" href="style.css?v=89">
 </head>
 <body>
 
@@ -341,6 +341,18 @@
         </div>
     </div>
 
+    <!-- Своё окно ввода названия счёта (без системного prompt с адресом сайта) -->
+    <div class="name-dialog-overlay" id="nameDialogOverlay" onclick="closeNameDialog(event)">
+        <div class="name-dialog" onclick="event.stopPropagation()">
+            <div class="name-dialog-title">Название счёта</div>
+            <input class="form-input" type="text" id="nameDialogInput" placeholder="Например: Копилка" autocomplete="off" autocapitalize="words" onkeydown="if(event.key==='Enter') confirmCustomName()">
+            <div class="name-dialog-actions">
+                <button class="name-dialog-cancel" onclick="closeNameDialog()">Отмена</button>
+                <button class="name-dialog-ok" onclick="confirmCustomName()">Готово</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Модалка "Обновить тариф" -->
     <div class="upgrade-overlay" id="upgradeOverlay" onclick="closeUpgrade(event)">
         <div class="upgrade-card" onclick="event.stopPropagation()">
@@ -579,13 +591,13 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=88"></script>
+    <script src="api.js?v=89"></script>
     <!-- app.js разбит на 6 частей (общая область видимости, порядок подключения важен) -->
-    <script src="app-core.js?v=88"></script>
-    <script src="app-data.js?v=88"></script>
-    <script src="app-operations.js?v=88"></script>
-    <script src="app-dashboard.js?v=88"></script>
-    <script src="app-wallets.js?v=88"></script>
-    <script src="app-main.js?v=88"></script>
+    <script src="app-core.js?v=89"></script>
+    <script src="app-data.js?v=89"></script>
+    <script src="app-operations.js?v=89"></script>
+    <script src="app-dashboard.js?v=89"></script>
+    <script src="app-wallets.js?v=89"></script>
+    <script src="app-main.js?v=89"></script>
 </body>
 </html>
