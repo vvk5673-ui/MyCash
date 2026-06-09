@@ -212,7 +212,7 @@ Object.assign(window, {
     setRefArticleType, saveRefForm, archiveRefItem,
     setDashMode, navReportMonth, toggleDdsSection,
     openBankPicker, closeBankPicker, selectBank, renderBankList, selectCashWallet,
-    toggleContragentAdd, quickAddContragent
+    selectCustomNameFromSearch, toggleContragentAdd, quickAddContragent
 });
 
 // Восстановить вкладку из хэша URL

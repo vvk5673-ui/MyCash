@@ -42,6 +42,8 @@ function openBankPicker() {
     if (s) s.value = '';
     renderBankList();
     document.getElementById('bankPickerOverlay').classList.add('active');
+    // фокус на поиск — можно сразу печатать (фильтрует банки / предлагает своё название)
+    setTimeout(function() { if (s) s.focus(); }, 100);
 }
 
 function closeBankPicker(e) {
@@ -50,11 +52,18 @@ function closeBankPicker(e) {
 }
 
 function renderBankList() {
-    const q = (document.getElementById('bankSearch').value || '').toLowerCase().trim();
+    const rawQ = (document.getElementById('bankSearch').value || '').trim();
+    const q = rawQ.toLowerCase();
     const items = BANKS.filter(function(b) { return !q || b.name.toLowerCase().indexOf(q) !== -1; });
     let html = '';
     const showCash = !q || 'наличка'.indexOf(q) !== -1;
-    if (!q) {
+    // Если что-то набрали — первым предлагаем использовать это как своё название.
+    // Если поле поиска пустое — обычный пункт «Без банка — своё название».
+    if (rawQ) {
+        html += '<div class="bank-row" onclick="selectCustomNameFromSearch()">' +
+                '<span class="bank-row-ico">' + walletSquircle(editWalletColor || '#8E8E93', 32) + '</span>' +
+                '<span class="bank-row-name">Использовать «' + esc(rawQ) + '» как название</span></div>';
+    } else {
         html += '<div class="bank-row" onclick="selectBank(null)">' +
                 '<span class="bank-row-ico">' + walletSquircle(editWalletColor || '#8E8E93', 32) + '</span>' +
                 '<span class="bank-row-name">Без банка — своё название</span></div>';
@@ -70,7 +79,6 @@ function renderBankList() {
                '<span class="bank-row-ico">' + bankFavicon(b.domain, 32) + '</span>' +
                '<span class="bank-row-name">' + esc(b.name) + '</span></div>';
     }).join('');
-    if (q && !items.length && !showCash) html += '<div style="padding:24px;text-align:center;color:var(--text2)">Ничего не найдено</div>';
     document.getElementById('bankPickerList').innerHTML = html;
 }
 
@@ -84,6 +92,16 @@ function selectBank(domain) {
         // Автозаполнить название банком, если поле пустое или там было имя другого банка
         if (b && (!cur || bankForName(cur))) nameInput.value = b.name;
     }
+    closeBankPicker();
+}
+
+// Использовать набранный в поиске текст как своё название счёта (без банка)
+function selectCustomNameFromSearch() {
+    const v = (document.getElementById('bankSearch').value || '').trim();
+    if (!v) return;
+    haptic('light');
+    setBankUI(null);   // без банка → значок-кошелёк, выбор цвета доступен
+    document.getElementById('walletEditName').value = v;
     closeBankPicker();
 }
 
