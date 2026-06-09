@@ -28,7 +28,8 @@ body {
 /* === ШАПКА === */
 .header {
     background: var(--card);
-    padding: 14px 20px;
+    /* верхний отступ = базовые 14px + безопасная зона телефона (чёлка/остров), на обычных = 0 */
+    padding: calc(14px + var(--safe-top, 0px)) 20px 14px;
     text-align: center;
     box-shadow: var(--shadow);
     position: sticky;
@@ -604,7 +605,8 @@ body {
     display: flex;
     align-items: flex-end;
     justify-content: space-around;
-    padding: 6px 0 env(safe-area-inset-bottom, 8px);
+    /* нижний отступ = большее из CSS-инсета и инсета от Telegram (подстраховка для webview) */
+    padding: 6px 0 max(env(safe-area-inset-bottom, 8px), var(--safe-bottom, 8px));
     box-shadow: 0 -1px 12px rgba(0,0,0,0.06);
     z-index: 50;
     min-height: 56px;

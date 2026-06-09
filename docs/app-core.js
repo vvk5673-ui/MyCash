@@ -11,6 +11,31 @@ if (tg) {
     tg.expand();
 }
 
+// === SAFE AREA (отступы под «чёлку»/динамический остров iPhone и системные панели) ===
+// Telegram отдаёт размеры безопасных зон. Прокидываем их в CSS-переменные
+// --safe-top / --safe-bottom, чтобы шапка и таб-бар не залезали под системные элементы.
+// Вне Telegram (браузер) или в старых клиентах значения = 0 — вид не меняется.
+function applySafeArea() {
+    try {
+        if (!tg) return;
+        const sa = tg.safeAreaInset || {};            // безопасная зона устройства
+        const csa = tg.contentSafeAreaInset || {};    // доп. зона контента Telegram
+        const top = (sa.top || 0) + (csa.top || 0);
+        const bottom = (sa.bottom || 0) + (csa.bottom || 0);
+        const root = document.documentElement;
+        root.style.setProperty('--safe-top', top + 'px');
+        root.style.setProperty('--safe-bottom', bottom + 'px');
+    } catch (e) {}
+}
+applySafeArea();
+try {
+    if (tg && typeof tg.onEvent === 'function') {
+        // Зоны меняются при повороте экрана / входе в полноэкранный режим
+        tg.onEvent('safeAreaChanged', applySafeArea);
+        tg.onEvent('contentSafeAreaChanged', applySafeArea);
+    }
+} catch (e) {}
+
 // Имя пользователя из Telegram
 const userName = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user)
     ? tg.initDataUnsafe.user.first_name
