@@ -191,6 +191,8 @@ function openWalletEdit(walletId) {
     if (accInput) accInput.value = accountingStartStr ? accountingStartStr.slice(0, 7) : '';
     // Режим редактирования: дата начала учёта видна, кнопка удаления активна
     document.getElementById('walletAccStartGroup').style.display = '';
+    var accHintEdit = document.getElementById('walletAccStartHint');
+    if (accHintEdit) accHintEdit.style.display = '';
     const delBtn = document.getElementById('walletDeleteBtn');
     delBtn.style.display = '';
     delBtn.style.opacity = '1';
@@ -219,6 +221,8 @@ function openNewWallet() {
     document.getElementById('walletEditBalance').value = 0;
     // При создании дату начала учёта (общую) и удаление не показываем
     document.getElementById('walletAccStartGroup').style.display = 'none';
+    var accHintNew = document.getElementById('walletAccStartHint');
+    if (accHintNew) accHintNew.style.display = 'none';
     document.getElementById('walletDeleteBtn').style.display = 'none';
 
     setBankUI(null);   // новый счёт — банк не выбран
