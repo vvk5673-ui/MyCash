@@ -239,10 +239,26 @@ function setAccountingStartFromServer(str) {
     accountingStart = str ? new Date(str + 'T00:00:00') : null;
 }
 
-// Попадает ли операция в учётный период (>= даты начала учёта)
+// Дата начала учёта конкретного кошелька (по имени) → Date или null
+function walletAccStartByName(name) {
+    if (!name) return null;
+    const list = (typeof Refs !== 'undefined' && Refs.wallets) ? Refs.wallets : [];
+    const w = list.find(function(x) { return x.name === name; });
+    return (w && w.accounting_start) ? new Date(w.accounting_start + 'T00:00:00') : null;
+}
+
+// Попадает ли операция в учётный период СВОЕГО кошелька (>= даты начала учёта этого кошелька)
 function isWithinAccounting(op) {
-    if (!accountingStart) return true;
-    return new Date(op.date) >= accountingStart;
+    const opDate = new Date(op.date);
+    if (op.type === 'transfer') {
+        // Перевод показываем, если он не раньше начала учёта хотя бы одного из кошельков
+        const a = walletAccStartByName(op.walletFrom);
+        const b = walletAccStartByName(op.walletTo);
+        const earliest = (a && b) ? (a < b ? a : b) : (a || b);
+        return earliest ? opDate >= earliest : true;
+    }
+    const start = walletAccStartByName(op.wallet);
+    return start ? opDate >= start : true;
 }
 
 // Переключатель режима: Графики / Отчёт ДДС

@@ -188,7 +188,7 @@ function openWalletEdit(walletId) {
     populateWalletDirectionSelect(w.direction_id);
     document.getElementById('walletEditBalance').value = Number(w.initial_balance) || 0;
     const accInput = document.getElementById('walletEditAccStart');
-    if (accInput) accInput.value = accountingStartStr ? accountingStartStr.slice(0, 10) : '';
+    if (accInput) accInput.value = w.accounting_start ? w.accounting_start.slice(0, 10) : '';
     // Режим редактирования: дата начала учёта видна, кнопка удаления активна
     document.getElementById('walletAccStartGroup').style.display = '';
     var accHintEdit = document.getElementById('walletAccStartHint');
@@ -219,18 +219,13 @@ function openNewWallet() {
     document.getElementById('walletEditName').value = '';
     populateWalletDirectionSelect();   // по умолчанию первое направление в списке
     document.getElementById('walletEditBalance').value = 0;
-    // При создании дату начала учёта (общую) показываем тоже.
-    // Если общая дата ещё не задана — по умолчанию подставляем сегодня; иначе показываем заданную.
+    // Дата начала учёта у каждого кошелька своя — при создании по умолчанию сегодня.
     const accInputNew = document.getElementById('walletEditAccStart');
     if (accInputNew) {
-        if (accountingStartStr) {
-            accInputNew.value = accountingStartStr.slice(0, 10);
-        } else {
-            const t = new Date();
-            accInputNew.value = t.getFullYear() + '-' +
-                String(t.getMonth() + 1).padStart(2, '0') + '-' +
-                String(t.getDate()).padStart(2, '0');
-        }
+        const t = new Date();
+        accInputNew.value = t.getFullYear() + '-' +
+            String(t.getMonth() + 1).padStart(2, '0') + '-' +
+            String(t.getDate()).padStart(2, '0');
     }
     document.getElementById('walletAccStartGroup').style.display = '';
     var accHintNew = document.getElementById('walletAccStartHint');
@@ -297,39 +292,38 @@ async function saveWalletEdit() {
 
     walletSaveBusy = true;
     try {
-        // Дата начала учёта (общая для всех кошельков): полная дата из поля 'YYYY-MM-DD'
+        // Дата начала учёта ЭТОГО кошелька (полная дата 'YYYY-MM-DD')
         const accInput = document.getElementById('walletEditAccStart');
         const newAccStr = (accInput && accInput.value) ? accInput.value : null;
-        const accChanged = (newAccStr !== accountingStartStr);
 
         if (!id) {
-            // Создание нового счёта
+            // Создание нового кошелька (дата начала учёта — у каждого своя)
             await API.createWallet({
                 name: newName,
                 icon: editWalletBank ? 'bank:' + editWalletBank : 'wallet',
                 color: editWalletColor,
                 initial_balance: newBalance,
-                direction_id: newDirectionId
+                direction_id: newDirectionId,
+                accounting_start: newAccStr
             });
-            if (accChanged) await API.setAccountingStart(newAccStr);
             await loadReferences();
-            if (accChanged) await loadServerOperations();   // перефильтровать операции под новую дату
+            await loadServerOperations();   // пересобрать список под дату нового кошелька
             haptic('success');
             closeWalletEdit();
             return;
         }
 
-        // Редактирование существующего счёта
+        // Редактирование существующего кошелька
         await API.updateWallet(id, {
             name: newName,
             icon: editWalletBank ? 'bank:' + editWalletBank : 'wallet',
             color: editWalletColor,
             initial_balance: newBalance,
-            direction_id: newDirectionId
+            direction_id: newDirectionId,
+            accounting_start: newAccStr
         });
-        if (accChanged) await API.setAccountingStart(newAccStr);
-        await loadReferences();   // перечитать счета + дату начала учёта (внутри вызывает renderAll)
-        if (accChanged) await loadServerOperations();   // перефильтровать операции под новую дату
+        await loadReferences();   // перечитать кошельки (внутри вызывает renderAll)
+        await loadServerOperations();   // дата кошелька могла измениться → перефильтровать
         haptic('success');
         closeWalletEdit();
     } catch (e) {

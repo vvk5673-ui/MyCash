@@ -123,6 +123,7 @@ class WalletCreate(BaseModel):
     color: str = '#F2F2F7'
     initial_balance: float = 0
     direction_id: Optional[str] = None   # направление счёта (Бизнес/Личное/...)
+    accounting_start: Optional[str] = None   # дата начала учёта кошелька 'YYYY-MM-DD' (по умолчанию — сегодня)
 
 class WalletUpdate(BaseModel):
     name: Optional[str] = None
@@ -131,6 +132,7 @@ class WalletUpdate(BaseModel):
     initial_balance: Optional[float] = None
     sort_order: Optional[int] = None
     direction_id: Optional[str] = None   # направление счёта
+    accounting_start: Optional[str] = None   # дата начала учёта кошелька 'YYYY-MM-DD'
 
 class SetBalances(BaseModel):
     card_balance: float = 0
@@ -449,7 +451,9 @@ async def create_wallet(body: WalletCreate, current_user: dict = Depends(get_cur
         'color': body.color,
         'initial_balance': body.initial_balance,
         'direction_id': body.direction_id,
-        'sort_order': existing.count or 0
+        'sort_order': existing.count or 0,
+        # Дата начала учёта кошелька: переданная или сегодня
+        'accounting_start': body.accounting_start or date.today().isoformat()
     }).execute()
     return result.data[0]
 
