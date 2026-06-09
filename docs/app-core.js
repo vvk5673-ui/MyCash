@@ -435,9 +435,11 @@ const SERVER_DEFAULT_WALLETS = [
     { name: 'Касса',   icon: 'shopping-bag', color: '#FF9500', initial_balance: 0 },
 ];
 
-// Активный список кошельков: с сервера (если загружены) либо стандартный набор
+// Активный список кошельков: с сервера (если загружены) либо стандартный набор.
+// Если справочники загружены — сервер источник правды (даже когда счетов 0: пользователь
+// удалил все — показываем пустой экран, а не болванки). Болванки только пока не загрузились.
 function getActiveWallets() {
-    if (Refs.loaded && Refs.wallets.length) return Refs.wallets;
+    if (Refs.loaded) return Refs.wallets;
     return SERVER_DEFAULT_WALLETS;
 }
 
