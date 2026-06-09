@@ -795,9 +795,8 @@ body {
     min-height: 36px;
 }
 
-/* === РАСШИРЕННАЯ ФОРМА === */
-.extended-form { display: none; }
-.extended-form.active { display: block; }
+/* === ДОП. ПОЛЯ ОПЕРАЦИИ (всегда видимы, без сворачивания) === */
+.extended-form { display: block; }
 
 .type-switch {
     display: flex;

@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=101">
+    <link rel="stylesheet" href="style.css?v=102">
 </head>
 <body>
 
@@ -415,10 +415,7 @@
                 <button class="save-btn" onclick="saveTransfer()">Сохранить перевод</button>
             </div>
 
-            <!-- Кнопка "Подробнее" (необязательные поля) -->
-            <button class="more-btn" onclick="toggleExtended()">Подробнее ▾</button>
-
-            <!-- Расширенная форма: направление, контрагент, назначение, дата -->
+            <!-- Доп. поля операции (направление, контрагент, назначение, дата) — всегда видимы в едином окне -->
             <div class="extended-form" id="extendedForm">
                 <div class="form-group">
                     <label class="form-label">Направление</label>
@@ -598,13 +595,13 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=101"></script>
+    <script src="api.js?v=102"></script>
     <!-- app.js разбит на 6 частей (общая область видимости, порядок подключения важен) -->
-    <script src="app-core.js?v=101"></script>
-    <script src="app-data.js?v=101"></script>
-    <script src="app-operations.js?v=101"></script>
-    <script src="app-dashboard.js?v=101"></script>
-    <script src="app-wallets.js?v=101"></script>
-    <script src="app-main.js?v=101"></script>
+    <script src="app-core.js?v=102"></script>
+    <script src="app-data.js?v=102"></script>
+    <script src="app-operations.js?v=102"></script>
+    <script src="app-dashboard.js?v=102"></script>
+    <script src="app-wallets.js?v=102"></script>
+    <script src="app-main.js?v=102"></script>
 </body>
 </html>
