@@ -961,7 +961,18 @@ body {
 }
 .splash.hidden { opacity: 0; pointer-events: none; }
 .splash-logo { width: 72px; height: 72px; border-radius: 18px; }
-.splash-name { font-size: 20px; font-weight: 700; color: var(--text, #1c1c1e); }
+.splash-text { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.splash-name { font-size: 24px; font-weight: 700; color: var(--text, #1c1c1e); letter-spacing: -0.02em; }
+.splash-tagline { font-size: 14px; color: var(--text2, #8E8E93); letter-spacing: 0.01em; }
+.splash-ai {
+    margin-top: 4px;
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent, #007AFF);
+    background: rgba(0,122,255,0.10);
+    padding: 4px 11px; border-radius: 20px;
+}
+.splash-ai-dot { font-size: 10px; line-height: 1; }
 .splash-spinner {
     width: 26px;
     height: 26px;
