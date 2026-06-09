@@ -55,17 +55,24 @@ function renderBankList() {
     const q = (document.getElementById('bankSearch').value || '').toLowerCase().trim();
     const items = BANKS.filter(function(b) { return !q || b.name.toLowerCase().indexOf(q) !== -1; });
     let html = '';
+    const showCash = !q || 'наличка'.indexOf(q) !== -1;
     if (!q) {
         html += '<div class="bank-row" onclick="selectBank(null)">' +
                 '<span class="bank-row-ico">' + walletSquircle(editWalletColor || '#8E8E93', 32) + '</span>' +
                 '<span class="bank-row-name">Без банка — своё название</span></div>';
+    }
+    // Быстрый выбор «Наличка» — счёт без банка с готовым названием и зелёным значком
+    if (showCash) {
+        html += '<div class="bank-row" onclick="selectCashWallet()">' +
+                '<span class="bank-row-ico">' + walletSquircle('#34C759', 32) + '</span>' +
+                '<span class="bank-row-name">Наличка</span></div>';
     }
     html += items.map(function(b) {
         return '<div class="bank-row" onclick="selectBank(\'' + b.domain + '\')">' +
                '<span class="bank-row-ico">' + bankFavicon(b.domain, 32) + '</span>' +
                '<span class="bank-row-name">' + esc(b.name) + '</span></div>';
     }).join('');
-    if (q && !items.length) html += '<div style="padding:24px;text-align:center;color:var(--text2)">Ничего не найдено</div>';
+    if (q && !items.length && !showCash) html += '<div style="padding:24px;text-align:center;color:var(--text2)">Ничего не найдено</div>';
     document.getElementById('bankPickerList').innerHTML = html;
 }
 
@@ -79,6 +86,16 @@ function selectBank(domain) {
         // Автозаполнить название банком, если поле пустое или там было имя другого банка
         if (b && (!cur || bankForName(cur))) nameInput.value = b.name;
     }
+    closeBankPicker();
+}
+
+// Быстрый выбор «Наличка»: счёт без банка с готовым названием и зелёным значком-кошельком
+function selectCashWallet() {
+    haptic('light');
+    setBankUI(null);                 // без банка → значок-кошелёк, выбор цвета доступен
+    editWalletColor = '#34C759';     // зелёный по умолчанию для налички
+    renderWalletColorGrid();
+    document.getElementById('walletEditName').value = 'Наличка';
     closeBankPicker();
 }
 
