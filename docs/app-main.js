@@ -211,7 +211,8 @@ Object.assign(window, {
     openRefList, closeRefList, openRefForm, closeRefForm,
     setRefArticleType, saveRefForm, archiveRefItem,
     setDashMode, navReportMonth, toggleDdsSection,
-    openBankPicker, closeBankPicker, selectBank, renderBankList
+    openBankPicker, closeBankPicker, selectBank, renderBankList,
+    toggleContragentAdd, quickAddContragent
 });
 
 // Восстановить вкладку из хэша URL

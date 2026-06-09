@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=74">
+    <link rel="stylesheet" href="style.css?v=75">
 </head>
 <body>
 
@@ -410,7 +410,16 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Контрагент</label>
-                    <select class="form-input" id="contragentSelect"></select>
+                    <div class="cg-row">
+                        <select class="form-input" id="contragentSelect"></select>
+                        <button type="button" class="cg-add-btn" title="Добавить контрагента"
+                                onclick="toggleContragentAdd('contragentAddRow','contragentAddName')">+</button>
+                    </div>
+                    <div class="cg-add-row" id="contragentAddRow" style="display:none">
+                        <input class="form-input" type="text" id="contragentAddName" placeholder="Имя нового контрагента">
+                        <button type="button" class="cg-add-save"
+                                onclick="quickAddContragent('contragentSelect','contragentAddName','contragentAddRow')">Добавить</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Назначение платежа</label>
@@ -461,7 +470,16 @@
 
             <div class="form-group">
                 <label class="form-label">Контрагент</label>
-                <select class="form-input" id="editContragentSelect"></select>
+                <div class="cg-row">
+                    <select class="form-input" id="editContragentSelect"></select>
+                    <button type="button" class="cg-add-btn" title="Добавить контрагента"
+                            onclick="toggleContragentAdd('editContragentAddRow','editContragentAddName')">+</button>
+                </div>
+                <div class="cg-add-row" id="editContragentAddRow" style="display:none">
+                    <input class="form-input" type="text" id="editContragentAddName" placeholder="Имя нового контрагента">
+                    <button type="button" class="cg-add-save"
+                            onclick="quickAddContragent('editContragentSelect','editContragentAddName','editContragentAddRow')">Добавить</button>
+                </div>
             </div>
 
             <div class="form-group">
@@ -561,13 +579,13 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=74"></script>
+    <script src="api.js?v=75"></script>
     <!-- app.js разбит на 6 частей (общая область видимости, порядок подключения важен) -->
-    <script src="app-core.js?v=74"></script>
-    <script src="app-data.js?v=74"></script>
-    <script src="app-operations.js?v=74"></script>
-    <script src="app-dashboard.js?v=74"></script>
-    <script src="app-wallets.js?v=74"></script>
-    <script src="app-main.js?v=74"></script>
+    <script src="app-core.js?v=75"></script>
+    <script src="app-data.js?v=75"></script>
+    <script src="app-operations.js?v=75"></script>
+    <script src="app-dashboard.js?v=75"></script>
+    <script src="app-wallets.js?v=75"></script>
+    <script src="app-main.js?v=75"></script>
 </body>
 </html>

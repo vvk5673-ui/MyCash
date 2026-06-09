@@ -201,6 +201,58 @@ function populateFormSelects() {
     }
 }
 
+// === БЫСТРОЕ ДОБАВЛЕНИЕ КОНТРАГЕНТА ИЗ ФОРМЫ ОПЕРАЦИИ ===
+// Заполнить указанный select контрагентами (с сохранением выбранного)
+function fillContragentSelect(selectId, selectedId) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— не указано —</option>' +
+        (Refs.contragents || []).filter(function(c) { return !c.is_archived; }).map(function(c) {
+            return '<option value="' + c.id + '">' + esc(c.name) + '</option>';
+        }).join('');
+    if (selectedId) sel.value = selectedId;
+}
+
+// Показать/скрыть строку ввода нового контрагента
+function toggleContragentAdd(rowId, inputId) {
+    const row = document.getElementById(rowId);
+    if (!row) return;
+    const show = !row.style.display || row.style.display === 'none';
+    row.style.display = show ? 'flex' : 'none';
+    if (show) setTimeout(function() { const i = document.getElementById(inputId); if (i) i.focus(); }, 50);
+}
+
+// Создать контрагента и сразу выбрать его в указанном списке
+async function quickAddContragent(selectId, inputId, rowId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const name = (input.value || '').trim();
+    if (!name) { haptic('error'); input.focus(); return; }
+    try {
+        const created = await API.createContragent({ name: name });
+        haptic('success');
+        await loadReferences();   // обновить Refs.contragents с сервера
+        // перезаполнить оба списка (форма добавления и редактирования), сохранив выбор
+        const addSel = document.getElementById('contragentSelect');
+        const editSel = document.getElementById('editContragentSelect');
+        if (addSel) fillContragentSelect('contragentSelect', addSel.value);
+        if (editSel) fillContragentSelect('editContragentSelect', editSel.value);
+        // выбрать только что созданного в текущем списке
+        const newId = (created && created.id)
+            ? created.id
+            : ((Refs.contragents || []).find(function(c) { return c.name === name; }) || {}).id;
+        const sel = document.getElementById(selectId);
+        if (sel && newId) sel.value = newId;
+        input.value = '';
+        const row = document.getElementById(rowId);
+        if (row) row.style.display = 'none';
+        if (typeof updateRefCounts === 'function') updateRefCounts();
+    } catch (e) {
+        haptic('error');
+        alert('Не удалось добавить контрагента: ' + (typeof refErrorText === 'function' ? refErrorText(e) : (e && e.message || e)));
+    }
+}
+
 function closeModal(e) {
     if (e && e.target !== e.currentTarget) return;
     document.getElementById('modalOverlay').classList.remove('active');

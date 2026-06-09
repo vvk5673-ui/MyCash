@@ -777,6 +777,37 @@ body {
 }
 .form-input:focus { border-color: var(--accent); }
 
+/* Быстрое добавление контрагента из формы операции */
+.cg-row { display: flex; gap: 8px; align-items: center; }
+.cg-row .form-input { flex: 1; }
+.cg-add-btn {
+    flex-shrink: 0;
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 22px; line-height: 1;
+    cursor: pointer;
+    transition: opacity .15s;
+}
+.cg-add-btn:active { opacity: 0.7; }
+.cg-add-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+.cg-add-row .form-input { flex: 1; }
+.cg-add-save {
+    flex-shrink: 0;
+    height: 38px; padding: 0 16px;
+    border-radius: 10px;
+    border: none;
+    background: var(--green);
+    color: #fff;
+    font-size: 14px; font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: opacity .15s;
+}
+.cg-add-save:active { opacity: 0.7; }
+
 /* Чипы (кошельки/статьи) в расширенной форме и редактировании */
 .cat-grid {
     display: flex;
