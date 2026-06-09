@@ -671,6 +671,7 @@ body {
     max-height: 92vh;
     overflow-y: auto;
     animation: slideUp 0.3s ease;
+    position: relative;   /* чтобы крестик закрытия встал в правый верхний угол окна */
 }
 @keyframes slideUp {
     from { transform: translateY(100%); }

@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=93">
+    <link rel="stylesheet" href="style.css?v=94">
 </head>
 <body>
 
@@ -369,6 +369,8 @@
     <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
         <div class="modal" onclick="event.stopPropagation()">
             <div class="modal-handle"></div>
+            <!-- Крестик закрытия окна (в едином стиле с другими окнами приложения) -->
+            <button onclick="closeModal()" aria-label="Закрыть" style="position:absolute;top:10px;right:12px;width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);z-index:2">✕</button>
 
             <!-- Поле суммы — крупное, с автофокусом -->
             <div class="amount-input-wrap" onclick="focusAmount()">
@@ -591,13 +593,13 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=93"></script>
+    <script src="api.js?v=94"></script>
     <!-- app.js разбит на 6 частей (общая область видимости, порядок подключения важен) -->
-    <script src="app-core.js?v=93"></script>
-    <script src="app-data.js?v=93"></script>
-    <script src="app-operations.js?v=93"></script>
-    <script src="app-dashboard.js?v=93"></script>
-    <script src="app-wallets.js?v=93"></script>
-    <script src="app-main.js?v=93"></script>
+    <script src="app-core.js?v=94"></script>
+    <script src="app-data.js?v=94"></script>
+    <script src="app-operations.js?v=94"></script>
+    <script src="app-dashboard.js?v=94"></script>
+    <script src="app-wallets.js?v=94"></script>
+    <script src="app-main.js?v=94"></script>
 </body>
 </html>
