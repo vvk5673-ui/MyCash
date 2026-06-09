@@ -45,16 +45,30 @@ try {
     }
 } catch (e) {}
 
-// === ЗАЩИТА ОТ ВЫХОДА С НЕЗАПОЛНЕННОЙ ОПЕРАЦИЕЙ ===
-// Включаем «подтверждение выхода» Telegram только пока открыто окно ввода операции
-// (вызывается из openModal/closeModal). Так вопрос «точно выйти?» не мешает в обычной работе.
+// === ОБВЯЗКА ОКНА ВВОДА ОПЕРАЦИИ: подтверждение выхода + нативная кнопка «Назад» ===
+// Пока открыто окно ввода операции: Telegram спрашивает «точно выйти?» и показывает
+// нативную кнопку «Назад» (закрывает окно). Вызывается из openModal/closeModal и путей
+// сохранения. Так вопрос и кнопка не мешают в обычной работе.
+
+// Обработчик нативной «Назад» регистрируем ОДИН раз (иначе Telegram копит обработчики).
+// closeModal определён в app-operations.js — на момент клика он уже доступен (late binding).
+try {
+    if (tg && tg.BackButton && typeof tg.BackButton.onClick === 'function') {
+        tg.BackButton.onClick(function() {
+            if (typeof closeModal === 'function') closeModal();
+        });
+    }
+} catch (e) {}
+
 function setClosingGuard(on) {
     try {
         if (!tg) return;
-        if (on && typeof tg.enableClosingConfirmation === 'function') {
-            tg.enableClosingConfirmation();
-        } else if (!on && typeof tg.disableClosingConfirmation === 'function') {
-            tg.disableClosingConfirmation();
+        if (on) {
+            if (typeof tg.enableClosingConfirmation === 'function') tg.enableClosingConfirmation();
+            if (tg.BackButton && typeof tg.BackButton.show === 'function') tg.BackButton.show();
+        } else {
+            if (typeof tg.disableClosingConfirmation === 'function') tg.disableClosingConfirmation();
+            if (tg.BackButton && typeof tg.BackButton.hide === 'function') tg.BackButton.hide();
         }
     } catch (e) {}
 }
