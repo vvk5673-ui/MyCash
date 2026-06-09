@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=100">
+    <link rel="stylesheet" href="style.css?v=101">
 </head>
 <body>
 
@@ -315,7 +315,9 @@
             <div style="display:flex;gap:10px">
                 <div class="form-group" style="flex:1;margin-bottom:0">
                     <label class="form-label">Начальный остаток</label>
-                    <input class="form-input" type="number" id="walletEditBalance" inputmode="numeric" placeholder="0" style="font-size:18px;font-weight:600;text-align:center">
+                    <input class="form-input" type="number" id="walletEditBalance" inputmode="numeric" placeholder="0"
+                           onfocus="if(this.value==='0')this.value=''" onblur="if(this.value.trim()==='')this.value='0'"
+                           style="font-size:18px;font-weight:600;text-align:center">
                 </div>
                 <div class="form-group" id="walletAccStartGroup" style="flex:1;margin-bottom:0">
                     <label class="form-label">Учёт ведётся с</label>
@@ -324,8 +326,8 @@
             </div>
             <div id="walletAccStartHint" style="font-size:11.5px;color:var(--text2);margin-top:5px">«Учёт ведётся с» — общая для всех кошельков; операции до этого месяца не учитываются.</div>
             <div class="edit-buttons" style="margin-top:18px">
-                <button onclick="deleteWallet()" style="padding:15px 18px;border:none;border-radius:14px;font-size:15px;font-weight:600;color:white;background:var(--red);cursor:pointer;min-height:50px;opacity:0.85" id="walletDeleteBtn">🗑 Удалить</button>
-                <button onclick="saveWalletEdit()" style="flex:1;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:white;background:var(--accent);cursor:pointer;min-height:50px">💾 Сохранить</button>
+                <button onclick="deleteWallet()" id="walletDeleteBtn" style="padding:14px 20px;border:none;border-radius:14px;font-size:15px;font-weight:600;color:var(--red);background:rgba(255,59,48,0.12);cursor:pointer;min-height:50px">Удалить</button>
+                <button onclick="saveWalletEdit()" style="flex:1;padding:14px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:#fff;background:var(--accent);cursor:pointer;min-height:50px;letter-spacing:0.2px">Сохранить</button>
             </div>
         </div>
     </div>
@@ -596,13 +598,13 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=100"></script>
+    <script src="api.js?v=101"></script>
     <!-- app.js разбит на 6 частей (общая область видимости, порядок подключения важен) -->
-    <script src="app-core.js?v=100"></script>
-    <script src="app-data.js?v=100"></script>
-    <script src="app-operations.js?v=100"></script>
-    <script src="app-dashboard.js?v=100"></script>
-    <script src="app-wallets.js?v=100"></script>
-    <script src="app-main.js?v=100"></script>
+    <script src="app-core.js?v=101"></script>
+    <script src="app-data.js?v=101"></script>
+    <script src="app-operations.js?v=101"></script>
+    <script src="app-dashboard.js?v=101"></script>
+    <script src="app-wallets.js?v=101"></script>
+    <script src="app-main.js?v=101"></script>
 </body>
 </html>

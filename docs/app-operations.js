@@ -294,7 +294,8 @@ function renderWalletSwitch() {
     const wallets = getActiveWallets();
     container.innerHTML = wallets.map(function(w) {
         const active = w.name === selectedWallet ? 'active' : '';
-        return '<button class="wallet-btn ' + active + '" onclick="selectWallet(\'' + w.name.replace(/'/g, "\\'") + '\')">' + esc(w.name) + '</button>';
+        return '<button class="wallet-btn ' + active + '" onclick="selectWallet(\'' + w.name.replace(/'/g, "\\'") + '\')">' +
+            '<span class="wallet-btn-ico">' + walletIconHtml(w.name, 18, w) + '</span>' + esc(w.name) + '</button>';
     }).join('');
 }
 

@@ -727,7 +727,10 @@ body {
     margin-bottom: 10px;
 }
 .wallet-btn {
-    padding: 6px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px 6px 8px;
     border-radius: 16px;
     border: 1px solid var(--border);
     background: var(--card);
@@ -736,6 +739,8 @@ body {
     transition: all 0.2s;
     min-height: 32px;
 }
+.wallet-btn-ico { display: inline-flex; flex-shrink: 0; }
+.wallet-btn-ico img, .wallet-btn-ico svg { display: block; border-radius: 6px; }
 .wallet-btn.active {
     background: var(--accent);
     color: white;
