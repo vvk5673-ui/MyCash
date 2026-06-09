@@ -499,15 +499,17 @@ body {
     display: flex; align-items: center; justify-content: center;
     margin-right: 12px;
     flex-shrink: 0;
+    overflow: hidden;   /* логотип/значок заполняет плитку 40px → единый размер */
 }
 .op-iconwrap .op-icon { margin-right: 0; }   /* отступ теперь у колонки, не у иконки */
 .op-icon.income { background: #E8F5E9; }
 .op-icon.expense { background: #FFEBEE; }
 .op-icon.transfer { background: #E3F2FD; }
 .op-info { flex: 1; min-width: 0; }
-.op-category { font-size: 15px; font-weight: 500; }
-.op-purpose { font-size: 13px; font-weight: 400; color: var(--text2); }
-.op-comment { font-size: 12px; color: var(--text2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Три строки максимум: статья / назначение / контрагент — каждая в одну строку с обрезкой «…» */
+.op-category { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.op-purpose { display: block; font-size: 13px; font-weight: 400; color: var(--text2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.op-comment { font-size: 12px; color: var(--text2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .op-right { text-align: right; flex-shrink: 0; margin-left: 8px; }
 .op-amount { font-size: 15px; font-weight: 600; }
 .op-amount.income { color: var(--green); }

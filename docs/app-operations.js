@@ -42,19 +42,20 @@ function renderOperations() {
         let iconClass = op.type;
         let sign = op.type === 'income' ? '+' : '-';
         let walletText = op.wallet || '💳 Карта';
-        // Иконка операции = логотип банка / значок счёта, по которому прошла операция
-        let iconHtml = walletIconHtml(op.wallet, 28);
+        // Иконка операции = логотип банка / значок счёта, по которому прошла операция.
+        // Размер 40 — заполняет плитку .op-icon целиком → все иконки выглядят одного размера.
+        let iconHtml = walletIconHtml(op.wallet, 40);
 
         if (op.type === 'transfer') {
-            iconHtml = lucideIcon('arrow-left-right', 20, '#007AFF');
+            iconHtml = lucideIcon('arrow-left-right', 24, '#007AFF');
             sign = '';
             walletText = (op.walletFrom || '💳 Карта') + ' → ' + (op.walletTo || '💵 Наличка');
         }
 
         const dateStr = formatDate(op.date);
         const titleText = op.type === 'transfer' ? 'Перевод' : esc(op.category);
-        // Назначение платежа — сразу после статьи (в первой строке), серым и помельче
-        const purposeHtml = op.purpose ? ' · <span class="op-purpose">' + esc(op.purpose) + '</span>' : '';
+        // Назначение платежа — отдельной строкой под статьёй (без точки-разделителя), серым
+        const purposeHtml = op.purpose ? '<div class="op-purpose">' + esc(op.purpose) + '</div>' : '';
         // Вторая строка: счёт (касса) первым, затем контрагент (если указан)
         const cg = (op.contragent_id && Refs.contragents)
             ? Refs.contragents.find(function(c) { return String(c.id) === String(op.contragent_id); })
@@ -79,7 +80,8 @@ function renderOperations() {
                         ${walletUnder ? `<div class="op-wallet-label">${walletUnder}</div>` : ''}
                     </div>
                     <div class="op-info">
-                        <div class="op-category">${titleText}${purposeHtml}</div>
+                        <div class="op-category">${titleText}</div>
+                        ${purposeHtml}
                         ${subtitle ? `<div class="op-comment">${subtitle}</div>` : ''}
                     </div>
                     <div class="op-right">
