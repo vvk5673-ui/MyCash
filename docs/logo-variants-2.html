@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyCash — логотип, тема «волна» (часть 2)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;background:#0b0d12;color:#e7e9ee;-webkit-font-smoothing:antialiased;padding:48px 20px 90px}
+.page-head{max-width:900px;margin:0 auto 14px;text-align:center}
+.page-head .kicker{font-size:13px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#7c8499;margin-bottom:14px}
+.page-head h1{font-size:38px;font-weight:800;letter-spacing:-1px;line-height:1.12;margin-bottom:14px}
+.page-head h1 span{background:linear-gradient(90deg,#6c5ce7,#2bd9a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.page-head p{font-size:16px;line-height:1.6;color:#aab1c2;max-width:640px;margin:0 auto}
+.hint{max-width:640px;margin:18px auto 0;font-size:13px;color:#7c8499;background:#12151d;border:1px solid #1e2230;border-radius:14px;padding:12px 16px;line-height:1.55}
+.hint b{color:#cdd3e0}
+
+.grid{max-width:1180px;margin:46px auto 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:26px}
+.card{background:#13161f;border:1px solid #1e2230;border-radius:24px;overflow:hidden;display:flex;flex-direction:column}
+.stage{height:210px;display:flex;align-items:center;justify-content:center;position:relative;background:radial-gradient(120% 120% at 50% 0,#1b2030 0,#10131b 70%)}
+.stage.light{background:radial-gradient(120% 120% at 50% 0,#ffffff 0,#eef1f6 75%)}
+.lockup{display:flex;align-items:center;gap:14px;padding:16px 22px;border-top:1px solid #1e2230}
+.lockup.light{background:#fff}
+.wordmark{font-size:26px;font-weight:800;letter-spacing:-.8px}
+.wordmark .my{font-weight:500;opacity:.65}
+.replay{margin-left:auto;font-size:11px;font-weight:600;color:#7c8499;border:1px solid #2a2f3e;background:#171a24;border-radius:20px;padding:6px 13px;cursor:pointer;user-select:none}
+.replay:hover{color:#cdd3e0;border-color:#3a4050}
+.desc{padding:16px 22px 22px}
+.desc .nm{font-size:17px;font-weight:700;letter-spacing:-.2px}
+.desc .nm .tag{font-size:11px;font-weight:600;color:#8a93a8;background:#161a26;border-radius:20px;padding:3px 9px;margin-left:9px;vertical-align:middle}
+.desc .idea{margin-top:9px;font-size:13px;line-height:1.55;color:#9aa2b4}
+.desc .idea b{color:#cdd3e0;font-weight:600}
+svg{display:block;overflow:visible}
+.footer{max-width:720px;margin:60px auto 0;text-align:center;color:#7c8499;font-size:14px;line-height:1.7}
+.footer b{color:#cdd3e0}
+@media(max-width:560px){.page-head h1{font-size:28px}body{padding:32px 14px}}
+
+/* ===================== АНИМАЦИИ ===================== */
+@keyframes eq{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+@keyframes draw{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
+@keyframes flow{from{transform:translateX(0)}to{transform:translateX(-40px)}}
+@keyframes ripple{0%{transform:scale(.3);opacity:.9}100%{transform:scale(1);opacity:0}}
+@keyframes blob{0%,100%{border-radius:46% 54% 58% 42%/52% 44% 56% 48%;transform:rotate(0)}50%{border-radius:54% 46% 42% 58%/44% 56% 48% 52%;transform:rotate(8deg)}}
+@keyframes fadeup{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes arrow{0%{transform:translateY(10px);opacity:0}60%{transform:translateY(-2px);opacity:1}100%{transform:translateY(0)}}
+
+.run [data-anim="eq"]{transform-box:fill-box;transform-origin:50% 100%;animation:eq 1.1s ease-in-out infinite;animation-delay:var(--d,0s)}
+.run [data-anim="eqc"]{transform-box:fill-box;transform-origin:50% 100%;animation:eq 1.1s ease-in-out infinite;animation-delay:var(--d,0s)}
+.run [data-anim="draw"]{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw 1.2s cubic-bezier(.6,0,.2,1) forwards;animation-delay:var(--d,0s)}
+.run [data-anim="flow"]{animation:flow 1.1s linear infinite}
+.run [data-anim="ripple"]{transform-box:fill-box;transform-origin:center;animation:ripple 1.8s ease-out infinite;animation-delay:var(--d,0s)}
+.run [data-anim="fadeup"]{opacity:0;animation:fadeup .6s ease forwards;animation-delay:var(--d,0s)}
+.run [data-anim="arrow"]{animation:arrow .8s cubic-bezier(.5,1.6,.4,1) forwards;animation-delay:.9s;opacity:0}
+.blob{animation:blob 4s ease-in-out infinite}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div class="kicker">MyCash · Логотип · тема «Волна»</div>
+  <h1>Ещё 7 вариантов с <span>голосовой волной</span></h1>
+  <p>Развиваю понравившийся вариант с волной — разные её формы, плюс пара свежих идей в ту же сторону. Все векторные (SVG) и анимированы, чтобы сразу видеть, как будут двигаться в ролике.</p>
+  <div class="hint">▶ Анимация запускается при загрузке. Кнопка <b>«↻ Повторить»</b> — посмотреть ещё раз. Под каждым логотипом — идея анимации для видео-анонса.</div>
+</div>
+
+<div class="grid run" id="grid">
+
+  <!-- ============ 1. КРУГОВАЯ ВОЛНА (Siri-стиль вокруг ₽) ============ -->
+  <div class="card">
+    <div class="stage">
+      <svg width="170" height="170" viewBox="0 0 100 100">
+        <defs><linearGradient id="r1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs>
+        <g fill="url(#r1)">
+          <!-- 16 палочек по кругу -->
+          <g transform="rotate(0 50 50)"><rect data-anim="eqc" style="--d:0s"   x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(22.5 50 50)"><rect data-anim="eqc" style="--d:.1s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(45 50 50)"><rect data-anim="eqc" style="--d:.2s"  x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(67.5 50 50)"><rect data-anim="eqc" style="--d:.3s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(90 50 50)"><rect data-anim="eqc" style="--d:.4s"  x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(112.5 50 50)"><rect data-anim="eqc" style="--d:.5s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(135 50 50)"><rect data-anim="eqc" style="--d:.6s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(157.5 50 50)"><rect data-anim="eqc" style="--d:.5s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(180 50 50)"><rect data-anim="eqc" style="--d:.4s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(202.5 50 50)"><rect data-anim="eqc" style="--d:.3s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(225 50 50)"><rect data-anim="eqc" style="--d:.2s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(247.5 50 50)"><rect data-anim="eqc" style="--d:.1s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(270 50 50)"><rect data-anim="eqc" style="--d:0s"  x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(292.5 50 50)"><rect data-anim="eqc" style="--d:.1s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(315 50 50)"><rect data-anim="eqc" style="--d:.2s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          <g transform="rotate(337.5 50 50)"><rect data-anim="eqc" style="--d:.3s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+        </g>
+        <text x="50" y="63" font-size="30" font-weight="800" fill="url(#r1)" text-anchor="middle" font-family="Segoe UI,sans-serif">₽</text>
+      </svg>
+    </div>
+    <div class="lockup">
+      <svg width="36" height="36" viewBox="0 0 100 100"><g fill="url(#r1)"><g transform="rotate(0 50 50)"><rect x="47.5" y="6" width="5" height="15" rx="2.5"/></g><g transform="rotate(45 50 50)"><rect x="47.5" y="6" width="5" height="15" rx="2.5"/></g><g transform="rotate(90 50 50)"><rect x="47.5" y="6" width="5" height="15" rx="2.5"/></g><g transform="rotate(135 50 50)"><rect x="47.5" y="6" width="5" height="15" rx="2.5"/></g><g transform="rotate(180 50 50)"><rect x="47.5" y="6" width="5" height="15" rx="2.5"/></g><g transform="rotate(225 50 50)"><rect x="47.5" y="6" width="5" height="15" rx="2.5"/></g><g transform="rotate(270 50 50)"><rect x="47.5" y="6" width="5" height="15" rx="2.5"/></g><g transform="rotate(315 50 50)"><rect x="47.5" y="6" width="5" height="15" rx="2.5"/></g></g><text x="50" y="62" font-size="30" font-weight="800" fill="url(#r1)" text-anchor="middle">₽</text></svg>
+      <span class="wordmark"><span class="my">My</span>Cash</span>
+      <span class="replay" onclick="replay()">↻ Повторить</span>
+    </div>
+    <div class="desc">
+      <div class="nm">Круговая волна<span class="tag">Siri-стиль</span></div>
+      <div class="idea"><b>Идея:</b> голосовая волна по кругу вокруг рубля — как ассистент, который «слушает». В ролике палочки <b>пульсируют по кольцу</b>, реагируя на голос. Очень AI-шный, технологичный образ.</div>
+    </div>
+  </div>
+
+  <!-- ============ 2. ТЕКУЧАЯ СИНУСОИДА → ₽ ============ -->
+  <div class="card">
+    <div class="stage">
+      <svg width="190" height="150" viewBox="0 0 130 100">
+        <defs>
+          <linearGradient id="r2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5b8cff"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient>
+          <clipPath id="clip2"><rect x="0" y="0" width="96" height="100"/></clipPath>
+        </defs>
+        <g clip-path="url(#clip2)">
+          <path data-anim="flow" d="M-20,50 Q-10,32 0,50 T20,50 T40,50 T60,50 T80,50 T100,50 T120,50 T140,50"
+                fill="none" stroke="url(#r2)" stroke-width="7" stroke-linecap="round"/>
+        </g>
+        <text data-anim="fadeup" style="--d:.4s" x="98" y="64" font-size="40" font-weight="800" fill="#2bd9a0" font-family="Segoe UI,sans-serif">₽</text>
+      </svg>
+    </div>
+    <div class="lockup">
+      <svg width="44" height="30" viewBox="0 0 130 100"><path d="M2,50 Q12,32 22,50 T42,50 T62,50 T82,50" fill="none" stroke="url(#r2)" stroke-width="7" stroke-linecap="round"/><text x="92" y="64" font-size="40" font-weight="800" fill="#2bd9a0">₽</text></svg>
+      <span class="wordmark"><span class="my">My</span>Cash</span>
+      <span class="replay" onclick="replay()">↻ Повторить</span>
+    </div>
+    <div class="desc">
+      <div class="nm">Текучая волна<span class="tag">Поток + голос</span></div>
+      <div class="idea"><b>Идея:</b> непрерывная волна <b>плавно течёт</b> слева направо и упирается в рубль. Читается двояко: звук голоса и поток денег. Гипнотично смотрится зацикленной в заставке.</div>
+    </div>
+  </div>
+
+  <!-- ============ 3. ВОЛНА ВНУТРИ БУКВЫ M ============ -->
+  <div class="card">
+    <div class="stage">
+      <svg width="160" height="160" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="r3" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient>
+          <clipPath id="clipM"><text x="50" y="78" font-size="86" font-weight="800" fill="#000" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif">M</text></clipPath>
+        </defs>
+        <g clip-path="url(#clipM)" fill="url(#r3)">
+          <rect data-anim="eq" style="--d:0s"   x="12" y="20" width="9" height="70" rx="4"/>
+          <rect data-anim="eq" style="--d:.15s" x="24" y="20" width="9" height="70" rx="4"/>
+          <rect data-anim="eq" style="--d:.3s"  x="36" y="20" width="9" height="70" rx="4"/>
+          <rect data-anim="eq" style="--d:.45s" x="48" y="20" width="9" height="70" rx="4"/>
+          <rect data-anim="eq" style="--d:.3s"  x="60" y="20" width="9" height="70" rx="4"/>
+          <rect data-anim="eq" style="--d:.15s" x="72" y="20" width="9" height="70" rx="4"/>
+          <rect data-anim="eq" style="--d:0s"   x="84" y="20" width="9" height="70" rx="4"/>
+        </g>
+      </svg>
+    </div>
+    <div class="lockup">
+      <svg width="34" height="34" viewBox="0 0 100 100"><text x="50" y="78" font-size="86" font-weight="800" fill="url(#r3)" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif">M</text></svg>
+      <span class="wordmark"><span class="my">My</span>Cash</span>
+      <span class="replay" onclick="replay()">↻ Повторить</span>
+    </div>
+    <div class="desc">
+      <div class="nm">Волна в букве M<span class="tag">Монограмма</span></div>
+      <div class="idea"><b>Идея:</b> сама буква «M» заполнена живой голосовой волной. В ролике волна <b>«дышит» внутри буквы</b>. Совмещает узнаваемую монограмму и фишку с голосом — отличная иконка приложения.</div>
+    </div>
+  </div>
+
+  <!-- ============ 4. ЖИДКАЯ КАПЛЯ (AI-орб) ============ -->
+  <div class="card">
+    <div class="stage">
+      <div style="width:120px;height:120px;position:relative">
+        <div class="blob" style="position:absolute;inset:0;background:linear-gradient(135deg,#6c5ce7,#2bd9a0);box-shadow:0 12px 40px rgba(108,92,231,.45)"></div>
+        <svg width="120" height="120" viewBox="0 0 120 120" style="position:absolute;inset:0">
+          <g clip-path="none">
+            <path data-anim="flow" d="M10,60 Q22,44 34,60 T58,60 T82,60 T106,60 T130,60" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".95"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div class="lockup">
+      <div style="width:32px;height:32px;border-radius:42% 54% 58% 42%/52% 44% 56% 48%;background:linear-gradient(135deg,#6c5ce7,#2bd9a0);position:relative;flex-shrink:0">
+        <svg width="32" height="32" viewBox="0 0 120 120" style="position:absolute;inset:0"><path d="M14,60 Q26,46 38,60 T62,60 T86,60 T110,60" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>
+      </div>
+      <span class="wordmark"><span class="my">My</span>Cash</span>
+      <span class="replay" onclick="replay()">↻ Повторить</span>
+    </div>
+    <div class="desc">
+      <div class="nm">Жидкая капля<span class="tag">AI-орб</span></div>
+      <div class="idea"><b>Идея:</b> мягкий градиентный шар с волной — как голосовой ассистент в топовых AI-приложениях. Капля <b>плавно перетекает</b>, внутри бежит волна. Самый «премиальный» и современный образ.</div>
+    </div>
+  </div>
+
+  <!-- ============ 5. АУДИОДОРОЖКА (симметричная волна) ============ -->
+  <div class="card">
+    <div class="stage">
+      <svg width="200" height="130" viewBox="0 0 140 80">
+        <defs><linearGradient id="r5" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5b8cff"/><stop offset=".5" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs>
+        <g fill="url(#r5)">
+          <rect data-anim="eq" style="--d:0s"   x="6"   y="30" width="5" height="20" rx="2.5"/>
+          <rect data-anim="eq" style="--d:.08s" x="16"  y="22" width="5" height="36" rx="2.5"/>
+          <rect data-anim="eq" style="--d:.16s" x="26"  y="12" width="5" height="56" rx="2.5"/>
+          <rect data-anim="eq" style="--d:.24s" x="36"  y="26" width="5" height="28" rx="2.5"/>
+          <rect data-anim="eq" style="--d:.32s" x="46"  y="34" width="5" height="12" rx="2.5"/>
+          <rect data-anim="eq" style="--d:.4s"  x="56"  y="18" width="5" height="44" rx="2.5"/>
+          <rect data-anim="eq" style="--d:.48s" x="66"  y="6"  width="5" height="68" rx="2.5"/>
+          <rect data-anim="eq" style="--d:.4s"  x="76"  y="20" width="5" height="40" rx="2.5"/>
+          <rect data-anim="eq" style="--d:.32s" x="86"  y="30" width="5" height="20" rx="2.5"/>
+          <rect data-anim="eq" style="--d:.24s" x="96"  y="14" width="5" height="52" rx="2.5"/>
+          <rect data-anim="eq" style="--d:.16s" x="106" y="24" width="5" height="32" rx="2.5"/>
+          <rect data-anim="eq" style="--d:.08s" x="116" y="28" width="5" height="24" rx="2.5"/>
+          <rect data-anim="eq" style="--d:0s"   x="126" y="32" width="5" height="16" rx="2.5"/>
+        </g>
+      </svg>
+    </div>
+    <div class="lockup">
+      <svg width="48" height="28" viewBox="0 0 140 80"><g fill="url(#r5)"><rect x="6" y="30" width="5" height="20" rx="2.5"/><rect x="22" y="22" width="5" height="36" rx="2.5"/><rect x="38" y="12" width="5" height="56" rx="2.5"/><rect x="54" y="26" width="5" height="28" rx="2.5"/><rect x="70" y="6" width="5" height="68" rx="2.5"/><rect x="86" y="20" width="5" height="40" rx="2.5"/><rect x="102" y="30" width="5" height="20" rx="2.5"/><rect x="118" y="14" width="5" height="52" rx="2.5"/><rect x="134" y="28" width="5" height="24" rx="2.5"/></g></svg>
+      <span class="wordmark"><span class="my">My</span>Cash</span>
+      <span class="replay" onclick="replay()">↻ Повторить</span>
+    </div>
+    <div class="desc">
+      <div class="nm">Аудиодорожка<span class="tag">Звук</span></div>
+      <div class="idea"><b>Идея:</b> классическая звуковая дорожка, как в приложениях для записи. Столбцы <b>живут как настоящий эквалайзер</b>. Универсально для шапки, баннера и заставки; легко тянется в любую ширину.</div>
+    </div>
+  </div>
+
+  <!-- ============ 6. СОНАР / ПУЛЬС МИКРОФОНА ============ -->
+  <div class="card">
+    <div class="stage">
+      <svg width="160" height="160" viewBox="0 0 100 100">
+        <defs><linearGradient id="r6" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs>
+        <circle data-anim="ripple" style="--d:0s"   cx="50" cy="50" r="40" fill="none" stroke="url(#r6)" stroke-width="3"/>
+        <circle data-anim="ripple" style="--d:.6s"  cx="50" cy="50" r="40" fill="none" stroke="url(#r6)" stroke-width="3"/>
+        <circle data-anim="ripple" style="--d:1.2s" cx="50" cy="50" r="40" fill="none" stroke="url(#r6)" stroke-width="3"/>
+        <circle cx="50" cy="50" r="20" fill="url(#r6)"/>
+        <!-- мини-волна внутри -->
+        <g stroke="#fff" stroke-width="3" stroke-linecap="round">
+          <line data-anim="eq" style="--d:0s"  x1="43" y1="45" x2="43" y2="55"/>
+          <line data-anim="eq" style="--d:.2s" x1="50" y1="41" x2="50" y2="59"/>
+          <line data-anim="eq" style="--d:.4s" x1="57" y1="45" x2="57" y2="55"/>
+        </g>
+      </svg>
+    </div>
+    <div class="lockup">
+      <svg width="34" height="34" viewBox="0 0 100 100"><circle cx="50" cy="50" r="38" fill="none" stroke="url(#r6)" stroke-width="4"/><circle cx="50" cy="50" r="20" fill="url(#r6)"/><g stroke="#fff" stroke-width="3" stroke-linecap="round"><line x1="43" y1="45" x2="43" y2="55"/><line x1="50" y1="41" x2="50" y2="59"/><line x1="57" y1="45" x2="57" y2="55"/></g></svg>
+      <span class="wordmark"><span class="my">My</span>Cash</span>
+      <span class="replay" onclick="replay()">↻ Повторить</span>
+    </div>
+    <div class="desc">
+      <div class="nm">Сонар<span class="tag">«Слушаю»</span></div>
+      <div class="idea"><b>Идея:</b> от центра расходятся круги-волны, как сигнал микрофона. В ролике <b>волны пульсируют наружу</b> — момент «приложение приняло голос». Динамичный акцент для анонса.</div>
+    </div>
+  </div>
+
+  <!-- ============ 7. ВОЛНА-ГРАФИК (двойное прочтение) ============ -->
+  <div class="card">
+    <div class="stage light">
+      <svg width="200" height="140" viewBox="0 0 140 90">
+        <defs><linearGradient id="r7" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#5b8cff"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs>
+        <!-- волна, идущая вверх как график доходов -->
+        <path data-anim="draw" style="--len:240" d="M8,70 Q18,58 28,64 T48,52 T68,54 T88,38 T108,40 T128,20"
+              fill="none" stroke="url(#r7)" stroke-width="6" stroke-linecap="round"/>
+        <g data-anim="arrow">
+          <path d="M114,18 L130,18 L130,34" fill="none" stroke="url(#r7)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </svg>
+    </div>
+    <div class="lockup light">
+      <svg width="48" height="30" viewBox="0 0 140 90"><path d="M8,70 Q18,58 28,64 T48,52 T68,54 T88,38 T108,40 T128,20 M114,18 L130,18 L130,34" fill="none" stroke="url(#r7)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="wordmark" style="color:#15182a"><span class="my">My</span>Cash</span>
+      <span class="replay" onclick="replay()" style="color:#8a93a8;background:#f0f1f5;border-color:#e3e4ea">↻ Повторить</span>
+    </div>
+    <div class="desc">
+      <div class="nm">Волна-график<span class="tag">Рост</span></div>
+      <div class="idea"><b>Идея:</b> волна, которая одновременно <b>график растущих доходов</b>. В ролике линия рисуется слева направо и в конце выстреливает стрелкой вверх. Голос + деньги + рост в одном знаке. Показан на светлом.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Напиши номера, что ближе — например <b>«1 и 4»</b>.<br>
+  Можно соединить: форму из одного варианта и тип анимации из другого.<br>
+  Дальше доведём цвет и форму и соберём <b>анимационный ролик</b> для заставки и анонса.
+</div>
+
+<script>
+function replay(){var g=document.getElementById('grid');g.classList.remove('run');void g.offsetWidth;g.classList.add('run');}
+</script>
+</body>
+</html>
