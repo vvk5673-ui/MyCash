@@ -166,12 +166,13 @@ function deleteOperation(id) {
 // === МОДАЛЬНОЕ ОКНО: БЫСТРЫЙ ВВОД ===
 function openModal() {
     haptic('light');
-    // Сбрасываем режим «Изменить» статьи при каждом открытии
+    // Сбрасываем режим «Изменить» статьи и выбор статьи при каждом открытии
     articleEditMode = false;
+    selectedArticleId = null;
     const aToggle = document.getElementById('articleEditToggle');
     const aLabel = document.getElementById('quickArticlesLabel');
     if (aToggle) aToggle.textContent = '✏️ Изменить';
-    if (aLabel) aLabel.textContent = 'Статья — нажмите, чтобы сохранить';
+    if (aLabel) aLabel.textContent = 'Статья — выберите';
     document.getElementById('modalOverlay').classList.add('active');
     // Пока окно ввода открыто — Telegram спросит подтверждение при попытке закрыть приложение
     if (typeof setClosingGuard === 'function') setClosingGuard(true);
@@ -390,26 +391,31 @@ function toggleExtended() {
 
 function setType(type) {
     currentType = type;
+    selectedArticleId = null;   // при смене типа статьи другие — выбор сбрасываем
     haptic('light');
     document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
     const btn = document.querySelector('.' + type + '-btn');
     if (btn) btn.classList.add('active');
     const articlesArea = document.getElementById('articlesArea');
     const transferArea = document.getElementById('transferArea');
+    const saveBtn = document.getElementById('quickSaveBtn');
     if (type === 'transfer') {
         articlesArea.style.display = 'none';
         transferArea.style.display = 'block';
+        if (saveBtn) saveBtn.style.display = 'none';   // у перевода своя кнопка «Сохранить перевод»
         document.getElementById('transferFrom').textContent = transferFrom;
         document.getElementById('transferTo').textContent = transferTo;
     } else {
         articlesArea.style.display = 'block';
         transferArea.style.display = 'none';
+        if (saveBtn) saveBtn.style.display = '';
         renderQuickArticles();
     }
 }
 
-// Рендер статей ДДС (отфильтрованных по типу) — тап = сохранение
-let articleEditMode = false;   // режим «Изменить» в окне операции (тап = редактировать статью)
+// Рендер статей ДДС (отфильтрованных по типу) — тап = выбор статьи (сохранение кнопкой внизу)
+let articleEditMode = false;     // режим «Изменить» в окне операции (тап = редактировать статью)
+let selectedArticleId = null;    // выбранная статья (подсвечена); сохранение — кнопкой «Сохранить»
 
 function renderQuickArticles() {
     const arts = articlesForType(currentType);
@@ -434,7 +440,8 @@ function renderQuickArticles() {
         if (articleEditMode) {
             return '<button class="cat-chip cat-chip-edit" onclick="openArticleEditFromOp(\'' + a.id + '\')">✏️ ' + esc(a.name) + '</button>';
         }
-        return '<button class="cat-chip" onclick="quickSaveArticle(\'' + a.id + '\')">' + esc(a.name) + '</button>';
+        const sel = (a.id === selectedArticleId) ? ' active' : '';
+        return '<button class="cat-chip' + sel + '" onclick="selectArticle(\'' + a.id + '\')">' + esc(a.name) + '</button>';
     }).join('');
     // Плитка «Новая статья» — всегда в конце сетки
     html += '<button class="cat-chip cat-chip-add" onclick="openNewArticleFromOp()">➕ Новая статья</button>';
@@ -450,7 +457,7 @@ function toggleArticleEditMode() {
     if (btn) btn.textContent = articleEditMode ? '✓ Готово' : '✏️ Изменить';
     if (lbl) lbl.textContent = articleEditMode
         ? 'Нажмите статью, чтобы изменить или удалить'
-        : 'Статья — нажмите, чтобы сохранить';
+        : 'Статья — выберите';
     renderQuickArticles();
 }
 
@@ -467,8 +474,15 @@ function openArticleEditFromOp(articleId) {
     openRefForm(articleId);
 }
 
-// Сохранение операции по тапу на статью (с учётом полей из «Подробнее»)
-function quickSaveArticle(articleId) {
+// Тап по статье — выбрать её (подсветить). Сохранение — кнопкой «Сохранить» внизу окна.
+function selectArticle(articleId) {
+    selectedArticleId = articleId;
+    haptic('light');
+    renderQuickArticles();   // перерисовать с подсветкой выбранной
+}
+
+// Сохранение операции (расход/доход) по кнопке «Сохранить» — с выбранной статьёй и полями «Подробнее»
+function saveQuickOp() {
     const v = validateAmount(document.getElementById('amountInput').value);
     if (!v.ok) {
         haptic('error');
@@ -477,7 +491,19 @@ function quickSaveArticle(articleId) {
         setTimeout(function() { disp.style.color = ''; }, 500);
         return;
     }
-    const article = getArticleById(articleId);
+    // Статья обязательна — без неё подсказываем выбрать
+    if (!selectedArticleId) {
+        haptic('error');
+        const lbl = document.getElementById('quickArticlesLabel');
+        if (lbl) {
+            const prev = lbl.textContent;
+            lbl.textContent = 'Сначала выберите статью ↑';
+            lbl.style.color = 'var(--red)';
+            setTimeout(function() { lbl.style.color = ''; lbl.textContent = 'Статья — выберите'; }, 1600);
+        }
+        return;
+    }
+    const article = getArticleById(selectedArticleId);
     if (!article) { haptic('error'); return; }
     // Тип операции определяется группой статьи (Поступление=доход / Выбытие=расход)
     const grp = Refs.groups.find(function(g) { return g.id === article.group_id; });

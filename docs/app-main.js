@@ -206,7 +206,7 @@ Object.assign(window, {
     setTableMode, setType, shareApp, showUpgrade, swapTransfer,
     switchTab, toggleCatOps, toggleExtended, updateAmountDisplay, acceptOffer, skipOffer,
     swipeStart, swipeMove, swipeEnd,
-    quickSaveArticle, saveTransfer, cycleTransfer,
+    selectArticle, saveQuickOp, saveTransfer, cycleTransfer,
     toggleArticleEditMode, openNewArticleFromOp, openArticleEditFromOp,
     openRefList, closeRefList, openRefForm, closeRefForm,
     setRefArticleType, saveRefForm, archiveRefItem,
