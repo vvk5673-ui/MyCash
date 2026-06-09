@@ -219,9 +219,19 @@ function openNewWallet() {
     document.getElementById('walletEditName').value = '';
     populateWalletDirectionSelect();   // по умолчанию первое направление в списке
     document.getElementById('walletEditBalance').value = 0;
-    // При создании дату начала учёта (общую) показываем тоже — предзаполняем текущим значением
+    // При создании дату начала учёта (общую) показываем тоже.
+    // Если общая дата ещё не задана — по умолчанию подставляем сегодня; иначе показываем заданную.
     const accInputNew = document.getElementById('walletEditAccStart');
-    if (accInputNew) accInputNew.value = accountingStartStr ? accountingStartStr.slice(0, 10) : '';
+    if (accInputNew) {
+        if (accountingStartStr) {
+            accInputNew.value = accountingStartStr.slice(0, 10);
+        } else {
+            const t = new Date();
+            accInputNew.value = t.getFullYear() + '-' +
+                String(t.getMonth() + 1).padStart(2, '0') + '-' +
+                String(t.getDate()).padStart(2, '0');
+        }
+    }
     document.getElementById('walletAccStartGroup').style.display = '';
     var accHintNew = document.getElementById('walletAccStartHint');
     if (accHintNew) accHintNew.style.display = '';

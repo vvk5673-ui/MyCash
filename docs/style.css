@@ -171,18 +171,19 @@ body {
     display: flex; align-items: center; gap: 8px;
     background: var(--bg);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 8px 10px 8px 8px;
+    border-radius: 10px;        /* единый радиус с .form-input */
+    padding: 5px 10px;
+    min-height: 38px;           /* единая высота с .form-input */
     cursor: pointer;
     transition: border-color .15s;
 }
 .wname-row:active { border-color: var(--accent); }
-.wname-ico { flex-shrink: 0; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; }
-.wname-ico img { width: 30px; height: 30px; border-radius: 7px; display: block; }
+.wname-ico { flex-shrink: 0; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; }
+.wname-ico img, .wname-ico svg { width: 26px; height: 26px; border-radius: 7px; display: block; }
 .wname-input {
     flex: 1; min-width: 0;
     border: none; background: transparent;
-    font-size: 15px; color: var(--text);
+    font-size: 14px; color: var(--text);   /* единый шрифт с .form-input */
     outline: none; padding: 0;
     cursor: pointer;
     pointer-events: none;   /* клик идёт на строку (открывает меню), клавиатура не всплывает */
