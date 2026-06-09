@@ -98,8 +98,23 @@ function selectBank(domain) {
 // «Без банка — впишите своё название»: курсор в поиск, чтобы набрать собственное имя счёта.
 // После набора первым пунктом появится «Использовать «…» как название».
 function startCustomName() {
-    const s = document.getElementById('bankSearch');
-    if (s) { s.focus(); }
+    haptic('light');
+    setBankUI(null);            // без банка → значок-кошелёк, выбор цвета доступен
+    closeBankPicker();
+    const inp = document.getElementById('walletEditName');
+    if (inp) { inp.focus(); }   // курсор сразу в поле названия — печатай своё имя
+}
+
+// Пользователь правит название вручную → это уже не банк: убираем логотип банка,
+// возвращаем значок-кошелёк и показываем выбор цвета
+function onWalletNameInput() {
+    if (editWalletBank) {
+        editWalletBank = null;
+        const ico = document.getElementById('walletBankIco');
+        if (ico) ico.innerHTML = walletSquircle(editWalletColor || '#007AFF', 30);
+        const colorGroup = document.getElementById('walletColorGroup');
+        if (colorGroup) colorGroup.style.display = '';
+    }
 }
 
 // Использовать набранный в поиске текст как своё название счёта (без банка)
