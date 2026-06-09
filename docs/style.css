@@ -1025,6 +1025,15 @@ body {
     animation: splashspin 0.8s linear infinite;
 }
 @keyframes splashspin { to { transform: rotate(360deg); } }
+/* --- Новый логотип на заставке (круговая волна + ₽ над названием) --- */
+.splash-mark { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.splash-icon { width: 88px; height: 88px; overflow: visible; }
+.splash-bars .sb { transform-box: fill-box; transform-origin: 50% 100%; animation: splashEq 1.15s ease-in-out infinite; }
+@keyframes splashEq { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
+.splash-name2 { font-size: 36px; font-weight: 800; letter-spacing: -1.4px; line-height: 1; color: var(--text, #14182a); }
+.splash-sub { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #9aa2b4; }
+.splash-sub .g { background: linear-gradient(90deg, #7d6cf0, #2bd9a0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.splash-sub .sep { margin: 0 5px; color: #c2c8d2; }
 
 /* === ОТЧЁТ ДДС === */
 .dds-report-nav {
