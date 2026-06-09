@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyCash — 5 вариантов дизайна</title>
+<style>
+/* ===================== БАЗА СТРАНИЦЫ ===================== */
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;
+  background:#0b0d12;
+  color:#e7e9ee;
+  -webkit-font-smoothing:antialiased;
+  padding:48px 20px 80px;
+}
+.page-head{max-width:1180px;margin:0 auto 40px;text-align:center}
+.page-head .kicker{
+  font-size:13px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;
+  color:#7c8499;margin-bottom:14px
+}
+.page-head h1{font-size:40px;font-weight:800;letter-spacing:-1px;line-height:1.1;margin-bottom:14px}
+.page-head h1 span{background:linear-gradient(90deg,#5b8cff,#9b6bff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.page-head p{font-size:16px;line-height:1.6;color:#aab1c2;max-width:640px;margin:0 auto}
+
+/* сетка телефонов */
+.grid{
+  max-width:1320px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:48px 32px;justify-items:center;
+}
+.cell{width:300px;max-width:100%}
+.cell .meta{margin-top:22px}
+.cell .meta .num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:8px;font-size:13px;font-weight:700;
+  background:#1c2030;color:#9fb0ff;margin-right:10px;vertical-align:middle
+}
+.cell .meta h3{display:inline;font-size:19px;font-weight:700;letter-spacing:-.3px;vertical-align:middle}
+.cell .meta .tag{
+  display:inline-block;margin-left:10px;font-size:11px;font-weight:600;
+  padding:3px 9px;border-radius:20px;background:#161a26;color:#8a93a8;vertical-align:middle
+}
+.cell .meta p{margin-top:10px;font-size:13.5px;line-height:1.55;color:#9aa2b4}
+
+/* рамка телефона */
+.phone{
+  width:300px;height:620px;border-radius:42px;
+  background:#000;padding:11px;
+  box-shadow:0 30px 60px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06);
+  position:relative
+}
+.screen{
+  width:100%;height:100%;border-radius:32px;overflow:hidden;position:relative;
+  display:flex;flex-direction:column
+}
+.notch{
+  position:absolute;top:11px;left:50%;transform:translateX(-50%);
+  width:110px;height:26px;background:#000;border-radius:0 0 16px 16px;z-index:50
+}
+.scr-body{flex:1;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.statusbar{display:flex;justify-content:space-between;align-items:center;padding:14px 22px 6px;font-size:12px;font-weight:600}
+.statusbar .dots{display:flex;gap:4px;align-items:center}
+.statusbar .dots i{width:5px;height:5px;border-radius:50%;display:inline-block;opacity:.85}
+
+/* общие мелочи внутри экранов */
+.op-row{display:flex;align-items:center;gap:11px}
+.op-ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.op-mid{flex:1;min-width:0}
+.op-name{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.op-sub{font-size:11px;margin-top:2px}
+.op-amt{font-size:13.5px;font-weight:700;white-space:nowrap}
+.tabbar{display:flex;justify-content:space-around;align-items:center;padding:10px 4px;flex-shrink:0}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600}
+.tab svg{width:22px;height:22px}
+.fab{position:absolute;z-index:40;display:flex;align-items:center;justify-content:center;font-weight:300}
+
+/* ===================================================================
+   ВАРИАНТ 1 — ЧИСТЫЙ МИНИМАЛ (Apple)
+=================================================================== */
+.v1 .screen{background:#F2F2F7;color:#1C1C1E}
+.v1 .statusbar{color:#1C1C1E}
+.v1 .v-head{padding:30px 20px 10px;display:flex;justify-content:space-between;align-items:flex-start}
+.v1 .v-head .hi{font-size:17px;font-weight:700}
+.v1 .v-head .dt{font-size:11px;color:#8E8E93;margin-top:3px}
+.v1 .v-head .logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#0A84FF,#5AC8FA);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px}
+.v1 .sect{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8E8E93;padding:14px 20px 8px}
+.v1 .card{background:#fff;border-radius:18px;margin:0 16px;padding:16px;box-shadow:0 2px 14px rgba(0,0,0,.05)}
+.v1 .bal{font-size:30px;font-weight:800;letter-spacing:-1px;text-align:center}
+.v1 .bal small{font-size:13px;color:#8E8E93;font-weight:600;display:block;margin-bottom:4px;letter-spacing:0}
+.v1 .wl{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #ececf1}
+.v1 .wl:last-child{border:none;padding-bottom:0}
+.v1 .wl .ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.v1 .wl .nm{flex:1;font-size:13.5px;font-weight:500}
+.v1 .wl .am{font-size:13.5px;font-weight:700}
+.v1 .op-ic{background:#F2F2F7}
+.v1 .op-sub{color:#8E8E93}
+.v1 .opcard{background:#fff;border-radius:18px;margin:0 16px;padding:6px 16px;box-shadow:0 2px 14px rgba(0,0,0,.05)}
+.v1 .opcard .op-row{padding:10px 0;border-bottom:1px solid #ececf1}
+.v1 .opcard .op-row:last-child{border:none}
+.v1 .tabbar{background:#fff;border-top:1px solid #e5e5ea}
+.v1 .tab{color:#C7C7CC}
+.v1 .tab.on{color:#0A84FF}
+.v1 .fab{right:20px;bottom:74px;width:56px;height:56px;border-radius:18px;background:#0A84FF;color:#fff;font-size:30px;box-shadow:0 8px 20px rgba(10,132,255,.4)}
+
+/* ===================================================================
+   ВАРИАНТ 2 — ФИНТЕХ ИНДИГО (градиент-герой, стекло)
+=================================================================== */
+.v2 .screen{background:#eef0f7;color:#15182a}
+.v2 .statusbar{color:#15182a}
+.v2 .v-head{padding:30px 20px 6px;display:flex;justify-content:space-between;align-items:center}
+.v2 .v-head .hi{font-size:16px;font-weight:700}
+.v2 .v-head .dt{font-size:11px;color:#7b7f95;margin-top:2px}
+.v2 .v-head .av{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#6c5ce7,#a55eea);box-shadow:0 6px 16px rgba(108,92,231,.4)}
+.v2 .hero{margin:12px 16px 0;border-radius:24px;padding:20px;color:#fff;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#5b4bdb 0%,#7b5cf0 55%,#9b6bff 100%);box-shadow:0 16px 34px rgba(91,75,219,.42)}
+.v2 .hero::after{content:"";position:absolute;right:-40px;top:-40px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.13)}
+.v2 .hero .lbl{font-size:12px;font-weight:600;opacity:.85;letter-spacing:.02em}
+.v2 .hero .bal{font-size:32px;font-weight:800;letter-spacing:-1px;margin:6px 0 14px}
+.v2 .hero .chips{display:flex;gap:8px;position:relative;z-index:2}
+.v2 .hero .chip{flex:1;background:rgba(255,255,255,.16);backdrop-filter:blur(6px);border-radius:14px;padding:9px 10px}
+.v2 .hero .chip .c1{font-size:10px;opacity:.85}
+.v2 .hero .chip .c2{font-size:13px;font-weight:700;margin-top:2px}
+.v2 .sect{font-size:13px;font-weight:700;color:#15182a;padding:18px 20px 10px;display:flex;justify-content:space-between}
+.v2 .sect span{font-size:11px;font-weight:600;color:#6c5ce7}
+.v2 .opcard{margin:0 16px;display:flex;flex-direction:column;gap:8px}
+.v2 .op-row{background:#fff;border-radius:16px;padding:11px 13px;box-shadow:0 4px 14px rgba(80,70,160,.07)}
+.v2 .op-ic{background:#f0eefc;color:#6c5ce7}
+.v2 .op-sub{color:#8b8fa3}
+.v2 .tabbar{background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border-top:1px solid #e3e2ef}
+.v2 .tab{color:#b3b6c6}
+.v2 .tab.on{color:#6c5ce7}
+.v2 .fab{right:20px;bottom:72px;width:58px;height:58px;border-radius:20px;color:#fff;font-size:30px;
+  background:linear-gradient(135deg,#6c5ce7,#9b6bff);box-shadow:0 10px 24px rgba(108,92,231,.5)}
+
+/* ===================================================================
+   ВАРИАНТ 3 — ГРАФИТ (тёмная премиум, изумруд)
+=================================================================== */
+.v3 .screen{background:#0e1116;color:#e6e9ef}
+.v3 .statusbar{color:#e6e9ef}
+.v3 .v-head{padding:30px 20px 6px;display:flex;justify-content:space-between;align-items:center}
+.v3 .v-head .hi{font-size:16px;font-weight:700}
+.v3 .v-head .dt{font-size:11px;color:#6c7589;margin-top:2px}
+.v3 .v-head .av{width:34px;height:34px;border-radius:11px;background:#1a1f29;border:1px solid #2a313e;display:flex;align-items:center;justify-content:center;color:#2bd9a0;font-weight:800;font-size:14px}
+.v3 .card{margin:14px 16px 0;border-radius:22px;padding:20px;background:linear-gradient(160deg,#181d26,#12161d);border:1px solid #232a36}
+.v3 .card .lbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6c7589}
+.v3 .card .bal{font-size:32px;font-weight:800;letter-spacing:-1px;margin:6px 0 4px}
+.v3 .card .bal em{color:#2bd9a0;font-style:normal}
+.v3 .card .delta{font-size:12px;font-weight:600;color:#2bd9a0}
+.v3 .card .wls{margin-top:16px;border-top:1px solid #232a36;padding-top:6px}
+.v3 .wl{display:flex;align-items:center;gap:10px;padding:9px 0}
+.v3 .wl .ic{width:30px;height:30px;border-radius:9px;background:#1c222c;display:flex;align-items:center;justify-content:center;font-size:14px}
+.v3 .wl .nm{flex:1;font-size:13px;font-weight:500;color:#c7cdd9}
+.v3 .wl .am{font-size:13px;font-weight:700}
+.v3 .sect{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6c7589;padding:18px 20px 8px}
+.v3 .op-row{padding:9px 18px}
+.v3 .op-ic{background:#1a1f29}
+.v3 .op-name{color:#e6e9ef}
+.v3 .op-sub{color:#6c7589}
+.v3 .tabbar{background:#0b0e13;border-top:1px solid #1c222c}
+.v3 .tab{color:#525c70}
+.v3 .tab.on{color:#2bd9a0}
+.v3 .fab{right:20px;bottom:72px;width:56px;height:56px;border-radius:18px;background:#2bd9a0;color:#08130d;font-size:30px;box-shadow:0 10px 24px rgba(43,217,160,.35)}
+
+/* ===================================================================
+   ВАРИАНТ 4 — ТЁПЛЫЙ РЕДАКТОРСКИЙ (крем, типографика)
+=================================================================== */
+.v4 .screen{background:#f3efe7;color:#1d1a15}
+.v4 .statusbar{color:#1d1a15}
+.v4 .v-head{padding:30px 22px 4px}
+.v4 .v-head .hi{font-size:14px;font-weight:600;color:#8a8276;letter-spacing:.01em}
+.v4 .v-head .big{font-size:22px;font-weight:800;letter-spacing:-.6px;margin-top:2px}
+.v4 .bal-wrap{padding:18px 22px 6px}
+.v4 .bal-wrap .lbl{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#b5511f}
+.v4 .bal-wrap .bal{font-size:38px;font-weight:800;letter-spacing:-1.5px;line-height:1;margin-top:8px}
+.v4 .bal-wrap .bal .cur{font-size:22px;color:#a59a87}
+.v4 .rule{height:1px;background:#ddd5c7;margin:16px 22px 0}
+.v4 .wl{display:flex;align-items:center;gap:12px;padding:11px 22px;border-bottom:1px solid #e6dfd2}
+.v4 .wl .ic{width:30px;height:30px;border-radius:50%;background:#fff;border:1px solid #e1d9c9;display:flex;align-items:center;justify-content:center;font-size:14px}
+.v4 .wl .nm{flex:1;font-size:14px;font-weight:600}
+.v4 .wl .am{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.v4 .sect{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#8a8276;padding:18px 22px 4px}
+.v4 .op-row{padding:11px 22px;border-bottom:1px solid #e6dfd2}
+.v4 .op-ic{width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid #e1d9c9}
+.v4 .op-name{font-weight:600}
+.v4 .op-sub{color:#a59a87}
+.v4 .op-amt{font-variant-numeric:tabular-nums}
+.v4 .tabbar{background:#ece6da;border-top:1px solid #ddd5c7}
+.v4 .tab{color:#b3aa99}
+.v4 .tab.on{color:#b5511f}
+.v4 .fab{right:22px;bottom:72px;width:54px;height:54px;border-radius:50%;background:#1d1a15;color:#f3efe7;font-size:28px;box-shadow:0 8px 20px rgba(29,26,21,.3)}
+
+/* ===================================================================
+   ВАРИАНТ 5 — ДАТА-ФОРВАРД (деловой дашборд, бирюза)
+=================================================================== */
+.v5 .screen{background:#ffffff;color:#0f172a}
+.v5 .statusbar{color:#0f172a}
+.v5 .v-head{padding:28px 18px 4px;display:flex;justify-content:space-between;align-items:center}
+.v5 .v-head .hi{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b}
+.v5 .v-head .dt{font-size:15px;font-weight:700;margin-top:2px}
+.v5 .v-head .av{width:32px;height:32px;border-radius:9px;background:#0f172a;color:#2dd4bf;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+.v5 .card{margin:12px 16px 0;border:1px solid #e7eaf0;border-radius:16px;overflow:hidden}
+.v5 .card .top{padding:16px;border-bottom:1px solid #e7eaf0}
+.v5 .card .lbl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b}
+.v5 .card .bal{font-size:31px;font-weight:800;letter-spacing:-1px;margin-top:5px;font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.v5 .card .bal .cur{color:#94a3b8;font-size:20px}
+.v5 .card .row2{display:flex}
+.v5 .card .kpi{flex:1;padding:11px 16px}
+.v5 .card .kpi+.kpi{border-left:1px solid #e7eaf0}
+.v5 .card .kpi .k1{font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.06em}
+.v5 .card .kpi .k2{font-size:15px;font-weight:800;margin-top:3px;font-variant-numeric:tabular-nums}
+.v5 .card .kpi .up{color:#0d9488}
+.v5 .card .kpi .dn{color:#e11d48}
+.v5 .sect{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;padding:18px 18px 6px;display:flex;justify-content:space-between}
+.v5 .op-row{padding:9px 16px;border-bottom:1px solid #f1f3f7}
+.v5 .op-ic{border-radius:9px;background:#f1f5f9}
+.v5 .op-name{font-weight:600}
+.v5 .op-sub{color:#94a3b8;font-variant-numeric:tabular-nums}
+.v5 .op-amt{font-variant-numeric:tabular-nums}
+.v5 .tabbar{background:#fff;border-top:1px solid #e7eaf0}
+.v5 .tab{color:#cbd5e1}
+.v5 .tab.on{color:#0d9488}
+.v5 .fab{right:18px;bottom:72px;width:52px;height:52px;border-radius:14px;background:#0d9488;color:#fff;font-size:28px;box-shadow:0 8px 20px rgba(13,148,136,.38)}
+
+/* подвал */
+.footer{max-width:760px;margin:64px auto 0;text-align:center;color:#7c8499;font-size:14px;line-height:1.7}
+.footer b{color:#cdd3e0}
+@media(max-width:640px){.page-head h1{font-size:30px}body{padding:32px 14px 60px}}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div class="kicker">MyCash · Дизайн-концепты</div>
+  <h1>5 направлений дизайна <span>MyCash</span></h1>
+  <p>Каждый вариант показан на реальном главном экране приложения — баланс, кошельки, операции и нижнее меню. Так их можно честно сравнить. Выбери, какое ощущение ближе, и я доведу его до готового приложения.</p>
+</div>
+
+<div class="grid">
+
+  <!-- ============ ВАРИАНТ 1 ============ -->
+  <div class="cell v1">
+    <div class="phone"><div class="notch"></div><div class="screen"><div class="scr-body">
+      <div class="statusbar"><span>9:41</span><span class="dots"><i style="background:#1C1C1E"></i><i style="background:#1C1C1E"></i><i style="background:#1C1C1E"></i></span></div>
+      <div class="v-head">
+        <div><div class="hi">Здравствуйте! 👋</div><div class="dt">Понедельник, 9 июня</div></div>
+        <div class="logo">M</div>
+      </div>
+      <div class="sect">Мои финансы</div>
+      <div class="card">
+        <div class="bal"><small>Всего на счетах</small>1 248 500 ₽</div>
+        <div style="margin-top:14px">
+          <div class="wl"><span class="ic" style="background:#E8F0FF">🏦</span><span class="nm">Сбер · основной</span><span class="am">842 000 ₽</span></div>
+          <div class="wl"><span class="ic" style="background:#FFF0E8">💳</span><span class="nm">Т-Банк</span><span class="am">311 500 ₽</span></div>
+          <div class="wl"><span class="ic" style="background:#E8FBEF">💵</span><span class="nm">Касса</span><span class="am">95 000 ₽</span></div>
+        </div>
+      </div>
+      <div class="sect">Операции</div>
+      <div class="opcard">
+        <div class="op-row"><span class="op-ic">📥</span><div class="op-mid"><div class="op-name">Оплата от клиента</div><div class="op-sub">Сбер · сегодня</div></div><span class="op-amt" style="color:#34C759">+85 000 ₽</span></div>
+        <div class="op-row"><span class="op-ic">🏠</span><div class="op-mid"><div class="op-name">Аренда офиса</div><div class="op-sub">Т-Банк · вчера</div></div><span class="op-amt" style="color:#FF3B30">−50 000 ₽</span></div>
+        <div class="op-row"><span class="op-ic">📣</span><div class="op-mid"><div class="op-name">Реклама</div><div class="op-sub">Касса · 7 июня</div></div><span class="op-amt" style="color:#FF3B30">−12 400 ₽</span></div>
+      </div>
+      <div class="fab">+</div>
+      <div style="flex:1"></div>
+      <div class="tabbar">
+        <div class="tab on">📊<span>Главная</span></div>
+        <div class="tab">📈<span>Аналитика</span></div>
+        <div class="tab">💼<span>Счета</span></div>
+        <div class="tab">👤<span>Профиль</span></div>
+      </div>
+    </div></div></div>
+    <div class="meta"><span class="num">1</span><h3>Чистый минимал</h3><span class="tag">Apple-style</span>
+      <p>Развитие текущего стиля: много воздуха, мягкие тени, синий акцент. Спокойно, привычно, дорого. Самый безопасный путь.</p></div>
+  </div>
+
+  <!-- ============ ВАРИАНТ 2 ============ -->
+  <div class="cell v2">
+    <div class="phone"><div class="notch"></div><div class="screen"><div class="scr-body">
+      <div class="statusbar"><span>9:41</span><span class="dots"><i style="background:#15182a"></i><i style="background:#15182a"></i><i style="background:#15182a"></i></span></div>
+      <div class="v-head">
+        <div><div class="hi">Здравствуйте 👋</div><div class="dt">9 июня, понедельник</div></div>
+        <div class="av"></div>
+      </div>
+      <div class="hero">
+        <div class="lbl">Всего на счетах</div>
+        <div class="bal">1 248 500 ₽</div>
+        <div class="chips">
+          <div class="chip"><div class="c1">Доход, июнь</div><div class="c2">+420 000</div></div>
+          <div class="chip"><div class="c1">Расход, июнь</div><div class="c2">−268 000</div></div>
+        </div>
+      </div>
+      <div class="sect">Операции<span>Все →</span></div>
+      <div class="opcard">
+        <div class="op-row"><span class="op-ic">📥</span><div class="op-mid"><div class="op-name">Оплата от клиента</div><div class="op-sub">Сбер · сегодня</div></div><span class="op-amt" style="color:#16a34a">+85 000 ₽</span></div>
+        <div class="op-row"><span class="op-ic">🏠</span><div class="op-mid"><div class="op-name">Аренда офиса</div><div class="op-sub">Т-Банк · вчера</div></div><span class="op-amt" style="color:#dc2626">−50 000 ₽</span></div>
+        <div class="op-row"><span class="op-ic">📣</span><div class="op-mid"><div class="op-name">Реклама</div><div class="op-sub">Касса · 7 июня</div></div><span class="op-amt" style="color:#dc2626">−12 400 ₽</span></div>
+      </div>
+      <div class="fab">+</div>
+      <div style="flex:1"></div>
+      <div class="tabbar">
+        <div class="tab on">📊<span>Главная</span></div>
+        <div class="tab">📈<span>Аналитика</span></div>
+        <div class="tab">💼<span>Счета</span></div>
+        <div class="tab">👤<span>Профиль</span></div>
+      </div>
+    </div></div></div>
+    <div class="meta"><span class="num">2</span><h3>Финтех-индиго</h3><span class="tag">Градиент</span>
+      <p>Яркая карта-герой с балансом и стеклянными плитками. Технологично и современно, как у необанков. Цепляет, выглядит «свежо».</p></div>
+  </div>
+
+  <!-- ============ ВАРИАНТ 3 ============ -->
+  <div class="cell v3">
+    <div class="phone"><div class="notch"></div><div class="screen"><div class="scr-body">
+      <div class="statusbar"><span>9:41</span><span class="dots"><i style="background:#e6e9ef"></i><i style="background:#e6e9ef"></i><i style="background:#e6e9ef"></i></span></div>
+      <div class="v-head">
+        <div><div class="hi">Здравствуйте 👋</div><div class="dt">9 июня, понедельник</div></div>
+        <div class="av">M</div>
+      </div>
+      <div class="card">
+        <div class="lbl">Всего на счетах</div>
+        <div class="bal">1 248 500 <em>₽</em></div>
+        <div class="delta">↑ +152 000 ₽ за июнь</div>
+        <div class="wls">
+          <div class="wl"><span class="ic">🏦</span><span class="nm">Сбер · основной</span><span class="am">842 000 ₽</span></div>
+          <div class="wl"><span class="ic">💳</span><span class="nm">Т-Банк</span><span class="am">311 500 ₽</span></div>
+          <div class="wl"><span class="ic">💵</span><span class="nm">Касса</span><span class="am">95 000 ₽</span></div>
+        </div>
+      </div>
+      <div class="sect">Последние операции</div>
+      <div>
+        <div class="op-row"><span class="op-ic">📥</span><div class="op-mid"><div class="op-name">Оплата от клиента</div><div class="op-sub">Сбер · сегодня</div></div><span class="op-amt" style="color:#2bd9a0">+85 000 ₽</span></div>
+        <div class="op-row"><span class="op-ic">🏠</span><div class="op-mid"><div class="op-name">Аренда офиса</div><div class="op-sub">Т-Банк · вчера</div></div><span class="op-amt" style="color:#ff6b6b">−50 000 ₽</span></div>
+        <div class="op-row"><span class="op-ic">📣</span><div class="op-mid"><div class="op-name">Реклама</div><div class="op-sub">Касса · 7 июня</div></div><span class="op-amt" style="color:#ff6b6b">−12 400 ₽</span></div>
+      </div>
+      <div class="fab">+</div>
+      <div style="flex:1"></div>
+      <div class="tabbar">
+        <div class="tab on">📊<span>Главная</span></div>
+        <div class="tab">📈<span>Аналитика</span></div>
+        <div class="tab">💼<span>Счета</span></div>
+        <div class="tab">👤<span>Профиль</span></div>
+      </div>
+    </div></div></div>
+    <div class="meta"><span class="num">3</span><h3>Графит</h3><span class="tag">Тёмная премиум</span>
+      <p>Глубокий графит с изумрудным акцентом. Ощущение серьёзного приват-банкинга, цифры на первом плане. Эффектно вечером и на витрине.</p></div>
+  </div>
+
+  <!-- ============ ВАРИАНТ 4 ============ -->
+  <div class="cell v4">
+    <div class="phone"><div class="notch"></div><div class="screen"><div class="scr-body">
+      <div class="statusbar"><span>9:41</span><span class="dots"><i style="background:#1d1a15"></i><i style="background:#1d1a15"></i><i style="background:#1d1a15"></i></span></div>
+      <div class="v-head">
+        <div class="hi">Понедельник, 9 июня</div>
+        <div class="big">Ваши финансы</div>
+      </div>
+      <div class="bal-wrap">
+        <div class="lbl">Всего на счетах</div>
+        <div class="bal">1 248 500<span class="cur"> ₽</span></div>
+      </div>
+      <div class="rule"></div>
+      <div class="wl"><span class="ic">🏦</span><span class="nm">Сбер · основной</span><span class="am">842 000 ₽</span></div>
+      <div class="wl"><span class="ic">💳</span><span class="nm">Т-Банк</span><span class="am">311 500 ₽</span></div>
+      <div class="wl"><span class="ic">💵</span><span class="nm">Касса</span><span class="am">95 000 ₽</span></div>
+      <div class="sect">Операции</div>
+      <div class="op-row"><span class="op-ic">📥</span><div class="op-mid"><div class="op-name">Оплата от клиента</div><div class="op-sub">Сбер · сегодня</div></div><span class="op-amt" style="color:#2f7d4f">+85 000</span></div>
+      <div class="op-row"><span class="op-ic">🏠</span><div class="op-mid"><div class="op-name">Аренда офиса</div><div class="op-sub">Т-Банк · вчера</div></div><span class="op-amt" style="color:#b5511f">−50 000</span></div>
+      <div class="op-row" style="border:none"><span class="op-ic">📣</span><div class="op-mid"><div class="op-name">Реклама</div><div class="op-sub">Касса · 7 июня</div></div><span class="op-amt" style="color:#b5511f">−12 400</span></div>
+      <div class="fab">+</div>
+      <div style="flex:1"></div>
+      <div class="tabbar">
+        <div class="tab on">📊<span>Главная</span></div>
+        <div class="tab">📈<span>Аналитика</span></div>
+        <div class="tab">💼<span>Счета</span></div>
+        <div class="tab">👤<span>Профиль</span></div>
+      </div>
+    </div></div></div>
+    <div class="meta"><span class="num">4</span><h3>Тёплый редакторский</h3><span class="tag">Типографика</span>
+      <p>Кремовый фон, крупные заголовки, один тёплый акцент. Спокойный, «человечный» и небанальный — выделяется среди холодных финтех-приложений.</p></div>
+  </div>
+
+  <!-- ============ ВАРИАНТ 5 ============ -->
+  <div class="cell v5">
+    <div class="phone"><div class="notch"></div><div class="screen"><div class="scr-body">
+      <div class="statusbar"><span>9:41</span><span class="dots"><i style="background:#0f172a"></i><i style="background:#0f172a"></i><i style="background:#0f172a"></i></span></div>
+      <div class="v-head">
+        <div><div class="hi">Главная</div><div class="dt">9 июня 2026</div></div>
+        <div class="av">M</div>
+      </div>
+      <div class="card">
+        <div class="top">
+          <div class="lbl">Всего на счетах</div>
+          <div class="bal">1 248 500<span class="cur"> ₽</span></div>
+        </div>
+        <div class="row2">
+          <div class="kpi"><div class="k1">Доход · июнь</div><div class="k2 up">+420 000</div></div>
+          <div class="kpi"><div class="k1">Расход · июнь</div><div class="k2 dn">−268 000</div></div>
+          <div class="kpi"><div class="k1">Прибыль</div><div class="k2 up">+152 000</div></div>
+        </div>
+      </div>
+      <div class="sect">Операции<span style="color:#0d9488">Все →</span></div>
+      <div class="op-row"><span class="op-ic">📥</span><div class="op-mid"><div class="op-name">Оплата от клиента</div><div class="op-sub">Сбер · 09.06</div></div><span class="op-amt" style="color:#0d9488">+85 000</span></div>
+      <div class="op-row"><span class="op-ic">🏠</span><div class="op-mid"><div class="op-name">Аренда офиса</div><div class="op-sub">Т-Банк · 08.06</div></div><span class="op-amt" style="color:#e11d48">−50 000</span></div>
+      <div class="op-row"><span class="op-ic">📣</span><div class="op-mid"><div class="op-name">Реклама</div><div class="op-sub">Касса · 07.06</div></div><span class="op-amt" style="color:#e11d48">−12 400</span></div>
+      <div class="fab">+</div>
+      <div style="flex:1"></div>
+      <div class="tabbar">
+        <div class="tab on">📊<span>Главная</span></div>
+        <div class="tab">📈<span>Аналитика</span></div>
+        <div class="tab">💼<span>Счета</span></div>
+        <div class="tab">👤<span>Профиль</span></div>
+      </div>
+    </div></div></div>
+    <div class="meta"><span class="num">5</span><h3>Дата-форвард</h3><span class="tag">Деловой дашборд</span>
+      <p>Чёткая сетка, моноширинные цифры, KPI-плитки (доход/расход/прибыль) сразу на главной. Выглядит как серьёзный рабочий инструмент для финансов.</p></div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Напиши номер варианта, который нравится больше всего — например <b>«нравится 2 и 3»</b>.<br>
+  Можно смешивать: взять баланс-карту из одного, а список операций из другого.<br>
+  После выбора я аккуратно применю стиль к настоящему приложению.
+</div>
+
+</body>
+</html>
