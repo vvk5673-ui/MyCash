@@ -61,6 +61,8 @@ try {
 } catch (e) {}
 
 function setClosingGuard(on) {
+    // Блокировка прокрутки фона — работает и вне Telegram (до проверки tg)
+    if (typeof lockBgScroll === 'function') lockBgScroll(on);
     try {
         if (!tg) return;
         if (on) {
