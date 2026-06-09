@@ -525,7 +525,7 @@ function renderWalletsRow() {
     // Строка добавления нового счёта (только онлайн — счета хранятся на сервере)
     html += '<div class="wallet-line wallet-line-add" onclick="openNewWallet()" style="cursor:pointer;color:var(--accent)">' +
         '<span style="flex-shrink:0">' + lucideIcon('plus', 18, '#007AFF') + '</span>' +
-        '<span class="wallet-line-name">Добавить счёт</span>' +
+        '<span class="wallet-line-name">Добавить кошелёк</span>' +
         '</div>';
 
     row.innerHTML = html;
