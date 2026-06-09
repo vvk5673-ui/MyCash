@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=80">
+    <link rel="stylesheet" href="style.css?v=81">
 </head>
 <body>
 
@@ -292,17 +292,13 @@
                 <button onclick="closeWalletEdit()" style="width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">✕</button>
             </div>
             <div class="form-group">
-                <label class="form-label">Банк</label>
-                <button type="button" class="bank-select-btn" id="walletBankBtn" onclick="openBankPicker()">
-                    <span class="bank-select-ico" id="walletBankIco"></span>
-                    <span class="bank-select-name" id="walletBankName">Выбрать банк</span>
-                    <span class="bank-select-arrow">›</span>
-                </button>
-                <div style="font-size:12px;color:var(--text2);margin-top:6px">Логотип банка появится на счёте сам. Или выберите «Без банка» и задайте своё название.</div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Название</label>
-                <input class="form-input" type="text" id="walletEditName" placeholder="Например: Сбер, Тинькофф" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
+                <label class="form-label">Название кошелька</label>
+                <div class="wname-row">
+                    <span class="wname-ico" id="walletBankIco"></span>
+                    <input class="wname-input" type="text" id="walletEditName" placeholder="Впишите название" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
+                    <button type="button" class="wname-bank" id="walletBankBtn" onclick="openBankPicker()">Банк ›</button>
+                </div>
+                <div style="font-size:12px;color:var(--text2);margin-top:6px">Выберите банк — логотип появится сам, или впишите своё название.</div>
             </div>
             <div class="form-group">
                 <label class="form-label">Направление</label>
@@ -579,13 +575,13 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=80"></script>
+    <script src="api.js?v=81"></script>
     <!-- app.js разбит на 6 частей (общая область видимости, порядок подключения важен) -->
-    <script src="app-core.js?v=80"></script>
-    <script src="app-data.js?v=80"></script>
-    <script src="app-operations.js?v=80"></script>
-    <script src="app-dashboard.js?v=80"></script>
-    <script src="app-wallets.js?v=80"></script>
-    <script src="app-main.js?v=80"></script>
+    <script src="app-core.js?v=81"></script>
+    <script src="app-data.js?v=81"></script>
+    <script src="app-operations.js?v=81"></script>
+    <script src="app-dashboard.js?v=81"></script>
+    <script src="app-wallets.js?v=81"></script>
+    <script src="app-main.js?v=81"></script>
 </body>
 </html>

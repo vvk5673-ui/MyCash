@@ -24,16 +24,14 @@ let walletSaveBusy = false;   // защита от двойного сохран
 function setBankUI(domain) {
     editWalletBank = domain || null;
     const ico = document.getElementById('walletBankIco');
-    const nameLbl = document.getElementById('walletBankName');
     const colorGroup = document.getElementById('walletColorGroup');
     if (editWalletBank) {
-        const b = bankByDomain(editWalletBank);
-        ico.innerHTML = bankFavicon(editWalletBank, 28);
-        nameLbl.textContent = b ? b.name : editWalletBank;
+        // банк выбран — слева логотип, выбор цвета прячем
+        if (ico) ico.innerHTML = bankFavicon(editWalletBank, 30);
         if (colorGroup) colorGroup.style.display = 'none';
     } else {
-        ico.innerHTML = '';
-        nameLbl.textContent = 'Выбрать банк';
+        // без банка — значок-кошелёк в выбранном цвете, выбор цвета доступен
+        if (ico) ico.innerHTML = walletSquircle(editWalletColor || '#007AFF', 30);
         if (colorGroup) colorGroup.style.display = '';
     }
 }
@@ -185,6 +183,11 @@ function selectWalletColor(color) {
     document.querySelectorAll('.wallet-color-btn').forEach(function(btn) {
         btn.classList.toggle('active', btn.getAttribute('data-color') === color);
     });
+    // обновить значок-кошелёк слева в строке названия (если банк не выбран)
+    if (!editWalletBank) {
+        const ico = document.getElementById('walletBankIco');
+        if (ico) ico.innerHTML = walletSquircle(color, 30);
+    }
 }
 
 async function saveWalletEdit() {
