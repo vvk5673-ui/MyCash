@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyCash — анимированный логотип с названием</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;background:#0b0d12;color:#e7e9ee;-webkit-font-smoothing:antialiased;padding:48px 20px 90px}
+.page-head{max-width:900px;margin:0 auto 14px;text-align:center}
+.page-head .kicker{font-size:13px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#7c8499;margin-bottom:14px}
+.page-head h1{font-size:38px;font-weight:800;letter-spacing:-1px;line-height:1.12;margin-bottom:14px}
+.page-head h1 span{background:linear-gradient(90deg,#6c5ce7,#2bd9a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.page-head p{font-size:16px;line-height:1.6;color:#aab1c2;max-width:640px;margin:0 auto}
+.hint{max-width:640px;margin:18px auto 0;font-size:13px;color:#7c8499;background:#12151d;border:1px solid #1e2230;border-radius:14px;padding:12px 16px;line-height:1.55}
+.hint b{color:#cdd3e0}
+
+.scenes{max-width:980px;margin:42px auto 0;display:flex;flex-direction:column;gap:26px}
+.scene{border:1px solid #1e2230;border-radius:24px;overflow:hidden;background:#13161f}
+.stage{height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;position:relative}
+.stage.dark{background:radial-gradient(130% 120% at 50% 35%,#1c2233 0,#0c0f16 75%)}
+.stage.light{background:radial-gradient(130% 120% at 50% 35%,#ffffff 0,#eef1f6 80%)}
+.bar{display:flex;align-items:center;gap:14px;padding:14px 22px;border-top:1px solid #1e2230}
+.bar .nm{font-size:16px;font-weight:700}
+.bar .nm .tag{font-size:11px;font-weight:600;color:#8a93a8;background:#161a26;border-radius:20px;padding:3px 9px;margin-left:9px;vertical-align:middle}
+.bar .idea{font-size:13px;color:#9aa2b4;margin-top:3px;line-height:1.5}
+.bar .txt{flex:1;min-width:0}
+.replay{font-size:12px;font-weight:600;color:#cdd3e0;border:1px solid #2a2f3e;background:#171a24;border-radius:20px;padding:8px 16px;cursor:pointer;user-select:none;white-space:nowrap}
+.replay:hover{border-color:#3a4050}
+svg{display:block;overflow:visible}
+
+/* связка иконка+текст */
+.lock{display:flex;align-items:center;gap:18px}
+.lock.col{flex-direction:column;gap:14px}
+.wm{font-size:46px;font-weight:800;letter-spacing:-1.5px;display:flex}
+.wm span{display:inline-block}
+.wm.dark{color:#f4f6fb}
+.wm.ink{color:#14182a}
+.tagline{font-size:14px;font-weight:600;letter-spacing:.04em}
+.tagline.dim{color:#8a93a8}
+.tagline.ink{color:#6b7a90}
+@media(max-width:560px){.page-head h1{font-size:28px}.wm{font-size:34px}body{padding:32px 14px}}
+
+/* ===================== АНИМАЦИИ ===================== */
+@keyframes eq{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+@keyframes flow{from{transform:translateX(0)}to{transform:translateX(-40px)}}
+@keyframes ripple{0%{transform:scale(.3);opacity:.9}100%{transform:scale(1);opacity:0}}
+@keyframes blob{0%,100%{border-radius:46% 54% 58% 42%/52% 44% 56% 48%;transform:rotate(0)}50%{border-radius:54% 46% 42% 58%/44% 56% 48% 52%;transform:rotate(8deg)}}
+@keyframes iconPop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes letterIn{0%{opacity:0;transform:translateY(18px);filter:blur(5px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes maskIn{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes slideL{0%{opacity:0;transform:translateX(-46px)}100%{opacity:1;transform:translateX(0)}}
+@keyframes slideR{0%{opacity:0;transform:translateX(46px)}100%{opacity:1;transform:translateX(0)}}
+@keyframes drawU{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popXY{0%{transform:scale(0);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+
+/* запуск — только когда у сцены класс .play */
+.blob{animation:blob 4s ease-in-out infinite}
+.scene.play [data-a="iconPop"]{opacity:0;animation:iconPop .7s cubic-bezier(.5,1.6,.4,1) forwards}
+.scene.play [data-a="eq"]{transform-box:fill-box;transform-origin:50% 100%;animation:eq 1.1s ease-in-out infinite;animation-delay:var(--d,0s)}
+.scene.play [data-a="flow"]{animation:flow 1.1s linear infinite}
+.scene.play [data-a="ripple"]{transform-box:fill-box;transform-origin:center;animation:ripple 1.8s ease-out infinite;animation-delay:var(--d,0s)}
+.scene.play [data-a="letter"]{opacity:0;animation:letterIn .55s cubic-bezier(.3,1.1,.4,1) forwards;animation-delay:var(--d,0s)}
+.scene.play [data-a="mask"]{animation:maskIn .9s cubic-bezier(.6,0,.2,1) forwards;animation-delay:var(--d,0s);clip-path:inset(0 100% 0 0)}
+.scene.play [data-a="slideL"]{opacity:0;animation:slideL .7s cubic-bezier(.3,1.2,.4,1) forwards;animation-delay:var(--d,0s)}
+.scene.play [data-a="slideR"]{opacity:0;animation:slideR .7s cubic-bezier(.3,1.2,.4,1) forwards;animation-delay:var(--d,0s)}
+.scene.play [data-a="drawU"]{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:drawU 1s cubic-bezier(.6,0,.2,1) forwards;animation-delay:var(--d,0s)}
+.scene.play [data-a="fade"]{opacity:0;animation:fadeIn .6s ease forwards;animation-delay:var(--d,0s)}
+.scene.play [data-a="pop"]{transform-box:fill-box;transform-origin:center;opacity:0;animation:popXY .6s cubic-bezier(.5,1.6,.4,1) forwards;animation-delay:var(--d,0s)}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div class="kicker">MyCash · Анимированный логотип</div>
+  <h1>Логотип <span>+ название в движении</span></h1>
+  <p>Полная связка «иконка + надпись MyCash», анимированная как заставка приложения или концовка видео-анонса. Ниже — 5 сцен с разными способами появления названия.</p>
+  <div class="hint">▶ Сцены проигрываются по кругу автоматически. Кнопка <b>«↻ Повторить»</b> перезапускает конкретную сцену. Это готовые «раскадровки» для splash-экрана и ролика.</div>
+</div>
+
+<div class="scenes" id="scenes">
+
+  <!-- ============ СЦЕНА 1: КАПЛЯ + БУКВЫ ВЫЕЗЖАЮТ ============ -->
+  <div class="scene play" id="s1">
+    <div class="stage dark">
+      <div class="lock">
+        <div style="width:76px;height:76px;position:relative" data-a="iconPop">
+          <div class="blob" style="position:absolute;inset:0;background:linear-gradient(135deg,#6c5ce7,#2bd9a0);box-shadow:0 12px 36px rgba(108,92,231,.45)"></div>
+          <svg width="76" height="76" viewBox="0 0 120 120" style="position:absolute;inset:0"><path data-a="flow" d="M10,60 Q22,44 34,60 T58,60 T82,60 T106,60 T130,60" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>
+        </div>
+        <div class="wm dark">
+          <span data-a="letter" style="--d:.55s">M</span><span data-a="letter" style="--d:.62s">y</span><span data-a="letter" style="--d:.69s">C</span><span data-a="letter" style="--d:.76s">a</span><span data-a="letter" style="--d:.83s">s</span><span data-a="letter" style="--d:.9s">h</span>
+        </div>
+      </div>
+      <div class="tagline dim" data-a="fade" style="--d:1.15s">Учёт финансов · голосом</div>
+    </div>
+    <div class="bar">
+      <div class="txt">
+        <div class="nm">Капля + буквы<span class="tag">AI-орб</span></div>
+        <div class="idea">Иконка-капля «выпрыгивает», затем буквы названия по очереди выезжают снизу с лёгким размытием. Премиально и плавно.</div>
+      </div>
+      <span class="replay" onclick="play('s1')">↻ Повторить</span>
+    </div>
+  </div>
+
+  <!-- ============ СЦЕНА 2: КРУГОВАЯ ВОЛНА + ПРОЯВЛЕНИЕ МАСКОЙ ============ -->
+  <div class="scene play" id="s2">
+    <div class="stage dark">
+      <div class="lock">
+        <svg width="80" height="80" viewBox="0 0 100 100" data-a="iconPop">
+          <defs><linearGradient id="a2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs>
+          <g fill="url(#a2)">
+            <g transform="rotate(0 50 50)"><rect data-a="eq" style="--d:0s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(45 50 50)"><rect data-a="eq" style="--d:.15s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(90 50 50)"><rect data-a="eq" style="--d:.3s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(135 50 50)"><rect data-a="eq" style="--d:.45s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(180 50 50)"><rect data-a="eq" style="--d:.3s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(225 50 50)"><rect data-a="eq" style="--d:.45s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(270 50 50)"><rect data-a="eq" style="--d:.3s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(315 50 50)"><rect data-a="eq" style="--d:.15s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          </g>
+          <text x="50" y="63" font-size="30" font-weight="800" fill="url(#a2)" text-anchor="middle" font-family="Segoe UI,sans-serif">₽</text>
+        </svg>
+        <div class="wm" data-a="mask" style="--d:.5s;background:linear-gradient(90deg,#6c5ce7,#2bd9a0);-webkit-background-clip:text;background-clip:text;color:transparent">MyCash</div>
+      </div>
+      <div class="tagline dim" data-a="fade" style="--d:1.3s">Скажи вслух — учтено</div>
+    </div>
+    <div class="bar">
+      <div class="txt">
+        <div class="nm">Круговая волна + проявление<span class="tag">Маска</span></div>
+        <div class="idea">Голосовая волна пульсирует вокруг рубля, название проявляется слева направо градиентом — как «луч» открывает буквы.</div>
+      </div>
+      <span class="replay" onclick="play('s2')">↻ Повторить</span>
+    </div>
+  </div>
+
+  <!-- ============ СЦЕНА 3: ВОЛНА В M + СЛОВА СХОДЯТСЯ (светлый) ============ -->
+  <div class="scene play" id="s3">
+    <div class="stage light">
+      <div class="lock">
+        <svg width="78" height="78" viewBox="0 0 100 100" data-a="iconPop">
+          <defs>
+            <linearGradient id="a3" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient>
+            <clipPath id="cm3"><text x="50" y="78" font-size="86" font-weight="800" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif">M</text></clipPath>
+          </defs>
+          <g clip-path="url(#cm3)" fill="url(#a3)">
+            <rect data-a="eq" style="--d:0s" x="12" y="20" width="9" height="70" rx="4"/>
+            <rect data-a="eq" style="--d:.15s" x="24" y="20" width="9" height="70" rx="4"/>
+            <rect data-a="eq" style="--d:.3s" x="36" y="20" width="9" height="70" rx="4"/>
+            <rect data-a="eq" style="--d:.45s" x="48" y="20" width="9" height="70" rx="4"/>
+            <rect data-a="eq" style="--d:.3s" x="60" y="20" width="9" height="70" rx="4"/>
+            <rect data-a="eq" style="--d:.15s" x="72" y="20" width="9" height="70" rx="4"/>
+            <rect data-a="eq" style="--d:0s" x="84" y="20" width="9" height="70" rx="4"/>
+          </g>
+        </svg>
+        <div class="wm ink">
+          <span data-a="slideL" style="--d:.5s;opacity:.6">My</span><span data-a="slideR" style="--d:.5s">Cash</span>
+        </div>
+      </div>
+      <div class="tagline ink" data-a="fade" style="--d:1.2s">Деньги бизнеса под контролем</div>
+    </div>
+    <div class="bar">
+      <div class="txt">
+        <div class="nm">Волна в M + слова сходятся<span class="tag">Светлый</span></div>
+        <div class="idea">Буква «M» наполнена живой волной. «My» въезжает слева, «Cash» справа — слова встречаются в центре. Показан на светлом фоне под твой бренд.</div>
+      </div>
+      <span class="replay" onclick="play('s3')">↻ Повторить</span>
+    </div>
+  </div>
+
+  <!-- ============ СЦЕНА 4: АУДИОДОРОЖКА + БУКВЫ + ВОЛНА-ПОДЧЁРКИВАНИЕ ============ -->
+  <div class="scene play" id="s4">
+    <div class="stage dark">
+      <div class="lock col">
+        <svg width="150" height="46" viewBox="0 0 140 50" data-a="fade" style="--d:0s">
+          <defs><linearGradient id="a4" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5b8cff"/><stop offset=".5" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs>
+          <g fill="url(#a4)">
+            <rect data-a="eq" style="--d:0s" x="6" y="18" width="5" height="14" rx="2.5"/>
+            <rect data-a="eq" style="--d:.08s" x="16" y="12" width="5" height="26" rx="2.5"/>
+            <rect data-a="eq" style="--d:.16s" x="26" y="4" width="5" height="42" rx="2.5"/>
+            <rect data-a="eq" style="--d:.24s" x="36" y="16" width="5" height="18" rx="2.5"/>
+            <rect data-a="eq" style="--d:.32s" x="46" y="20" width="5" height="10" rx="2.5"/>
+            <rect data-a="eq" style="--d:.4s" x="56" y="10" width="5" height="30" rx="2.5"/>
+            <rect data-a="eq" style="--d:.48s" x="66" y="2" width="5" height="46" rx="2.5"/>
+            <rect data-a="eq" style="--d:.4s" x="76" y="12" width="5" height="26" rx="2.5"/>
+            <rect data-a="eq" style="--d:.32s" x="86" y="18" width="5" height="14" rx="2.5"/>
+            <rect data-a="eq" style="--d:.24s" x="96" y="8" width="5" height="34" rx="2.5"/>
+            <rect data-a="eq" style="--d:.16s" x="106" y="16" width="5" height="18" rx="2.5"/>
+            <rect data-a="eq" style="--d:.08s" x="116" y="20" width="5" height="12" rx="2.5"/>
+            <rect data-a="eq" style="--d:0s" x="126" y="19" width="5" height="14" rx="2.5"/>
+          </g>
+        </svg>
+        <div class="wm dark" style="font-size:42px">
+          <span data-a="letter" style="--d:.5s">M</span><span data-a="letter" style="--d:.57s">y</span><span data-a="letter" style="--d:.64s">C</span><span data-a="letter" style="--d:.71s">a</span><span data-a="letter" style="--d:.78s">s</span><span data-a="letter" style="--d:.85s">h</span>
+        </div>
+        <svg width="200" height="14" viewBox="0 0 200 14">
+          <path data-a="drawU" style="--len:230;--d:1s" d="M4,8 Q16,2 28,8 T52,8 T76,8 T100,8 T124,8 T148,8 T172,8 T196,8" fill="none" stroke="url(#a4)" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="bar">
+      <div class="txt">
+        <div class="nm">Дорожка + волна-подчёркивание<span class="tag">Вертикальный</span></div>
+        <div class="idea">Сверху живой эквалайзер, по центру появляется название, снизу прорисовывается волна-подчёркивание. Хорош для вертикальной заставки приложения.</div>
+      </div>
+      <span class="replay" onclick="play('s4')">↻ Повторить</span>
+    </div>
+  </div>
+
+  <!-- ============ СЦЕНА 5: НАЗВАНИЕ + ТЕКУЧАЯ ВОЛНА + ₽ (светлый) ============ -->
+  <div class="scene play" id="s5">
+    <div class="stage light">
+      <div class="lock col">
+        <div style="display:flex;align-items:baseline;gap:6px">
+          <div class="wm ink">
+            <span data-a="letter" style="--d:0s">M</span><span data-a="letter" style="--d:.07s">y</span><span data-a="letter" style="--d:.14s">C</span><span data-a="letter" style="--d:.21s">a</span><span data-a="letter" style="--d:.28s">s</span><span data-a="letter" style="--d:.35s">h</span>
+          </div>
+          <span data-a="pop" style="--d:.6s;font-size:40px;font-weight:800;color:#2bd9a0">₽</span>
+        </div>
+        <svg width="230" height="20" viewBox="0 0 230 20">
+          <defs>
+            <linearGradient id="a5" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5b8cff"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient>
+            <clipPath id="cl5"><rect x="0" y="0" width="230" height="20"/></clipPath>
+          </defs>
+          <g clip-path="url(#cl5)">
+            <path data-a="flow" d="M-20,10 Q-10,2 0,10 T20,10 T40,10 T60,10 T80,10 T100,10 T120,10 T140,10 T160,10 T180,10 T200,10 T220,10 T240,10" fill="none" stroke="url(#a5)" stroke-width="4" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div class="bar">
+      <div class="txt">
+        <div class="nm">Название + текучая волна<span class="tag">Минимал</span></div>
+        <div class="idea">Чистое название, рядом вылетает рубль, под ним бесконечно течёт волна. Лаконично и «живо» — отлично для шапки сайта и анонса.</div>
+      </div>
+      <span class="replay" onclick="play('s5')">↻ Повторить</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer" style="max-width:720px;margin:54px auto 0;text-align:center;color:#7c8499;font-size:14px;line-height:1.7">
+  Напиши номер сцены, которая нравится — например <b style="color:#cdd3e0">«сцена 1»</b>.<br>
+  Иконку и тип анимации названия можно комбинировать как угодно.<br>
+  Дальше отрисую финальный логотип и соберу из этого настоящий <b style="color:#cdd3e0">видео-ролик</b> (заставка + анонс).
+</div>
+
+<script>
+function play(id){
+  var s=document.getElementById(id);
+  s.classList.remove('play');void s.offsetWidth;s.classList.add('play');
+}
+// автоповтор всех сцен по кругу
+setInterval(function(){
+  ['s1','s2','s3','s4','s5'].forEach(play);
+},4800);
+</script>
+</body>
+</html>
