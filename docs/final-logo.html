@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyCash — финальный логотип</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;background:#0b0d12;color:#e7e9ee;-webkit-font-smoothing:antialiased;padding:48px 20px 90px}
+.page-head{max-width:900px;margin:0 auto 14px;text-align:center}
+.page-head .kicker{font-size:13px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#7c8499;margin-bottom:14px}
+.page-head h1{font-size:36px;font-weight:800;letter-spacing:-1px;line-height:1.12;margin-bottom:14px}
+.page-head h1 span{background:linear-gradient(90deg,#6c5ce7,#2bd9a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.page-head p{font-size:16px;line-height:1.6;color:#aab1c2;max-width:620px;margin:0 auto}
+.hint{max-width:620px;margin:18px auto 0;font-size:13px;color:#7c8499;background:#12151d;border:1px solid #1e2230;border-radius:14px;padding:12px 16px;line-height:1.55}
+.hint b{color:#cdd3e0}
+
+.scenes{max-width:760px;margin:42px auto 0;display:flex;flex-direction:column;gap:26px}
+.scene{border:1px solid #1e2230;border-radius:24px;overflow:hidden;background:#13161f}
+.stage{height:330px;display:flex;align-items:center;justify-content:center;position:relative}
+.stage.dark{background:radial-gradient(130% 120% at 50% 35%,#1c2233 0,#0c0f16 80%)}
+.stage.light{background:radial-gradient(130% 120% at 50% 35%,#ffffff 0,#eef1f6 84%)}
+.bar{display:flex;align-items:center;gap:14px;padding:14px 22px;border-top:1px solid #1e2230}
+.bar .nm{font-size:16px;font-weight:700}
+.bar .nm .tag{font-size:11px;font-weight:600;color:#8a93a8;background:#161a26;border-radius:20px;padding:3px 9px;margin-left:9px;vertical-align:middle}
+.bar .idea{font-size:13px;color:#9aa2b4;margin-top:3px;line-height:1.5}
+.bar .txt{flex:1;min-width:0}
+.replay{font-size:12px;font-weight:600;color:#cdd3e0;border:1px solid #2a2f3e;background:#171a24;border-radius:20px;padding:8px 16px;cursor:pointer;user-select:none;white-space:nowrap}
+.replay:hover{border-color:#3a4050}
+svg{display:block;overflow:visible}
+
+.lock{display:flex;flex-direction:column;align-items:center;gap:16px}
+.wm{font-size:56px;font-weight:800;letter-spacing:-2px;display:flex;line-height:1}
+.wm span{display:inline-block}
+.wm.dark{color:#f4f6fb}
+.wm.ink{color:#14182a}
+.spaced{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.2em}
+.spaced.dark{color:#cfd5e3}
+.spaced.ink{color:#5b6577}
+.spaced .a{background:linear-gradient(90deg,#7d6cf0,#2bd9a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.spaced .d{color:#46506a;margin:0 5px}
+.spaced.ink .d{color:#aab2c0}
+
+@media(max-width:560px){.page-head h1{font-size:26px}.wm{font-size:40px}body{padding:32px 14px}}
+
+/* ===================== АНИМАЦИИ ===================== */
+@keyframes eq{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
+@keyframes iconPop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes letterIn{0%{opacity:0;transform:translateY(20px);filter:blur(5px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes spaceIn{0%{opacity:0;letter-spacing:.7em}100%{opacity:1;letter-spacing:.2em}}
+
+.eqc{transform-box:fill-box;transform-origin:50% 100%;animation:eq 1.1s ease-in-out infinite}
+.scene.play [data-a="icon"]{opacity:0;animation:iconPop .7s cubic-bezier(.5,1.6,.4,1) forwards}
+.scene.play [data-a="letter"]{opacity:0;animation:letterIn .55s cubic-bezier(.3,1.1,.4,1) forwards;animation-delay:var(--d,0s)}
+.scene.play [data-a="space"]{animation:spaceIn .9s ease forwards;animation-delay:var(--d,0s);opacity:0}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div class="kicker">MyCash · Финальный логотип</div>
+  <h1>Иконка <span>круговая волна + ₽</span> над названием</h1>
+  <p>Компоновка как ты просил: иконка с рублём сверху по центру, под ней MyCash, ниже — подпись «AI SERVICE · УЧЁТА ФИНАНСОВ» с разрядкой. Тёмная и светлая версии.</p>
+  <div class="hint">▶ Логотип проигрывается по кругу. <b>«↻ Повторить»</b> — пересмотреть анимацию.</div>
+</div>
+
+<div class="scenes" id="scenes">
+
+  <!-- ===== ТЁМНАЯ ВЕРСИЯ (как скрин 1) ===== -->
+  <div class="scene play" id="s1">
+    <div class="stage dark">
+      <div class="lock">
+        <svg width="104" height="104" viewBox="0 0 100 100" data-a="icon">
+          <defs><linearGradient id="d1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs>
+          <g fill="url(#d1)">
+            <g transform="rotate(0 50 50)"><rect class="eqc" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(22.5 50 50)"><rect class="eqc" style="animation-delay:.1s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(45 50 50)"><rect class="eqc" style="animation-delay:.2s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(67.5 50 50)"><rect class="eqc" style="animation-delay:.3s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(90 50 50)"><rect class="eqc" style="animation-delay:.4s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(112.5 50 50)"><rect class="eqc" style="animation-delay:.5s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(135 50 50)"><rect class="eqc" style="animation-delay:.6s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(157.5 50 50)"><rect class="eqc" style="animation-delay:.5s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(180 50 50)"><rect class="eqc" style="animation-delay:.4s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(202.5 50 50)"><rect class="eqc" style="animation-delay:.3s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(225 50 50)"><rect class="eqc" style="animation-delay:.2s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(247.5 50 50)"><rect class="eqc" style="animation-delay:.1s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(270 50 50)"><rect class="eqc" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(292.5 50 50)"><rect class="eqc" style="animation-delay:.1s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(315 50 50)"><rect class="eqc" style="animation-delay:.2s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(337.5 50 50)"><rect class="eqc" style="animation-delay:.3s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          </g>
+          <text x="50" y="62" font-size="30" font-weight="800" fill="url(#d1)" text-anchor="middle" font-family="Segoe UI,sans-serif">₽</text>
+        </svg>
+        <div class="wm dark">
+          <span data-a="letter" style="--d:.55s">M</span><span data-a="letter" style="--d:.62s">y</span><span data-a="letter" style="--d:.69s">C</span><span data-a="letter" style="--d:.76s">a</span><span data-a="letter" style="--d:.83s">s</span><span data-a="letter" style="--d:.9s">h</span>
+        </div>
+        <div class="spaced dark" data-a="space" style="--d:1.05s"><span class="a">AI SERVICE</span><span class="d">·</span>УЧЁТА ФИНАНСОВ</div>
+      </div>
+    </div>
+    <div class="bar"><div class="txt"><div class="nm">Тёмная версия<span class="tag">Заставка / анонс</span></div><div class="idea">Для splash-экрана приложения, видео-анонса и тёмных фонов. Иконка-волна с рублём пульсирует над названием.</div></div><span class="replay" onclick="play('s1')">↻ Повторить</span></div>
+  </div>
+
+  <!-- ===== СВЕТЛАЯ ВЕРСИЯ (для сайта / светлого фона) ===== -->
+  <div class="scene play" id="s2">
+    <div class="stage light">
+      <div class="lock">
+        <svg width="104" height="104" viewBox="0 0 100 100" data-a="icon">
+          <defs><linearGradient id="d2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs>
+          <g fill="url(#d2)">
+            <g transform="rotate(0 50 50)"><rect class="eqc" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(22.5 50 50)"><rect class="eqc" style="animation-delay:.1s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(45 50 50)"><rect class="eqc" style="animation-delay:.2s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(67.5 50 50)"><rect class="eqc" style="animation-delay:.3s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(90 50 50)"><rect class="eqc" style="animation-delay:.4s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(112.5 50 50)"><rect class="eqc" style="animation-delay:.5s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(135 50 50)"><rect class="eqc" style="animation-delay:.6s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(157.5 50 50)"><rect class="eqc" style="animation-delay:.5s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(180 50 50)"><rect class="eqc" style="animation-delay:.4s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(202.5 50 50)"><rect class="eqc" style="animation-delay:.3s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(225 50 50)"><rect class="eqc" style="animation-delay:.2s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(247.5 50 50)"><rect class="eqc" style="animation-delay:.1s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(270 50 50)"><rect class="eqc" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(292.5 50 50)"><rect class="eqc" style="animation-delay:.1s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(315 50 50)"><rect class="eqc" style="animation-delay:.2s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+            <g transform="rotate(337.5 50 50)"><rect class="eqc" style="animation-delay:.3s" x="47.5" y="6" width="5" height="15" rx="2.5"/></g>
+          </g>
+          <text x="50" y="62" font-size="30" font-weight="800" fill="url(#d2)" text-anchor="middle" font-family="Segoe UI,sans-serif">₽</text>
+        </svg>
+        <div class="wm ink">
+          <span data-a="letter" style="--d:.55s">M</span><span data-a="letter" style="--d:.62s">y</span><span data-a="letter" style="--d:.69s">C</span><span data-a="letter" style="--d:.76s">a</span><span data-a="letter" style="--d:.83s">s</span><span data-a="letter" style="--d:.9s">h</span>
+        </div>
+        <div class="spaced ink" data-a="space" style="--d:1.05s"><span class="a">AI SERVICE</span><span class="d">·</span>УЧЁТА ФИНАНСОВ</div>
+      </div>
+    </div>
+    <div class="bar"><div class="txt"><div class="nm">Светлая версия<span class="tag">Сайт / светлый фон</span></div><div class="idea">Та же композиция под основной Apple-стиль приложения и для светлых фонов. Цвета иконки и подписи сохранены.</div></div><span class="replay" onclick="play('s2')">↻ Повторить</span></div>
+  </div>
+
+</div>
+
+<div class="footer" style="max-width:720px;margin:54px auto 0;text-align:center;color:#7c8499;font-size:14px;line-height:1.7">
+  Если всё нравится — отрисую логотип в высоком качестве (<b style="color:#cdd3e0">PNG + SVG</b>) для иконки приложения, шапки и заставки,<br>
+  и соберу из него <b style="color:#cdd3e0">видео-ролик</b> анонса.<br>
+  Что-то поправить (размер иконки, цвет, расстояния) — просто скажи.
+</div>
+
+<script>
+function play(id){var s=document.getElementById(id);s.classList.remove('play');void s.offsetWidth;s.classList.add('play');}
+setInterval(function(){['s1','s2'].forEach(play);},4600);
+</script>
+</body>
+</html>
