@@ -146,7 +146,7 @@ body {
     transition: all 0.15s;
 }
 .wallet-color-btn svg { display: block; border-radius: 10px; }
-.wallet-color-btn.active { border-color: var(--text); transform: scale(1.12); }
+.wallet-color-btn.active { transform: scale(1.14); box-shadow: 0 6px 14px rgba(0,0,0,0.28); }
 .wallet-color-btn:active { transform: scale(0.9); }
 
 /* Выбор банка в окне счёта */
