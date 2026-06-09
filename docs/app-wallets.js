@@ -188,7 +188,7 @@ function openWalletEdit(walletId) {
     populateWalletDirectionSelect(w.direction_id);
     document.getElementById('walletEditBalance').value = Number(w.initial_balance) || 0;
     const accInput = document.getElementById('walletEditAccStart');
-    if (accInput) accInput.value = accountingStartStr ? accountingStartStr.slice(0, 7) : '';
+    if (accInput) accInput.value = accountingStartStr ? accountingStartStr.slice(0, 10) : '';
     // Режим редактирования: дата начала учёта видна, кнопка удаления активна
     document.getElementById('walletAccStartGroup').style.display = '';
     var accHintEdit = document.getElementById('walletAccStartHint');
@@ -219,10 +219,13 @@ function openNewWallet() {
     document.getElementById('walletEditName').value = '';
     populateWalletDirectionSelect();   // по умолчанию первое направление в списке
     document.getElementById('walletEditBalance').value = 0;
-    // При создании дату начала учёта (общую) и удаление не показываем
-    document.getElementById('walletAccStartGroup').style.display = 'none';
+    // При создании дату начала учёта (общую) показываем тоже — предзаполняем текущим значением
+    const accInputNew = document.getElementById('walletEditAccStart');
+    if (accInputNew) accInputNew.value = accountingStartStr ? accountingStartStr.slice(0, 10) : '';
+    document.getElementById('walletAccStartGroup').style.display = '';
     var accHintNew = document.getElementById('walletAccStartHint');
-    if (accHintNew) accHintNew.style.display = 'none';
+    if (accHintNew) accHintNew.style.display = '';
+    // Кнопку удаления при создании не показываем (удалять нечего)
     document.getElementById('walletDeleteBtn').style.display = 'none';
 
     setBankUI(null);   // новый счёт — банк не выбран
@@ -280,6 +283,11 @@ async function saveWalletEdit() {
 
     walletSaveBusy = true;
     try {
+        // Дата начала учёта (общая для всех кошельков): полная дата из поля 'YYYY-MM-DD'
+        const accInput = document.getElementById('walletEditAccStart');
+        const newAccStr = (accInput && accInput.value) ? accInput.value : null;
+        const accChanged = (newAccStr !== accountingStartStr);
+
         if (!id) {
             // Создание нового счёта
             await API.createWallet({
@@ -289,18 +297,15 @@ async function saveWalletEdit() {
                 initial_balance: newBalance,
                 direction_id: newDirectionId
             });
+            if (accChanged) await API.setAccountingStart(newAccStr);
             await loadReferences();
+            if (accChanged) await loadServerOperations();   // перефильтровать операции под новую дату
             haptic('success');
             closeWalletEdit();
             return;
         }
 
         // Редактирование существующего счёта
-        // Дата начала учёта (общая для всех счетов): месяц из поля → 'YYYY-MM-01'
-        const accInput = document.getElementById('walletEditAccStart');
-        const newAccStr = (accInput && accInput.value) ? accInput.value + '-01' : null;
-        const accChanged = (newAccStr !== accountingStartStr);
-
         await API.updateWallet(id, {
             name: newName,
             icon: editWalletBank ? 'bank:' + editWalletBank : 'wallet',
