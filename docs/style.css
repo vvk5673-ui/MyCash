@@ -480,6 +480,18 @@ body {
     z-index: 1;
     transition: transform 0.2s;
 }
+/* Левая колонка строки операции: иконка сверху + название кошелька под ней */
+.op-iconwrap {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 3px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+.op-wallet-label {
+    font-size: 10.5px; color: var(--text2);
+    text-align: center; line-height: 1.15;
+    max-width: 58px; word-break: break-word;
+}
 .op-icon {
     width: 40px; height: 40px;
     border-radius: 12px;
@@ -487,6 +499,7 @@ body {
     margin-right: 12px;
     flex-shrink: 0;
 }
+.op-iconwrap .op-icon { margin-right: 0; }   /* отступ теперь у колонки, не у иконки */
 .op-icon.income { background: #E8F5E9; }
 .op-icon.expense { background: #FFEBEE; }
 .op-icon.transfer { background: #E3F2FD; }

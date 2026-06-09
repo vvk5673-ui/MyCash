@@ -59,8 +59,11 @@ function renderOperations() {
         const cg = (op.contragent_id && Refs.contragents)
             ? Refs.contragents.find(function(c) { return String(c.id) === String(op.contragent_id); })
             : null;
-        const subtitle = esc(walletText) +
-            (cg && op.type !== 'transfer' ? ' · ' + esc(cg.name) : '');
+        const isTransfer = op.type === 'transfer';
+        // Под иконкой — название кошелька (для перевода не пишем: маршрут «А → Б» оставляем в середине)
+        const walletUnder = isTransfer ? '' : esc(op.wallet || '');
+        // Середина (вторая строка): для перевода — маршрут, иначе — только контрагент (кошелёк ушёл под иконку)
+        const subtitle = isTransfer ? esc(walletText) : (cg ? esc(cg.name) : '');
 
         return `
             <div class="op-item" data-id="${op.id}"
@@ -71,10 +74,13 @@ function renderOperations() {
                     <button class="op-swipe-btn delete" onclick="event.stopPropagation(); deleteOperation('${op.id}')"><i data-lucide="trash-2" style="width:19px;height:19px;color:white"></i><span>Удалить</span></button>
                 </div>
                 <div class="op-content">
-                    <div class="op-icon ${iconClass}">${iconHtml}</div>
+                    <div class="op-iconwrap">
+                        <div class="op-icon ${iconClass}">${iconHtml}</div>
+                        ${walletUnder ? `<div class="op-wallet-label">${walletUnder}</div>` : ''}
+                    </div>
                     <div class="op-info">
                         <div class="op-category">${titleText}${purposeHtml}</div>
-                        <div class="op-comment">${subtitle}</div>
+                        ${subtitle ? `<div class="op-comment">${subtitle}</div>` : ''}
                     </div>
                     <div class="op-right">
                         <div class="op-amount ${iconClass}">${sign}${fmt(op.amount)} ₽</div>
