@@ -239,6 +239,10 @@ function openNewWallet() {
     document.getElementById('walletDeleteBtn').style.display = 'none';
 
     setBankUI(null);   // новый счёт — банк не выбран
+    // Блок «Цвет значка» при открытии создания прячем — окно компактное, как в настройках.
+    // Он появится сам при выборе небанковского названия (Наличка / своё) через setBankUI(null).
+    var colorGroupNew = document.getElementById('walletColorGroup');
+    if (colorGroupNew) colorGroupNew.style.display = 'none';
     renderWalletColorGrid();
     document.getElementById('walletEditOverlay').classList.add('active');
     if (typeof lockBgScroll === 'function') lockBgScroll(true);
