@@ -55,8 +55,12 @@ function renderOperations() {
         const titleText = op.type === 'transfer' ? 'Перевод' : esc(op.category);
         // Назначение платежа — сразу после статьи (в первой строке), серым и помельче
         const purposeHtml = op.purpose ? ' · <span class="op-purpose">' + esc(op.purpose) + '</span>' : '';
-        // Вторая строка: счёт (касса) — всегда первым
-        const subtitle = esc(walletText);
+        // Вторая строка: счёт (касса) первым, затем контрагент (если указан)
+        const cg = (op.contragent_id && Refs.contragents)
+            ? Refs.contragents.find(function(c) { return String(c.id) === String(op.contragent_id); })
+            : null;
+        const subtitle = esc(walletText) +
+            (cg && op.type !== 'transfer' ? ' · ' + esc(cg.name) : '');
 
         return `
             <div class="op-item" data-id="${op.id}"
