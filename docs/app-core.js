@@ -87,6 +87,17 @@ try {
     if (tg && typeof tg.setBottomBarColor === 'function') tg.setBottomBarColor('#FFFFFF');
 } catch (e) {}
 
+// === БЛОКИРОВКА ПРОКРУТКИ ФОНА ПОД ОТКРЫТЫМ ОКНОМ ===
+// Пока окно (модалка) открыто, фон под ним не должен прокручиваться —
+// иначе появляется вторая, «пустая» полоса прокрутки рядом со скроллом самого окна.
+function lockBgScroll(on) {
+    try {
+        document.documentElement.style.overflow = on ? 'hidden' : '';
+        document.body.style.overflow = on ? 'hidden' : '';
+    } catch (e) {}
+}
+window.lockBgScroll = lockBgScroll;
+
 // Имя пользователя из Telegram
 const userName = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user)
     ? tg.initDataUnsafe.user.first_name

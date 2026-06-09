@@ -204,6 +204,7 @@ function openWalletEdit(walletId) {
 
     renderWalletColorGrid();
     document.getElementById('walletEditOverlay').classList.add('active');
+    if (typeof lockBgScroll === 'function') lockBgScroll(true);
 }
 
 // Открыть окно создания нового счёта
@@ -223,6 +224,7 @@ function openNewWallet() {
     setBankUI(null);   // новый счёт — банк не выбран
     renderWalletColorGrid();
     document.getElementById('walletEditOverlay').classList.add('active');
+    if (typeof lockBgScroll === 'function') lockBgScroll(true);
     setTimeout(function() {
         const nameInput = document.getElementById('walletEditName');
         if (nameInput) nameInput.focus();
@@ -232,6 +234,7 @@ function openNewWallet() {
 function closeWalletEdit(e) {
     if (e && e.target && e.target !== e.currentTarget) return;
     document.getElementById('walletEditOverlay').classList.remove('active');
+    if (typeof lockBgScroll === 'function') lockBgScroll(false);
     editingWalletId = null;
 }
 
