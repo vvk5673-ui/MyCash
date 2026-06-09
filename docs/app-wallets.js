@@ -64,9 +64,9 @@ function renderBankList() {
                 '<span class="bank-row-ico">' + walletSquircle(editWalletColor || '#8E8E93', 32) + '</span>' +
                 '<span class="bank-row-name">Использовать «' + esc(rawQ) + '» как название</span></div>';
     } else {
-        html += '<div class="bank-row" onclick="selectBank(null)">' +
+        html += '<div class="bank-row" onclick="startCustomName()">' +
                 '<span class="bank-row-ico">' + walletSquircle(editWalletColor || '#8E8E93', 32) + '</span>' +
-                '<span class="bank-row-name">Без банка — своё название</span></div>';
+                '<span class="bank-row-name">Без банка — впишите своё название</span></div>';
     }
     // Быстрый выбор «Наличка» — счёт без банка с готовым названием и зелёным значком
     if (showCash) {
@@ -93,6 +93,13 @@ function selectBank(domain) {
         if (b && (!cur || bankForName(cur))) nameInput.value = b.name;
     }
     closeBankPicker();
+}
+
+// «Без банка — впишите своё название»: курсор в поиск, чтобы набрать собственное имя счёта.
+// После набора первым пунктом появится «Использовать «…» как название».
+function startCustomName() {
+    const s = document.getElementById('bankSearch');
+    if (s) { s.focus(); }
 }
 
 // Использовать набранный в поиске текст как своё название счёта (без банка)
