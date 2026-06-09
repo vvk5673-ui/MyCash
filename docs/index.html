@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=86">
+    <link rel="stylesheet" href="style.css?v=87">
 </head>
 <body>
 
@@ -297,12 +297,12 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Название кошелька</label>
-                <div class="wname-row">
+                <div class="wname-row" id="walletBankBtn" onclick="openBankPicker()">
                     <span class="wname-ico" id="walletBankIco"></span>
-                    <input class="wname-input" type="text" id="walletEditName" placeholder="Впишите название" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" oninput="onWalletNameInput()">
-                    <button type="button" class="wname-bank" id="walletBankBtn" onclick="openBankPicker()">Банк ›</button>
+                    <input class="wname-input" type="text" id="walletEditName" placeholder="Нажмите — выбрать банк или вписать название" readonly>
+                    <span class="wname-arrow">›</span>
                 </div>
-                <div style="font-size:12px;color:var(--text2);margin-top:6px">Впишите своё название или нажмите «Банк» — выбрать банк с логотипом.</div>
+                <div style="font-size:12px;color:var(--text2);margin-top:6px">Нажмите — откроется список. Выберите банк, «Наличку» или начните печатать своё название.</div>
             </div>
             <div class="form-group">
                 <label class="form-label">Направление</label>
@@ -579,13 +579,13 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=86"></script>
+    <script src="api.js?v=87"></script>
     <!-- app.js разбит на 6 частей (общая область видимости, порядок подключения важен) -->
-    <script src="app-core.js?v=86"></script>
-    <script src="app-data.js?v=86"></script>
-    <script src="app-operations.js?v=86"></script>
-    <script src="app-dashboard.js?v=86"></script>
-    <script src="app-wallets.js?v=86"></script>
-    <script src="app-main.js?v=86"></script>
+    <script src="app-core.js?v=87"></script>
+    <script src="app-data.js?v=87"></script>
+    <script src="app-operations.js?v=87"></script>
+    <script src="app-dashboard.js?v=87"></script>
+    <script src="app-wallets.js?v=87"></script>
+    <script src="app-main.js?v=87"></script>
 </body>
 </html>
