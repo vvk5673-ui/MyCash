@@ -88,9 +88,9 @@ function selectBank(domain) {
     setBankUI(domain);
     if (domain) {
         const b = bankByDomain(domain);
-        const cur = (nameInput.value || '').trim();
-        // Автозаполнить название банком, если поле пустое или там было имя другого банка
-        if (b && (!cur || bankForName(cur))) nameInput.value = b.name;
+        // Выбор банка ВСЕГДА ставит его название: логотип банка возможен только
+        // вместе с названием этого банка (никаких «своё имя + чужой логотип»)
+        if (b) nameInput.value = b.name;
     }
     closeBankPicker();
 }
