@@ -23,11 +23,24 @@ function updateDashboard() {
     const isExpense = dashTab === 'expense';
     dashExpenses = filtered.filter(op => op.type === (isExpense ? 'expense' : 'income'));
 
+    // Блок аналитики всегда виден, чтобы кнопки периода (Сегодня/Неделя/…) оставались доступны
+    document.getElementById('dashboardInline').style.display = 'block';
+
     if (dashExpenses.length === 0) {
-        document.getElementById('dashboardInline').style.display = 'none';
+        // Пустой период: показываем сообщение, но кнопки периода НЕ прячем
+        const totalLabel = document.getElementById('dashTotalLabel');
+        if (totalLabel) {
+            totalLabel.textContent = '0 ₽';
+            totalLabel.style.color = isExpense ? 'var(--red)' : 'var(--green)';
+        }
+        const canvas = document.getElementById('pieChart');
+        if (canvas) canvas.style.display = 'none';
+        const barsBox = document.getElementById('dashBars');
+        if (barsBox) barsBox.innerHTML = '<div style="text-align:center;color:var(--text2);font-size:13px;padding:24px 0">Нет операций за выбранный период</div>';
+        const legendBox = document.getElementById('dashLegend');
+        if (legendBox) legendBox.innerHTML = '';
         return;
     }
-    document.getElementById('dashboardInline').style.display = 'block';
 
     // Группировка операций по выбранному измерению (статьи / направления)
     const groups = {};   // key → { name, icon, amount, ops: [] }
