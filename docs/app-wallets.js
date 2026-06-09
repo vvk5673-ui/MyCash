@@ -7,12 +7,10 @@
 // Цвета значка счёта (яркие — в новой модели color = цвет иконки, не фон карточки)
 const WALLET_COLORS = [
     { name: 'Синий', color: '#007AFF' },
-    { name: 'Индиго', color: '#5856D6' },
     { name: 'Зелёный', color: '#34C759' },
     { name: 'Оранжевый', color: '#FF9500' },
     { name: 'Розовый', color: '#FF2D55' },
     { name: 'Фиолетовый', color: '#AF52DE' },
-    { name: 'Бирюзовый', color: '#5AC8FA' },
     { name: 'Жёлтый', color: '#FFCC00' }
 ];
 
