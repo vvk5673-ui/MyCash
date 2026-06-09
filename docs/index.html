@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=94">
+    <link rel="stylesheet" href="style.css?v=95">
 </head>
 <body>
 
@@ -292,40 +292,37 @@
             <div class="modal-handle"></div>
             <div class="wallet-edit-title">
                 <div style="width:32px"></div>
-                <span id="walletEditTitle">Настройки счёта</span>
+                <span id="walletEditTitle">Настройки кошелька</span>
                 <button onclick="closeWalletEdit()" style="width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">✕</button>
             </div>
             <div class="form-group">
-                <label class="form-label">Название кошелька</label>
+                <label class="form-label">Название</label>
                 <div class="wname-row" id="walletBankBtn" onclick="openBankPicker()">
                     <span class="wname-ico" id="walletBankIco"></span>
-                    <input class="wname-input" type="text" id="walletEditName" placeholder="Нажмите — выбрать банк или вписать название" readonly>
+                    <input class="wname-input" type="text" id="walletEditName" placeholder="Банк, «Наличка» или своё название" readonly>
                     <span class="wname-arrow">›</span>
                 </div>
-                <div style="font-size:12px;color:var(--text2);margin-top:6px">Нажмите — откроется список. Выберите банк, «Наличку» или начните печатать своё название.</div>
             </div>
             <div class="form-group">
                 <label class="form-label">Направление</label>
                 <select class="form-input" id="walletEditDirection"></select>
-                <div style="font-size:12px;color:var(--text2);margin-top:6px">Счёт относится к этому направлению. Направления добавляются в Профиле.</div>
             </div>
             <div class="form-group">
                 <label class="form-label">Начальный остаток</label>
                 <input class="form-input" type="number" id="walletEditBalance" inputmode="numeric" placeholder="0" style="font-size:20px;font-weight:600;text-align:center">
             </div>
-            <div class="form-group" id="walletAccStartGroup">
-                <label class="form-label">Учёт ведётся с</label>
-                <input class="form-input" type="month" id="walletEditAccStart">
-                <div style="font-size:12px;color:var(--text2);margin-top:6px">Остатки и операции до этого месяца не учитываются. Настройка общая для всех счетов.</div>
-            </div>
             <div class="form-group" id="walletColorGroup">
                 <label class="form-label">Цвет значка</label>
                 <div class="wallet-color-grid" id="walletColorGrid"></div>
             </div>
-            <div class="edit-buttons" style="margin-top:20px">
-                <button onclick="deleteWallet()" style="padding:16px 20px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:white;background:var(--red);cursor:pointer;min-height:52px;opacity:0.6" id="walletDeleteBtn">🗑</button>
-                <button onclick="closeWalletEdit()" style="padding:16px 20px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:var(--text);background:var(--bg);cursor:pointer;min-height:52px">← Назад</button>
-                <button onclick="saveWalletEdit()" style="flex:1;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:white;background:var(--accent);cursor:pointer;min-height:52px">💾 Сохранить</button>
+            <div class="form-group" id="walletAccStartGroup">
+                <label class="form-label">Учёт ведётся с · общая для всех кошельков</label>
+                <input class="form-input" type="month" id="walletEditAccStart">
+                <div style="font-size:11.5px;color:var(--text2);margin-top:4px">Операции до этого месяца не учитываются.</div>
+            </div>
+            <div class="edit-buttons" style="margin-top:18px">
+                <button onclick="deleteWallet()" style="padding:15px 18px;border:none;border-radius:14px;font-size:15px;font-weight:600;color:white;background:var(--red);cursor:pointer;min-height:50px;opacity:0.85" id="walletDeleteBtn">🗑 Удалить</button>
+                <button onclick="saveWalletEdit()" style="flex:1;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:600;color:white;background:var(--accent);cursor:pointer;min-height:50px">💾 Сохранить</button>
             </div>
         </div>
     </div>
@@ -593,13 +590,13 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=94"></script>
+    <script src="api.js?v=95"></script>
     <!-- app.js разбит на 6 частей (общая область видимости, порядок подключения важен) -->
-    <script src="app-core.js?v=94"></script>
-    <script src="app-data.js?v=94"></script>
-    <script src="app-operations.js?v=94"></script>
-    <script src="app-dashboard.js?v=94"></script>
-    <script src="app-wallets.js?v=94"></script>
-    <script src="app-main.js?v=94"></script>
+    <script src="app-core.js?v=95"></script>
+    <script src="app-data.js?v=95"></script>
+    <script src="app-operations.js?v=95"></script>
+    <script src="app-dashboard.js?v=95"></script>
+    <script src="app-wallets.js?v=95"></script>
+    <script src="app-main.js?v=95"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 
 Используется при регистрации (main.py) — чтобы новый пользователь сразу
 получил ту же структуру, что задана в prototype_table.xlsx:
-  - 4 кошелька (Счёт №1, Счёт №2, Наличка, Касса)
+  - 4 кошелька (Кошелёк №1, Кошелёк №2, Наличка, Касса)
   - 2 направления (Направление 1, Направление 2)
   - 31 статью ДДС (с привязкой к группе и виду деятельности)
 
@@ -13,8 +13,8 @@
 # 4 базовых кошелька (как в Excel).
 # "direction" — имя направления по умолчанию (привязка счёта к направлению).
 DEFAULT_WALLETS = [
-    {"name": "Счёт №1", "icon": "credit-card", "color": "#007AFF", "initial_balance": 0, "sort_order": 1, "direction": "Направление 1"},
-    {"name": "Счёт №2", "icon": "credit-card", "color": "#5856D6", "initial_balance": 0, "sort_order": 2, "direction": "Направление 1"},
+    {"name": "Кошелёк №1", "icon": "credit-card", "color": "#007AFF", "initial_balance": 0, "sort_order": 1, "direction": "Направление 1"},
+    {"name": "Кошелёк №2", "icon": "credit-card", "color": "#5856D6", "initial_balance": 0, "sort_order": 2, "direction": "Направление 1"},
     {"name": "Наличка", "icon": "wallet", "color": "#34C759", "initial_balance": 0, "sort_order": 3, "direction": "Направление 2"},
     {"name": "Касса", "icon": "shopping-bag", "color": "#FF9500", "initial_balance": 0, "sort_order": 4, "direction": "Направление 2"},
 ]

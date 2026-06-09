@@ -231,10 +231,10 @@ async def auth_telegram(body: AuthRequest):
             .select('id, name').eq('user_id', user['id']).execute().data
         article_id_by_name = {a['name']: a['id'] for a in (user_articles or [])}
 
-        # Создаём демо-данные на первых двух кошельках (Счёт №1 + Наличка)
+        # Создаём демо-данные на первых двух кошельках (Кошелёк №1 + Наличка)
         demo_ops = generate_demo_operations(
             user['id'],
-            wallet_ids.get('Счёт №1'),
+            wallet_ids.get('Кошелёк №1'),
             wallet_ids.get('Наличка'),
             article_id_by_name
         )
@@ -476,7 +476,7 @@ async def delete_wallet(wallet_id: str, current_user: dict = Depends(get_current
     # Счёт должен принадлежать пользователю
     wallet = supabase.table('wallets').select('id').eq('id', wallet_id).eq('user_id', user_id).execute()
     if not wallet.data:
-        raise HTTPException(status_code=404, detail='Счёт не найден')
+        raise HTTPException(status_code=404, detail='Кошелёк не найден')
 
     # Запрет удаления, если по счёту есть операции (в т.ч. переводы from/to)
     ops = supabase.table('operations').select('id', count='exact') \
@@ -486,7 +486,7 @@ async def delete_wallet(wallet_id: str, current_user: dict = Depends(get_current
     if ops.count and ops.count > 0:
         raise HTTPException(
             status_code=409,
-            detail=f'На счёте есть операции ({ops.count}). Сначала удалите или перенесите их.'
+            detail=f'В кошельке есть операции ({ops.count}). Сначала удалите или перенесите их.'
         )
 
     supabase.table('wallets').delete().eq('id', wallet_id).eq('user_id', user_id).execute()

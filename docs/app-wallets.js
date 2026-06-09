@@ -183,7 +183,7 @@ function openWalletEdit(walletId) {
     editWalletColor = w.color || '#007AFF';
     haptic('light');
 
-    document.getElementById('walletEditTitle').textContent = 'Настройки счёта';
+    document.getElementById('walletEditTitle').textContent = 'Настройки кошелька';
     document.getElementById('walletEditName').value = w.name || '';
     populateWalletDirectionSelect(w.direction_id);
     document.getElementById('walletEditBalance').value = Number(w.initial_balance) || 0;
@@ -212,7 +212,7 @@ function openNewWallet() {
     editingWalletId = null;                 // null → режим создания
     editWalletColor = WALLET_COLORS[0].color;
 
-    document.getElementById('walletEditTitle').textContent = 'Новый счёт';
+    document.getElementById('walletEditTitle').textContent = 'Новый кошелёк';
     document.getElementById('walletEditName').value = '';
     populateWalletDirectionSelect();   // по умолчанию первое направление в списке
     document.getElementById('walletEditBalance').value = 0;
@@ -260,14 +260,14 @@ async function saveWalletEdit() {
     const newDirectionId = dirSel ? dirSel.value : '';
     if (!newDirectionId) {
         haptic('error');
-        alert('Выберите направление счёта. Добавить новое направление можно в Профиле.');
+        alert('Выберите направление кошелька. Добавить новое направление можно в Профиле.');
         return;
     }
 
     // Остаток и настройки счёта храним на сервере (единый источник) — без сети сохранить нельзя
     if (typeof API === 'undefined' || !API.isOnline()) {
         haptic('error');
-        alert('Нет связи с сервером. Счета сохраняются только онлайн — попробуйте позже.');
+        alert('Нет связи с сервером. Кошельки сохраняются только онлайн — попробуйте позже.');
         return;
     }
 
@@ -378,7 +378,7 @@ async function walletDragEnd() {
 
     if (typeof API === 'undefined' || !API.isOnline()) {
         haptic('error');
-        alert('Перемещение счетов работает только онлайн.');
+        alert('Перемещение кошельков работает только онлайн.');
         await loadReferences();   // вернуть прежний порядок
         return;
     }
@@ -409,11 +409,11 @@ async function deleteWallet() {
 
     if (typeof API === 'undefined' || !API.isOnline()) {
         haptic('error');
-        alert('Нет связи с сервером. Удаление счёта работает только онлайн.');
+        alert('Нет связи с сервером. Удаление кошелька работает только онлайн.');
         return;
     }
 
-    if (!confirm('Удалить этот счёт? Действие нельзя отменить.')) return;
+    if (!confirm('Удалить этот кошелёк? Действие нельзя отменить.')) return;
 
     walletSaveBusy = true;
     try {
@@ -424,7 +424,7 @@ async function deleteWallet() {
     } catch (e) {
         haptic('error');
         // Сервер запрещает удаление счёта с операциями (409) — показываем понятный текст
-        alert(e && e.message ? e.message : 'Не удалось удалить счёт.');
+        alert(e && e.message ? e.message : 'Не удалось удалить кошелёк.');
     } finally {
         walletSaveBusy = false;
     }

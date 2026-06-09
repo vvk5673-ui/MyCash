@@ -52,7 +52,7 @@ function generateDemoData() {
             amount: d.amount,
             category: d.category,
             // Сопоставляем демо со стандартными кошельками сервера
-            wallet: (d.wallet === '💳 Карта' ? 'Счёт №1' : 'Наличка'),
+            wallet: (d.wallet === '💳 Карта' ? 'Кошелёк №1' : 'Наличка'),
             comment: d.comment,
             date: new Date(y, m, day, 10 + i % 12, i * 7 % 60).toISOString(),
             _demo: true

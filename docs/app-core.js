@@ -505,8 +505,8 @@ function articlesForType(type) {
 
 // Стандартный набор кошельков (как на сервере) — фоллбек, если справочники не загрузились
 const SERVER_DEFAULT_WALLETS = [
-    { name: 'Счёт №1', icon: 'credit-card',  color: '#007AFF', initial_balance: 0 },
-    { name: 'Счёт №2', icon: 'credit-card',  color: '#5856D6', initial_balance: 0 },
+    { name: 'Кошелёк №1', icon: 'credit-card',  color: '#007AFF', initial_balance: 0 },
+    { name: 'Кошелёк №2', icon: 'credit-card',  color: '#5856D6', initial_balance: 0 },
     { name: 'Наличка', icon: 'wallet',       color: '#34C759', initial_balance: 0 },
     { name: 'Касса',   icon: 'shopping-bag', color: '#FF9500', initial_balance: 0 },
 ];
