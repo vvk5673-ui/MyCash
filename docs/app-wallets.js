@@ -98,9 +98,22 @@ function selectBank(domain) {
 // «Без банка — впишите своё название»: курсор в поиск, чтобы набрать собственное имя счёта.
 // После набора первым пунктом появится «Использовать «…» как название».
 function startCustomName() {
-    // Курсор в поиск меню — печатай своё название, появится «Использовать «…» как название»
-    const s = document.getElementById('bankSearch');
-    if (s) s.focus();
+    // Спрашиваем название через диалог (надёжно на десктопе). Если диалог недоступен —
+    // фолбэк: ставим курсор в поиск, где можно набрать имя и выбрать «Использовать «…»».
+    let name;
+    try { name = window.prompt('Введите название счёта'); }
+    catch (e) { name = undefined; }
+    if (typeof name === 'undefined') {
+        const s = document.getElementById('bankSearch');
+        if (s) s.focus();
+        return;
+    }
+    name = (name || '').trim();
+    if (!name) return;          // отмена или пусто — остаёмся в меню
+    haptic('light');
+    setBankUI(null);            // без банка → значок-кошелёк, выбор цвета доступен
+    document.getElementById('walletEditName').value = name;
+    closeBankPicker();
 }
 
 // Пользователь правит название вручную → это уже не банк: убираем логотип банка,
