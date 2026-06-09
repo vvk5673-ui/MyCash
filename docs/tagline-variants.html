@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyCash — варианты подписи «AI Service учёта финансов»</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;background:#0b0d12;color:#e7e9ee;-webkit-font-smoothing:antialiased;padding:48px 20px 90px}
+.page-head{max-width:900px;margin:0 auto 14px;text-align:center}
+.page-head .kicker{font-size:13px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#7c8499;margin-bottom:14px}
+.page-head h1{font-size:36px;font-weight:800;letter-spacing:-1px;line-height:1.12;margin-bottom:14px}
+.page-head h1 span{background:linear-gradient(90deg,#6c5ce7,#2bd9a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.page-head p{font-size:16px;line-height:1.6;color:#aab1c2;max-width:640px;margin:0 auto}
+.hint{max-width:640px;margin:18px auto 0;font-size:13px;color:#7c8499;background:#12151d;border:1px solid #1e2230;border-radius:14px;padding:12px 16px;line-height:1.55}
+.hint b{color:#cdd3e0}
+
+.grid{max-width:1080px;margin:42px auto 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:24px}
+.scene{border:1px solid #1e2230;border-radius:24px;overflow:hidden;background:#13161f}
+.stage{height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(130% 120% at 50% 30%,#1c2233 0,#0c0f16 78%)}
+.bar{display:flex;align-items:center;gap:14px;padding:14px 20px;border-top:1px solid #1e2230}
+.bar .nm{font-size:15px;font-weight:700}
+.bar .nm .tag{font-size:11px;font-weight:600;color:#8a93a8;background:#161a26;border-radius:20px;padding:3px 9px;margin-left:8px;vertical-align:middle}
+.bar .idea{font-size:12.5px;color:#9aa2b4;margin-top:3px;line-height:1.5}
+.bar .txt{flex:1;min-width:0}
+.replay{font-size:11px;font-weight:600;color:#cdd3e0;border:1px solid #2a2f3e;background:#171a24;border-radius:20px;padding:7px 13px;cursor:pointer;user-select:none;white-space:nowrap}
+.replay:hover{border-color:#3a4050}
+svg{display:block;overflow:visible}
+
+/* логотип сверху (статичный пульс) */
+.logo{display:flex;align-items:center;gap:12px}
+.wm{font-size:28px;font-weight:800;letter-spacing:-1px;background:linear-gradient(90deg,#6c5ce7,#2bd9a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* === БАЗА ПОДПИСИ === */
+.tg{height:34px;display:flex;align-items:center;justify-content:center}
+.ai{font-weight:800;background:linear-gradient(90deg,#7d6cf0,#2bd9a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ru{color:#9aa2b4;font-weight:500}
+
+/* 1 — одна строка */
+.v1 .ai{font-size:15px;letter-spacing:.01em}
+.v1 .dot{color:#4a5266;margin:0 8px;font-weight:700}
+.v1 .ru{font-size:14px}
+
+/* 2 — пилюля */
+.v2 .pill{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:linear-gradient(90deg,#6c5ce7,#2bd9a0);padding:5px 11px;border-radius:20px;box-shadow:0 4px 14px rgba(108,92,231,.4)}
+.v2 .ru{font-size:13.5px;margin-left:10px}
+
+/* 3 — разрядка капсом */
+.v3 .spaced{font-size:11.5px;font-weight:700;text-transform:uppercase;color:#cfd5e3}
+.v3 .spaced .a{background:linear-gradient(90deg,#7d6cf0,#2bd9a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.v3 .spaced .d{color:#46506a;margin:0 4px}
+
+/* 4 — квадрат AI */
+.v4 .sq{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#6c5ce7,#2bd9a0);color:#fff;font-size:11px;font-weight:800;letter-spacing:-.02em;box-shadow:0 4px 12px rgba(108,92,231,.4)}
+.v4 .rest{font-size:14px;font-weight:600;color:#cfd5e3;margin-left:9px}
+.v4 .rest .g{color:#9aa2b4;font-weight:500}
+
+/* 5 — линии по бокам */
+.v5 .lined{display:flex;align-items:center;gap:12px}
+.v5 .ln{height:1px;width:34px;background:linear-gradient(90deg,transparent,#3a4050 60%,#5b6a8a)}
+.v5 .ln.l{background:linear-gradient(90deg,#5b6a8a,#3a4050 40%,transparent)}
+.v5 .mid{font-size:12px;font-weight:600;letter-spacing:.06em;white-space:nowrap}
+.v5 .mid .a{background:linear-gradient(90deg,#7d6cf0,#2bd9a0);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
+.v5 .mid .g{color:#9aa2b4}
+
+/* 6 — стек две строки */
+.v6 .stk{text-align:center;line-height:1.25}
+.v6 .ai{font-size:16px;letter-spacing:.04em}
+.v6 .ru{font-size:11px;letter-spacing:.16em;text-transform:uppercase;margin-top:3px}
+
+@media(max-width:520px){.page-head h1{font-size:26px}body{padding:32px 14px}.grid{grid-template-columns:1fr}}
+
+/* ===================== АНИМАЦИИ ===================== */
+@keyframes ripple{0%{transform:scale(.3);opacity:.9}100%{transform:scale(1);opacity:0}}
+@keyframes eq{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
+@keyframes maskIn{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes fadeUp{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pop{0%{transform:scale(0);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@keyframes spaceIn{0%{opacity:0;letter-spacing:.7em}100%{opacity:1;letter-spacing:.2em}}
+@keyframes lineGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes slideR{0%{opacity:0;transform:translateX(16px)}100%{opacity:1;transform:translateX(0)}}
+
+/* логотип — всегда пульсирует */
+.ring{transform-box:fill-box;transform-origin:center;animation:ripple 1.9s ease-out infinite}
+.eql{transform-box:fill-box;transform-origin:50% 100%;animation:eq 1.1s ease-in-out infinite}
+
+/* подпись — по классу .play */
+.scene.play [data-a="mask"]{animation:maskIn .85s cubic-bezier(.6,0,.2,1) forwards;animation-delay:var(--d,0s);clip-path:inset(0 100% 0 0)}
+.scene.play [data-a="fadeup"]{opacity:0;animation:fadeUp .55s ease forwards;animation-delay:var(--d,0s)}
+.scene.play [data-a="fade"]{opacity:0;animation:fadeIn .6s ease forwards;animation-delay:var(--d,0s)}
+.scene.play [data-a="pop"]{transform-box:fill-box;transform-origin:center;opacity:0;animation:pop .6s cubic-bezier(.5,1.6,.4,1) forwards;animation-delay:var(--d,0s)}
+.scene.play [data-a="space"]{animation:spaceIn .9s ease forwards;animation-delay:var(--d,0s);opacity:0}
+.scene.play [data-a="line"]{transform:scaleX(0);animation:lineGrow .6s ease forwards;animation-delay:var(--d,0s)}
+.scene.play [data-a="slideR"]{opacity:0;animation:slideR .55s cubic-bezier(.3,1.2,.4,1) forwards;animation-delay:var(--d,0s)}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div class="kicker">MyCash · Подпись логотипа</div>
+  <h1>«AI Service учёта финансов» — <span>6 вариантов</span></h1>
+  <p>Одна и та же фраза, оформленная под стиль логотипа MyCash и анимированная по-разному. Сверху каждой карточки — логотип, под ним — вариант подписи.</p>
+  <div class="hint">▶ Подпись проигрывается по кругу. <b>«↻ Повторить»</b> перезапускает сцену. Выбери оформление, которое нравится больше.</div>
+</div>
+
+<div class="grid" id="grid">
+
+  <!-- ===== 1 ===== -->
+  <div class="scene play v1" id="s1">
+    <div class="stage">
+      <div class="logo">
+        <svg width="46" height="46" viewBox="0 0 100 100"><defs><linearGradient id="l1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs><circle class="ring" cx="50" cy="50" r="40" fill="none" stroke="url(#l1)" stroke-width="3"/><circle class="ring" style="animation-delay:.95s" cx="50" cy="50" r="40" fill="none" stroke="url(#l1)" stroke-width="3"/><circle cx="50" cy="50" r="20" fill="url(#l1)"/><g stroke="#fff" stroke-width="3" stroke-linecap="round"><line class="eql" x1="43" y1="45" x2="43" y2="55"/><line class="eql" style="animation-delay:.2s" x1="50" y1="41" x2="50" y2="59"/><line class="eql" style="animation-delay:.4s" x1="57" y1="45" x2="57" y2="55"/></g></svg>
+        <span class="wm">MyCash</span>
+      </div>
+      <div class="tg"><span class="ai" data-a="mask" style="--d:.2s">AI Service</span><span class="dot" data-a="fade" style="--d:.7s">·</span><span class="ru" data-a="fadeup" style="--d:.75s">учёта финансов</span></div>
+    </div>
+    <div class="bar"><div class="txt"><div class="nm">Иерархия в строку<span class="tag">Рекомендую</span></div><div class="idea">«AI Service» акцентным градиентом проявляется маской, «учёта финансов» — тонким серым. Чисто и понятно.</div></div><span class="replay" onclick="play('s1')">↻ Повторить</span></div>
+  </div>
+
+  <!-- ===== 2 ===== -->
+  <div class="scene play v2" id="s2">
+    <div class="stage">
+      <div class="logo">
+        <svg width="46" height="46" viewBox="0 0 100 100"><defs><linearGradient id="l2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs><circle class="ring" cx="50" cy="50" r="40" fill="none" stroke="url(#l2)" stroke-width="3"/><circle class="ring" style="animation-delay:.95s" cx="50" cy="50" r="40" fill="none" stroke="url(#l2)" stroke-width="3"/><circle cx="50" cy="50" r="20" fill="url(#l2)"/><g stroke="#fff" stroke-width="3" stroke-linecap="round"><line class="eql" x1="43" y1="45" x2="43" y2="55"/><line class="eql" style="animation-delay:.2s" x1="50" y1="41" x2="50" y2="59"/><line class="eql" style="animation-delay:.4s" x1="57" y1="45" x2="57" y2="55"/></g></svg>
+        <span class="wm">MyCash</span>
+      </div>
+      <div class="tg"><span class="pill" data-a="pop" style="--d:.2s">AI Service</span><span class="ru" data-a="slideR" style="--d:.5s">учёта финансов</span></div>
+    </div>
+    <div class="bar"><div class="txt"><div class="nm">Бейдж-пилюля<span class="tag">Заметно</span></div><div class="idea">«AI Service» в градиентной капсуле «выпрыгивает», текст въезжает справа. Делает акцент на технологичности.</div></div><span class="replay" onclick="play('s2')">↻ Повторить</span></div>
+  </div>
+
+  <!-- ===== 3 ===== -->
+  <div class="scene play v3" id="s3">
+    <div class="stage">
+      <div class="logo">
+        <svg width="46" height="46" viewBox="0 0 100 100"><defs><linearGradient id="l3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs><circle class="ring" cx="50" cy="50" r="40" fill="none" stroke="url(#l3)" stroke-width="3"/><circle class="ring" style="animation-delay:.95s" cx="50" cy="50" r="40" fill="none" stroke="url(#l3)" stroke-width="3"/><circle cx="50" cy="50" r="20" fill="url(#l3)"/><g stroke="#fff" stroke-width="3" stroke-linecap="round"><line class="eql" x1="43" y1="45" x2="43" y2="55"/><line class="eql" style="animation-delay:.2s" x1="50" y1="41" x2="50" y2="59"/><line class="eql" style="animation-delay:.4s" x1="57" y1="45" x2="57" y2="55"/></g></svg>
+        <span class="wm">MyCash</span>
+      </div>
+      <div class="tg"><span class="spaced" data-a="space" style="--d:.2s"><span class="a">AI SERVICE</span><span class="d">·</span>УЧЁТА ФИНАНСОВ</span></div>
+    </div>
+    <div class="bar"><div class="txt"><div class="nm">Разрядка капсом<span class="tag">Минимал</span></div><div class="idea">Заглавные с широкой разрядкой, которая плавно «сжимается». Строгий минимализм в духе Apple.</div></div><span class="replay" onclick="play('s3')">↻ Повторить</span></div>
+  </div>
+
+  <!-- ===== 4 ===== -->
+  <div class="scene play v4" id="s4">
+    <div class="stage">
+      <div class="logo">
+        <svg width="46" height="46" viewBox="0 0 100 100"><defs><linearGradient id="l4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs><circle class="ring" cx="50" cy="50" r="40" fill="none" stroke="url(#l4)" stroke-width="3"/><circle class="ring" style="animation-delay:.95s" cx="50" cy="50" r="40" fill="none" stroke="url(#l4)" stroke-width="3"/><circle cx="50" cy="50" r="20" fill="url(#l4)"/><g stroke="#fff" stroke-width="3" stroke-linecap="round"><line class="eql" x1="43" y1="45" x2="43" y2="55"/><line class="eql" style="animation-delay:.2s" x1="50" y1="41" x2="50" y2="59"/><line class="eql" style="animation-delay:.4s" x1="57" y1="45" x2="57" y2="55"/></g></svg>
+        <span class="wm">MyCash</span>
+      </div>
+      <div class="tg"><span class="sq" data-a="pop" style="--d:.2s">AI</span><span class="rest" data-a="slideR" style="--d:.45s">Service <span class="g">· учёта финансов</span></span></div>
+    </div>
+    <div class="bar"><div class="txt"><div class="nm">Квадрат-бейдж «AI»<span class="tag">Айдентика</span></div><div class="idea">«AI» в скруглённом квадратике перекликается с иконкой приложения. Хорошо связывает подпись с логотипом.</div></div><span class="replay" onclick="play('s4')">↻ Повторить</span></div>
+  </div>
+
+  <!-- ===== 5 ===== -->
+  <div class="scene play v5" id="s5">
+    <div class="stage">
+      <div class="logo">
+        <svg width="46" height="46" viewBox="0 0 100 100"><defs><linearGradient id="l5" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs><circle class="ring" cx="50" cy="50" r="40" fill="none" stroke="url(#l5)" stroke-width="3"/><circle class="ring" style="animation-delay:.95s" cx="50" cy="50" r="40" fill="none" stroke="url(#l5)" stroke-width="3"/><circle cx="50" cy="50" r="20" fill="url(#l5)"/><g stroke="#fff" stroke-width="3" stroke-linecap="round"><line class="eql" x1="43" y1="45" x2="43" y2="55"/><line class="eql" style="animation-delay:.2s" x1="50" y1="41" x2="50" y2="59"/><line class="eql" style="animation-delay:.4s" x1="57" y1="45" x2="57" y2="55"/></g></svg>
+        <span class="wm">MyCash</span>
+      </div>
+      <div class="tg"><span class="lined"><span class="ln l" data-a="line" style="--d:.2s;transform-origin:right"></span><span class="mid" data-a="fade" style="--d:.45s"><span class="a">AI Service</span> <span class="g">· учёта финансов</span></span><span class="ln" data-a="line" style="--d:.2s;transform-origin:left"></span></span></div>
+    </div>
+    <div class="bar"><div class="txt"><div class="nm">Линии по бокам<span class="tag">Премиум</span></div><div class="idea">Тонкие линии «вырастают» в стороны и обрамляют подпись. Придаёт солидности, как на дорогих визитках.</div></div><span class="replay" onclick="play('s5')">↻ Повторить</span></div>
+  </div>
+
+  <!-- ===== 6 ===== -->
+  <div class="scene play v6" id="s6">
+    <div class="stage">
+      <div class="logo">
+        <svg width="46" height="46" viewBox="0 0 100 100"><defs><linearGradient id="l6" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs><circle class="ring" cx="50" cy="50" r="40" fill="none" stroke="url(#l6)" stroke-width="3"/><circle class="ring" style="animation-delay:.95s" cx="50" cy="50" r="40" fill="none" stroke="url(#l6)" stroke-width="3"/><circle cx="50" cy="50" r="20" fill="url(#l6)"/><g stroke="#fff" stroke-width="3" stroke-linecap="round"><line class="eql" x1="43" y1="45" x2="43" y2="55"/><line class="eql" style="animation-delay:.2s" x1="50" y1="41" x2="50" y2="59"/><line class="eql" style="animation-delay:.4s" x1="57" y1="45" x2="57" y2="55"/></g></svg>
+        <span class="wm">MyCash</span>
+      </div>
+      <div class="tg" style="height:auto"><span class="stk"><span class="ai" data-a="fadeup" style="--d:.2s;display:block">AI Service</span><span class="ru" data-a="fadeup" style="--d:.4s;display:block">учёта финансов</span></span></div>
+    </div>
+    <div class="bar"><div class="txt"><div class="nm">Две строки (стек)<span class="tag">Компактно</span></div><div class="idea">«AI Service» крупнее, «учёта финансов» мельче с разрядкой под ним. Аккуратный блок — хорош под иконкой по центру.</div></div><span class="replay" onclick="play('s6')">↻ Повторить</span></div>
+  </div>
+
+</div>
+
+<div class="footer" style="max-width:720px;margin:54px auto 0;text-align:center;color:#7c8499;font-size:14px;line-height:1.7">
+  Напиши номер варианта — например <b style="color:#cdd3e0">«вариант 1»</b>.<br>
+  Можно смешивать: оформление из одного, анимацию из другого.<br>
+  Выбранную подпись поставлю в финальный логотип и в видео-ролик.
+</div>
+
+<script>
+function play(id){var s=document.getElementById(id);s.classList.remove('play');void s.offsetWidth;s.classList.add('play');}
+setInterval(function(){['s1','s2','s3','s4','s5','s6'].forEach(play);},4600);
+</script>
+</body>
+</html>
