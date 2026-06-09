@@ -684,7 +684,7 @@ body {
     background: var(--card);
     border-radius: 20px 20px 0 0;
     width: 100%;
-    padding: 10px 16px 18px;
+    padding: 8px 16px 14px;
     max-height: 92vh;
     overflow-y: auto;
     animation: slideUp 0.3s ease;
@@ -704,17 +704,17 @@ body {
 /* Поле суммы */
 .amount-input-wrap {
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
 }
 .amount-display {
-    font-size: 32px;
+    font-size: 27px;
     font-weight: 700;
     letter-spacing: -1px;
     color: var(--text);
-    min-height: 40px;
+    min-height: 32px;
 }
 .amount-display.placeholder { color: var(--text2); }
-.amount-currency { font-size: 18px; color: var(--text2); margin-left: 4px; }
+.amount-currency { font-size: 16px; color: var(--text2); margin-left: 4px; }
 .amount-real-input {
     position: absolute;
     opacity: 0;
@@ -728,7 +728,7 @@ body {
     flex-wrap: wrap;
     justify-content: center;
     gap: 6px;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
 }
 .wallet-btn {
     display: inline-flex;
@@ -756,7 +756,7 @@ body {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 6px;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
 }
 .quick-cat {
     display: flex;
@@ -801,13 +801,15 @@ body {
 
 /* === ДОП. ПОЛЯ ОПЕРАЦИИ (всегда видимы, без сворачивания) === */
 .extended-form { display: block; }
+/* В окне операции доп-поля компактнее: меньше отступы между ними */
+.extended-form .form-group { margin-bottom: 6px; }
 
 .type-switch {
     display: flex;
     background: var(--bg);
     border-radius: 12px;
     padding: 3px;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
 }
 .type-btn {
     flex: 1;
