@@ -487,6 +487,7 @@ body {
     gap: 3px;
     margin-right: 12px;
     flex-shrink: 0;
+    width: 56px;   /* фикс. ширина колонки → иконки ровно по вертикали, тексты операций с одного отступа */
 }
 .op-wallet-label {
     font-size: 10.5px; color: var(--text2);
