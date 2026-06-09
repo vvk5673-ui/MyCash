@@ -60,6 +60,19 @@ function setClosingGuard(on) {
 }
 window.setClosingGuard = setClosingGuard;
 
+// === ЦВЕТА ШАПКИ/ФОНА TELEGRAM ПОД НАШУ СВЕТЛУЮ ТЕМУ (бесшовность Apple-стиля) ===
+// Подгоняем «обвязку» Telegram под уже существующие цвета приложения:
+// шапка = белая (--card), фон = светло-серый (--bg). Hex поддерживается с Bot API 6.9+.
+try {
+    if (tg && typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#FFFFFF');
+} catch (e) {}
+try {
+    if (tg && typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#F2F2F7');
+} catch (e) {}
+try {
+    if (tg && typeof tg.setBottomBarColor === 'function') tg.setBottomBarColor('#FFFFFF');
+} catch (e) {}
+
 // Имя пользователя из Telegram
 const userName = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user)
     ? tg.initDataUnsafe.user.first_name
