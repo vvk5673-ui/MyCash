@@ -36,6 +36,30 @@ try {
     }
 } catch (e) {}
 
+// === ЗАПРЕТ СЛУЧАЙНОГО ЗАКРЫТИЯ СВАЙПОМ ===
+// Без этого свайп вниз при прокрутке длинных списков (операции, аналитика)
+// случайно сворачивает Mini App. Метод есть не во всех версиях — оборачиваем.
+try {
+    if (tg && typeof tg.disableVerticalSwipes === 'function') {
+        tg.disableVerticalSwipes();
+    }
+} catch (e) {}
+
+// === ЗАЩИТА ОТ ВЫХОДА С НЕЗАПОЛНЕННОЙ ОПЕРАЦИЕЙ ===
+// Включаем «подтверждение выхода» Telegram только пока открыто окно ввода операции
+// (вызывается из openModal/closeModal). Так вопрос «точно выйти?» не мешает в обычной работе.
+function setClosingGuard(on) {
+    try {
+        if (!tg) return;
+        if (on && typeof tg.enableClosingConfirmation === 'function') {
+            tg.enableClosingConfirmation();
+        } else if (!on && typeof tg.disableClosingConfirmation === 'function') {
+            tg.disableClosingConfirmation();
+        }
+    } catch (e) {}
+}
+window.setClosingGuard = setClosingGuard;
+
 // Имя пользователя из Telegram
 const userName = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user)
     ? tg.initDataUnsafe.user.first_name

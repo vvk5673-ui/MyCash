@@ -167,6 +167,8 @@ function openModal() {
     if (aToggle) aToggle.textContent = '✏️ Изменить';
     if (aLabel) aLabel.textContent = 'Статья — нажмите, чтобы сохранить';
     document.getElementById('modalOverlay').classList.add('active');
+    // Пока окно ввода открыто — Telegram спросит подтверждение при попытке закрыть приложение
+    if (typeof setClosingGuard === 'function') setClosingGuard(true);
     document.getElementById('amountInput').value = '';
     document.getElementById('amountDisplay').innerHTML = '0 <span class="amount-currency">₽</span>';
     document.getElementById('amountDisplay').classList.add('placeholder');
@@ -260,6 +262,8 @@ async function quickAddContragent(selectId, inputId, rowId) {
 function closeModal(e) {
     if (e && e.target !== e.currentTarget) return;
     document.getElementById('modalOverlay').classList.remove('active');
+    // Окно закрыто — снимаем подтверждение выхода
+    if (typeof setClosingGuard === 'function') setClosingGuard(false);
 }
 
 function focusAmount() {
@@ -331,6 +335,7 @@ function quickSave(category) {
 
     haptic('success');
     document.getElementById('modalOverlay').classList.remove('active');
+    if (typeof setClosingGuard === 'function') setClosingGuard(false);
     renderAll();
 
     // Отправка на сервер (фоном, не блокирует UI)
@@ -491,6 +496,7 @@ function quickSaveArticle(articleId) {
     Storage.save('mycash_last_wallet', selectedWallet);
     haptic('success');
     document.getElementById('modalOverlay').classList.remove('active');
+    if (typeof setClosingGuard === 'function') setClosingGuard(false);
     renderAll();
     sendOperationToServer(op);
 }
@@ -517,6 +523,7 @@ function saveTransfer() {
     Storage.save('mycash_ops', operations);
     haptic('success');
     document.getElementById('modalOverlay').classList.remove('active');
+    if (typeof setClosingGuard === 'function') setClosingGuard(false);
     renderAll();
     sendOperationToServer(op);
 }
@@ -604,6 +611,7 @@ function saveExtended() {
     Storage.save('mycash_last_wallet', selectedWallet);
     haptic('success');
     document.getElementById('modalOverlay').classList.remove('active');
+    if (typeof setClosingGuard === 'function') setClosingGuard(false);
     renderAll();
 
     // Отправка на сервер в фоне
