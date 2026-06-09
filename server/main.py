@@ -583,17 +583,28 @@ async def create_article(body: ArticleCreate, current_user: dict = Depends(get_c
     return result.data[0]
 
 
+def _technical_kind_id():
+    """id вида деятельности 'technical' (служебные статьи переводов между кошельками)."""
+    res = supabase.table('dds_activity_kinds').select('id').eq('code', 'technical').limit(1).execute()
+    return res.data[0]['id'] if res.data else None
+
+
 @app.put('/v1/articles/{article_id}')
 async def update_article(article_id: str, body: ArticleUpdate, current_user: dict = Depends(get_current_user)):
     """Редактировать статью ДДС"""
     user_id = current_user['user_id']
-    existing = supabase.table('dds_articles').select('id').eq('id', article_id).eq('user_id', user_id).execute()
+    existing = supabase.table('dds_articles').select('id,activity_kind_id').eq('id', article_id).eq('user_id', user_id).execute()
     if not existing.data:
         raise HTTPException(status_code=404, detail='Статья не найдена')
 
     update_data = {k: v for k, v in body.dict().items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=400, detail='Нечего обновлять')
+
+    # Служебную (техническую) статью нельзя «перевести» в обычную: не даём менять вид и группу
+    if existing.data[0].get('activity_kind_id') == _technical_kind_id():
+        update_data.pop('activity_kind_id', None)
+        update_data.pop('group_id', None)
 
     result = supabase.table('dds_articles').update(update_data).eq('id', article_id).execute()
     return result.data[0]
@@ -603,6 +614,12 @@ async def update_article(article_id: str, body: ArticleUpdate, current_user: dic
 async def delete_article(article_id: str, current_user: dict = Depends(get_current_user)):
     """Удалить статью ДДС (операции с этой статьёй сохранятся, ссылка обнулится)"""
     user_id = current_user['user_id']
+    art = supabase.table('dds_articles').select('id,activity_kind_id').eq('id', article_id).eq('user_id', user_id).limit(1).execute()
+    if not art.data:
+        raise HTTPException(status_code=404, detail='Статья не найдена')
+    # Служебные статьи переводов между кошельками удалять нельзя
+    if art.data[0].get('activity_kind_id') == _technical_kind_id():
+        raise HTTPException(status_code=400, detail='Служебную статью удалить нельзя')
     result = supabase.table('dds_articles').delete().eq('id', article_id).eq('user_id', user_id).execute()
     if not result.data:
         raise HTTPException(status_code=404, detail='Статья не найдена')

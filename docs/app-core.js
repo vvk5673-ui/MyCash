@@ -447,7 +447,9 @@ const ARTICLE_VISUALS = {
     'Вклады от собственников':                { icon: 'piggy-bank',      color: '#0D9488' },
     'Оплаты по кредитам и займам':            { icon: 'credit-card',     color: '#DC2626' },
     'Дивиденды':                              { icon: 'coins',           color: '#D97706' },
-    // Техническая (переводы между счетами)
+    // Техническая (переводы между кошельками). Старые ключи оставлены для старых операций.
+    'Доход — Перевод между кошельками':       { icon: 'arrow-left-right', color: '#007AFF' },
+    'Расход — Перевод между кошельками':      { icon: 'arrow-left-right', color: '#007AFF' },
     'Доход — Перевод между счетами':          { icon: 'arrow-left-right', color: '#007AFF' },
     'Расход — Перевод между счетами':         { icon: 'arrow-left-right', color: '#007AFF' }
 };
@@ -726,6 +728,13 @@ function renderRefList() {
     refreshIcons();
 }
 
+// Служебная (техническая) статья переводов между кошельками — её нельзя удалять
+function isTechnicalArticle(a) {
+    if (!a || !a.activity_kind_id) return false;
+    const k = (Refs.activityKinds || []).find(function(x) { return x.id === a.activity_kind_id; });
+    return !!(k && k.code === 'technical');
+}
+
 // Открыть форму добавления/редактирования
 function openRefForm(id) {
     editingRefId = (id && id !== 'null') ? id : null;
@@ -739,9 +748,12 @@ function openRefForm(id) {
     // Список видов деятельности (для статей)
     if (kind === 'articles') {
         const sel = document.getElementById('refFormActivityKind');
-        sel.innerHTML = Refs.activityKinds.map(function(k) {
-            return '<option value="' + k.id + '">' + esc(k.name) + '</option>';
-        }).join('');
+        // «Техническую» пользователю не предлагаем — она только у служебных статей переводов
+        sel.innerHTML = Refs.activityKinds
+            .filter(function(k) { return k.code !== 'technical'; })
+            .map(function(k) {
+                return '<option value="' + k.id + '">' + esc(k.name) + '</option>';
+            }).join('');
     }
 
     // Текущий элемент (при редактировании)
@@ -759,6 +771,10 @@ function openRefForm(id) {
             const inGrp = Refs.groups.find(function(g) { return g.code === 'inflow'; });
             setRefArticleType(inGrp && item.group_id === inGrp.id ? 'income' : 'expense');
             if (item.activity_kind_id) document.getElementById('refFormActivityKind').value = item.activity_kind_id;
+            // Служебную (техническую) статью удалять нельзя — прячем кнопку «Удалить»
+            if (isTechnicalArticle(item)) {
+                document.getElementById('refFormDeleteBtn').style.display = 'none';
+            }
         }
     } else {
         document.getElementById('refFormTitle').textContent = 'Добавить ' + REF_META[kind].addLabel;
