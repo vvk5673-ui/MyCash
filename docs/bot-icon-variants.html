@@ -50,6 +50,8 @@ var GRADS='<defs>'
  +'<linearGradient id="champagneBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F8EDD0"/><stop offset="1" stop-color="#E6CF95"/></linearGradient>'
  +'<linearGradient id="nameGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C99A2E"/><stop offset="1" stop-color="#3A3A46"/></linearGradient>'
  +'<linearGradient id="goldBlue" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E0AE3C"/><stop offset="1" stop-color="#2E9BF0"/></linearGradient>'
+ +'<linearGradient id="blueBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3AA0F2"/><stop offset="1" stop-color="#1E7FD4"/></linearGradient>'
+ +'<linearGradient id="navyBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#143A63"/><stop offset="1" stop-color="#081A2E"/></linearGradient>'
  +'</defs>';
 
 // 16 палочек волны по кругу
@@ -81,7 +83,12 @@ var VARIANTS=[
   {name:'Шампань + синие лучи',   desc:'Мягкий фон, синие лучи, золотой ₽',      bg:'url(#champagneBg)',mark:'url(#nameGrad)', acc:BLUE},
   {name:'Графит + кольцо',        desc:'Графит, золотой ободок, синие лучи',     bg:'url(#graphiteBg)', mark:'url(#goldGrad)', acc:BLUE, ring:'#C99A2E'},
   {name:'Минимал ₽',             desc:'Крупный золотой ₽ без лучей, графит',    bg:'url(#graphiteBg)', mark:'url(#goldGrad)', acc:BLUE, wave:false, big:true},
-  {name:'Бренд-градиент',         desc:'Синие лучи, ₽ золото→графит',            bg:'#FFFFFF',          mark:'url(#nameGrad)', acc:BLUE}
+  {name:'Бренд-градиент',         desc:'Синие лучи, ₽ золото→графит',            bg:'#FFFFFF',          mark:'url(#nameGrad)', acc:BLUE},
+  // Синий фон — всё золотое (лучи + ₽)
+  {name:'Синий + золото',         desc:'Телеграм-синий фон, всё золотое',        bg:'url(#blueBg)',     mark:'url(#goldGrad)'},
+  {name:'Тёмно-синий + золото',   desc:'Глубокий синий, всё золотое',            bg:'url(#navyBg)',     mark:'url(#goldGrad)'},
+  {name:'Синий + золотое кольцо', desc:'Синий фон, золото + ободок',             bg:'url(#blueBg)',     mark:'url(#goldGrad)', ring:'#E8C56A'},
+  {name:'Синий минимал ₽',        desc:'Крупный золотой ₽ на синем',             bg:'url(#blueBg)',     mark:'url(#goldGrad)', wave:false, big:true}
 ];
 
 // Построить карточки
