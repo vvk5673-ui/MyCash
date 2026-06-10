@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyCash — редизайн окна операции</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;background:#0b0d12;color:#e7e9ee;-webkit-font-smoothing:antialiased;padding:46px 20px 80px}
+.head{max-width:880px;margin:0 auto 14px;text-align:center}
+.head .kicker{font-size:13px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#7c8499;margin-bottom:12px}
+.head h1{font-size:32px;font-weight:800;letter-spacing:-1px;margin-bottom:12px}
+.head h1 span{background:linear-gradient(90deg,#6366f1,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent}
+.head p{font-size:15px;color:#aab1c2;line-height:1.6;max-width:600px;margin:0 auto}
+
+.grid{max-width:1200px;margin:40px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:40px 28px;justify-items:center}
+.cell{width:330px;max-width:100%}
+.phone{width:330px;border-radius:40px;background:#000;padding:10px;box-shadow:0 30px 60px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06)}
+.screen{border-radius:30px;overflow:hidden;background:#fff;position:relative}
+.meta{margin-top:20px}
+.meta h3{font-size:19px;font-weight:700;letter-spacing:-.3px}
+.meta h3 .tag{font-size:11px;font-weight:600;color:#9fb0ff;background:#1c2030;border-radius:20px;padding:3px 9px;margin-left:9px;vertical-align:middle}
+.meta ul{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.meta li{font-size:13px;line-height:1.45;color:#9aa2b4;padding-left:18px;position:relative}
+.meta li::before{content:"";position:absolute;left:0;top:6px;width:7px;height:7px;border-radius:2px;background:linear-gradient(135deg,#6366f1,#a855f7)}
+.meta li b{color:#cdd3e0;font-weight:600}
+
+/* ===== ОБЩИЕ ЭЛЕМЕНТЫ МОКАПА (светлая Apple-база) ===== */
+.scr{padding:14px 16px 18px;color:#1C1C1E;background:#fff}
+.handle{width:38px;height:5px;border-radius:3px;background:#E5E5EA;margin:2px auto 12px}
+.amount{font-size:34px;font-weight:800;letter-spacing:-1px;text-align:center}
+.amount .cur{color:#C7C7CC;font-size:24px}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#8E8E93;margin:0 0 8px}
+.row-between{display:flex;align-items:center;justify-content:space-between}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:20px;font-size:13px;font-weight:600;background:#F2F2F7;color:#1C1C1E;white-space:nowrap}
+.chip .d{width:16px;height:16px;border-radius:50%;display:inline-block;flex-shrink:0}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{background:#F2F2F7;border-radius:14px;padding:11px 12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.tile .ti{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.save{margin-top:14px;width:100%;padding:15px;border:none;border-radius:16px;font-size:16px;font-weight:700;color:#fff;cursor:pointer}
+
+/* ============================================================
+   КОНЦЕПЦИЯ 1 — APPLE INSET (сегменты, сгруппированные секции)
+============================================================ */
+.c1 .seg{display:flex;background:#F2F2F7;border-radius:12px;padding:3px;margin:14px 0}
+.c1 .seg button{flex:1;border:none;background:transparent;padding:9px 0;border-radius:9px;font-size:13px;font-weight:600;color:#8E8E93;cursor:pointer}
+.c1 .seg button.on{background:#fff;color:#FF3B30;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.c1 .wallets{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px}
+.c1 .wallets .chip.on{background:#0A84FF;color:#fff}
+.c1 .group{background:#F2F2F7;border-radius:14px;overflow:hidden;margin-top:6px}
+.c1 .grow{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;font-size:14px;border-bottom:1px solid #E5E5EA}
+.c1 .grow:last-child{border:none}
+.c1 .grow .v{color:#C7C7CC;font-size:13px;display:flex;align-items:center;gap:6px}
+.c1 .tile.on{background:#fff;box-shadow:0 0 0 2px #0A84FF inset}
+.c1 .save{background:#0A84FF}
+
+/* ============================================================
+   КОНЦЕПЦИЯ 2 — ФИНТЕХ КАРТОЧКИ + ЦВЕТОВОЙ КОД
+============================================================ */
+.c2 .scr{background:#F2F2F7}
+.c2 .hero{background:linear-gradient(135deg,#FF5A52,#FF3B30);border-radius:20px;padding:18px;color:#fff;text-align:center;box-shadow:0 12px 26px rgba(255,59,48,.32)}
+.c2 .hero .lbl{color:rgba(255,255,255,.8);margin-bottom:4px}
+.c2 .hero .amt{font-size:36px;font-weight:800;letter-spacing:-1px}
+.c2 .types{display:flex;gap:8px;margin:12px 0}
+.c2 .type{flex:1;background:#fff;border-radius:14px;padding:11px 4px;text-align:center;font-size:12px;font-weight:700;color:#8E8E93}
+.c2 .type .ic{font-size:18px;display:block;margin-bottom:3px}
+.c2 .type.on{background:#FF3B30;color:#fff}
+.c2 .card{background:#fff;border-radius:16px;padding:14px;margin-top:12px}
+.c2 .wallets{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.c2 .chip.on{background:#1C1C1E;color:#fff}
+.c2 .tile{background:#F7F7FA}
+.c2 .tile.on{background:#FFECEA;box-shadow:0 0 0 1.5px #FF3B30 inset;color:#FF3B30}
+.c2 .save{background:#1C1C1E}
+
+/* ============================================================
+   КОНЦЕПЦИЯ 3 — КОМПАКТНЫЙ СМАРТ (минимум скролла)
+============================================================ */
+.c3 .topbar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.c3 .amt-in{flex:1;background:#F2F2F7;border-radius:14px;padding:12px 14px;font-size:24px;font-weight:800;letter-spacing:-.5px}
+.c3 .amt-in .cur{color:#C7C7CC}
+.c3 .seg-v{display:flex;flex-direction:column;gap:3px;background:#F2F2F7;border-radius:12px;padding:3px}
+.c3 .seg-v button{border:none;background:transparent;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;color:#8E8E93;cursor:pointer}
+.c3 .seg-v button.on{background:#FF3B30;color:#fff}
+.c3 .wal{display:flex;gap:12px;justify-content:space-between;margin-bottom:16px}
+.c3 .wal .w{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;color:#8E8E93;flex:1}
+.c3 .wal .wi{width:42px;height:42px;border-radius:13px;background:#F2F2F7;display:flex;align-items:center;justify-content:center;font-size:18px}
+.c3 .wal .w.on .wi{background:#0A84FF;color:#fff;box-shadow:0 6px 14px rgba(10,132,255,.35)}
+.c3 .wal .w.on{color:#0A84FF;font-weight:700}
+.c3 .flow{display:flex;flex-wrap:wrap;gap:7px}
+.c3 .chip.on{background:#0A84FF;color:#fff}
+.c3 .chip.add{background:#fff;color:#0A84FF;box-shadow:0 0 0 1.5px #D6E6FF inset}
+.c3 .mini{display:flex;gap:8px;margin-top:14px}
+.c3 .mini .m{flex:1;background:#F2F2F7;border-radius:12px;padding:9px 12px;font-size:12px;color:#8E8E93}
+.c3 .save{background:#0A84FF}
+@media(max-width:560px){.head h1{font-size:25px}body{padding:32px 14px}}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">MyCash · Окно операции</div>
+  <h1>Редизайн окна — <span>3 концепции</span></h1>
+  <p>Окно добавления операции, оформленное по-разному. Под каждым — какие фишки применены к каждому блоку. Выбери концепцию (или отдельные приёмы из разных).</p>
+</div>
+
+<div class="grid">
+
+  <!-- ================= КОНЦЕПЦИЯ 1 ================= -->
+  <div class="cell c1">
+    <div class="phone"><div class="screen"><div class="scr">
+      <div class="handle"></div>
+      <div class="amount">555 <span class="cur">₽</span></div>
+
+      <div class="seg">
+        <button class="on">Расход</button><button>Доход</button><button>Перевод</button>
+      </div>
+
+      <div class="wallets">
+        <span class="chip on"><span class="d" style="background:#21A038"></span>Сбербанк</span>
+        <span class="chip"><span class="d" style="background:#FFDD2D"></span>Т-Банк</span>
+        <span class="chip"><span class="d" style="background:#0A84FF"></span>Наличка</span>
+      </div>
+
+      <div class="row-between" style="margin-bottom:8px">
+        <span class="lbl" style="margin:0">Статья</span>
+        <span style="font-size:13px;font-weight:600;color:#0A84FF">✏ Изменить</span>
+      </div>
+      <div class="tiles">
+        <div class="tile on"><span class="ti" style="background:#E8F0FF">🏠</span>Аренда</div>
+        <div class="tile"><span class="ti" style="background:#FFF0E8">📱</span>Связь</div>
+        <div class="tile"><span class="ti" style="background:#E8FBEF">🛒</span>Продукты</div>
+        <div class="tile"><span class="ti" style="background:#F3E8FF">🔧</span>Ремонт</div>
+      </div>
+
+      <div class="group" style="margin-top:14px">
+        <div class="grow">Направление <span class="v">не указано ›</span></div>
+        <div class="grow">Контрагент <span class="v">не указано ›</span></div>
+      </div>
+
+      <button class="save">Сохранить расход</button>
+    </div></div></div>
+    <div class="meta">
+      <h3>1. Apple Inset<span class="tag">нативно</span></h3>
+      <ul>
+        <li><b>Тип:</b> сегмент-контрол как в iOS — скользящий выбор, цвет по типу (красный/зелёный/синий)</li>
+        <li><b>Кошельки:</b> чипы с цветной точкой банка, горизонтальный скролл</li>
+        <li><b>Статья:</b> плитки, выбранная — синяя обводка</li>
+        <li><b>Направление/Контрагент:</b> сгруппированный список со стрелками «›» (как Настройки iOS)</li>
+        <li><b>Кнопка:</b> меняет текст под тип</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ================= КОНЦЕПЦИЯ 2 ================= -->
+  <div class="cell c2">
+    <div class="phone"><div class="screen"><div class="scr">
+      <div class="handle"></div>
+      <div class="hero">
+        <div class="lbl">Сумма расхода</div>
+        <div class="amt">555 ₽</div>
+      </div>
+
+      <div class="types">
+        <div class="type on"><span class="ic">↓</span>Расход</div>
+        <div class="type"><span class="ic">↑</span>Доход</div>
+        <div class="type"><span class="ic">⇄</span>Перевод</div>
+      </div>
+
+      <div class="card">
+        <div class="lbl">Кошелёк</div>
+        <div class="wallets">
+          <span class="chip on"><span class="d" style="background:#21A038"></span>Сбербанк</span>
+          <span class="chip"><span class="d" style="background:#FFDD2D"></span>Т-Банк</span>
+          <span class="chip"><span class="d" style="background:#0A84FF"></span>Наличка</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row-between" style="margin-bottom:10px">
+          <span class="lbl" style="margin:0">Статья</span>
+          <span style="font-size:13px;font-weight:600;color:#FF3B30">Изменить</span>
+        </div>
+        <div class="tiles">
+          <div class="tile on">🏠 Аренда</div>
+          <div class="tile">📱 Связь</div>
+          <div class="tile">🛒 Продукты</div>
+          <div class="tile">🔧 Ремонт</div>
+        </div>
+      </div>
+
+      <button class="save">Сохранить</button>
+    </div></div></div>
+    <div class="meta">
+      <h3>2. Финтех + цвет-код<span class="tag">ярко</span></h3>
+      <ul>
+        <li><b>Сумма:</b> карточка-герой с градиентом по типу (расход — красный, доход — зелёный)</li>
+        <li><b>Тип:</b> крупные кнопки с иконками ↓↑⇄ — понятно с первого взгляда</li>
+        <li><b>Блоки:</b> каждый в своей белой карточке с мелким заголовком</li>
+        <li><b>Статья:</b> плитки с эмодзи, выбранная подсвечена цветом типа</li>
+        <li><b>Фон:</b> серый, карточки «парят» — глубина и порядок</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ================= КОНЦЕПЦИЯ 3 ================= -->
+  <div class="cell c3">
+    <div class="phone"><div class="screen"><div class="scr">
+      <div class="handle"></div>
+      <div class="topbar">
+        <div class="amt-in">555 <span class="cur">₽</span></div>
+        <div class="seg-v">
+          <button class="on">Расход</button><button>Доход</button><button>Перевод</button>
+        </div>
+      </div>
+
+      <div class="wal">
+        <div class="w on"><div class="wi">🟢</div>Сбер</div>
+        <div class="w"><div class="wi">🟡</div>Т-Банк</div>
+        <div class="w"><div class="wi">💵</div>Наличка</div>
+        <div class="w"><div class="wi">🟣</div>ЮMoney</div>
+      </div>
+
+      <div class="lbl">Статья</div>
+      <div class="flow">
+        <span class="chip on">🏠 Аренда</span>
+        <span class="chip">📱 Связь</span>
+        <span class="chip">🛒 Продукты</span>
+        <span class="chip">🔧 Ремонт</span>
+        <span class="chip">🌐 Интернет</span>
+        <span class="chip add">+ Новая</span>
+      </div>
+
+      <div class="mini">
+        <div class="m">🧭 Направление ›</div>
+        <div class="m">👤 Контрагент ›</div>
+      </div>
+
+      <button class="save">Сохранить</button>
+    </div></div></div>
+    <div class="meta">
+      <h3>3. Компактный смарт<span class="tag">быстро</span></h3>
+      <ul>
+        <li><b>Сумма + тип</b> в одной строке сверху — экономия места</li>
+        <li><b>Кошельки:</b> круглые иконки-кнопки в ряд, выбранный «подсвечен»</li>
+        <li><b>Статья:</b> чипы в перенос (flow) + «+ Новая» — всё видно сразу</li>
+        <li><b>Направление/Контрагент:</b> две компактные строки рядом</li>
+        <li><b>Цель:</b> заполнить операцию без прокрутки — максимально быстро</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div style="max-width:720px;margin:50px auto 0;text-align:center;color:#7c8499;font-size:14px;line-height:1.7">
+  Напиши номер концепции — например <b style="color:#cdd3e0">«концепция 2»</b>.<br>
+  Можно комбинировать: «сумма из 2, кошельки из 3, статьи из 1».<br>
+  После выбора аккуратно применю к реальному окну (с твоим подтверждением на каждый блок).
+</div>
+
+</body>
+</html>
