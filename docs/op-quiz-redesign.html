@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyCash — окно операции в виде квиза</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;background:#0b0d12;color:#e7e9ee;-webkit-font-smoothing:antialiased;padding:46px 20px 80px}
+.head{max-width:880px;margin:0 auto 14px;text-align:center}
+.head .kicker{font-size:13px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#7c8499;margin-bottom:12px}
+.head h1{font-size:32px;font-weight:800;letter-spacing:-1px;margin-bottom:12px}
+.head h1 span{background:linear-gradient(90deg,#E0AE3C,#B8860B);-webkit-background-clip:text;background-clip:text;color:transparent}
+.head p{font-size:15px;color:#aab1c2;line-height:1.6;max-width:600px;margin:0 auto}
+
+.grid{max-width:1200px;margin:40px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:40px 28px;justify-items:center}
+.cell{width:330px;max-width:100%}
+.phone{width:330px;border-radius:40px;background:#000;padding:10px;box-shadow:0 30px 60px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06)}
+.screen{border-radius:30px;overflow:hidden;background:#fff;position:relative;height:600px;display:flex;flex-direction:column}
+.meta{margin-top:20px}
+.meta h3{font-size:19px;font-weight:700;letter-spacing:-.3px}
+.meta h3 .tag{font-size:11px;font-weight:600;color:#E0AE3C;background:#241d10;border-radius:20px;padding:3px 9px;margin-left:9px;vertical-align:middle}
+.meta ul{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.meta li{font-size:13px;line-height:1.45;color:#9aa2b4;padding-left:18px;position:relative}
+.meta li::before{content:"";position:absolute;left:0;top:6px;width:7px;height:7px;border-radius:2px;background:linear-gradient(135deg,#E0AE3C,#B8860B)}
+.meta li b{color:#cdd3e0;font-weight:600}
+.try{display:inline-block;margin-top:10px;font-size:12px;font-weight:600;color:#E0AE3C;background:#241d10;border:1px solid #3a2e14;border-radius:20px;padding:6px 12px}
+
+/* ===== базовые элементы окна ===== */
+.scr{color:#1C1C1E;height:100%;display:flex;flex-direction:column;background:#fff}
+.qhead{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px}
+.qhead .nav{width:30px;height:30px;border-radius:50%;background:#F2F2F7;display:flex;align-items:center;justify-content:center;font-size:17px;color:#8E8E93;cursor:pointer}
+.prog{display:flex;gap:5px}
+.prog i{width:22px;height:5px;border-radius:3px;background:#E5E5EA;transition:.3s}
+.prog i.on{background:#E0AE3C;width:26px}
+.prog i.done{background:#B8860B}
+.qtitle{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8E8E93;text-align:center;margin:2px 0 4px}
+.qsub{font-size:20px;font-weight:800;letter-spacing:-.4px;text-align:center;margin-bottom:10px}
+
+/* === A — полноэкранный квиз === */
+.A .body{flex:1;overflow:hidden;position:relative}
+.A .step{position:absolute;inset:0;padding:6px 18px;display:none;flex-direction:column}
+.A .step.active{display:flex}
+.A .amt{font-size:46px;font-weight:800;letter-spacing:-1.5px;text-align:center;margin:24px 0 6px}
+.A .amt .cur{color:#C7C7CC;font-size:30px}
+.A .amt.empty{color:#C7C7CC}
+.A .keypad{margin-top:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-bottom:6px}
+.A .key{background:#F2F2F7;border:none;border-radius:14px;padding:16px 0;font-size:22px;font-weight:600;color:#1C1C1E;cursor:pointer}
+.A .key:active{background:#E5E5EA}
+.A .opts{display:flex;flex-direction:column;gap:9px;margin-top:6px;overflow-y:auto}
+.A .opt{display:flex;align-items:center;gap:11px;background:#F2F2F7;border:2px solid transparent;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:600;cursor:pointer}
+.A .opt .oi{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.A .opt.sel{border-color:#E0AE3C;background:#FBF3E2}
+.A .opt.new{color:#B8860B;justify-content:center;border:2px dashed #E5D6B0;background:#fff}
+.A .types{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.A .tbtn{display:flex;align-items:center;gap:12px;border:none;border-radius:16px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;color:#fff}
+.A .tbtn .ti{font-size:20px}
+.A .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;overflow-y:auto;align-content:flex-start}
+.A .chip{background:#F2F2F7;border:2px solid transparent;border-radius:20px;padding:9px 14px;font-size:14px;font-weight:600;cursor:pointer}
+.A .chip.sel{border-color:#E0AE3C;background:#FBF3E2;color:#9a6a00}
+.A .summary{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:10px 4px}
+.A .srow{display:flex;justify-content:space-between;font-size:15px;padding:11px 14px;background:#F2F2F7;border-radius:12px}
+.A .srow b{font-weight:700}
+.A .foot{padding:10px 18px 18px}
+.A .next{width:100%;border:none;border-radius:16px;padding:15px;font-size:16px;font-weight:700;color:#fff;background:linear-gradient(135deg,#E0AE3C,#B8860B);cursor:pointer;box-shadow:0 8px 20px rgba(184,134,11,.32)}
+.A .next:disabled{opacity:.4;box-shadow:none}
+.A .hint{font-size:11px;color:#C7C7CC;text-align:center;margin-top:6px}
+
+/* === B — степпер-аккордеон === */
+.B .scr{padding:14px 16px;gap:10px;overflow-y:auto}
+.B .sec{border:1.5px solid #EEE;border-radius:16px;overflow:hidden}
+.B .sec.act{border-color:#E0AE3C;box-shadow:0 4px 16px rgba(184,134,11,.12)}
+.B .sechead{display:flex;align-items:center;gap:10px;padding:13px 14px;font-size:14px;font-weight:600}
+.B .num{width:24px;height:24px;border-radius:50%;background:#F2F2F7;color:#8E8E93;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.B .sec.done .num{background:#34C759;color:#fff}
+.B .sec.act .num{background:#E0AE3C;color:#fff}
+.B .secval{margin-left:auto;font-size:13px;color:#8E8E93;font-weight:600}
+.B .secbody{padding:0 14px 14px;display:none}
+.B .sec.act .secbody{display:block}
+.B .bamt{font-size:30px;font-weight:800;text-align:center;color:#1C1C1E;margin:4px 0 8px}
+.B .row{display:flex;flex-wrap:wrap;gap:7px}
+.B .bchip{background:#F2F2F7;border-radius:18px;padding:8px 13px;font-size:13px;font-weight:600}
+.B .bchip.sel{background:#FBF3E2;color:#9a6a00;box-shadow:0 0 0 1.5px #E0AE3C inset}
+.B .bsave{margin-top:4px;width:100%;border:none;border-radius:14px;padding:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,#E0AE3C,#B8860B)}
+
+/* === C — чат-визард === */
+.C .scr{padding:16px 14px;gap:10px;overflow-y:auto;background:#F2F2F7}
+.C .ask{max-width:80%;background:#fff;border-radius:16px 16px 16px 4px;padding:11px 14px;font-size:14px;font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.C .ans{align-self:flex-end;max-width:80%;background:linear-gradient(135deg,#E0AE3C,#B8860B);color:#fff;border-radius:16px 16px 4px 16px;padding:10px 14px;font-size:14px;font-weight:700}
+.C .opts{align-self:flex-end;display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end;max-width:90%}
+.C .copt{background:#fff;border:1.5px solid #E5D6B0;color:#9a6a00;border-radius:18px;padding:8px 13px;font-size:13px;font-weight:600}
+@media(max-width:560px){.head h1{font-size:25px}body{padding:32px 14px}}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">MyCash · Ввод операции</div>
+  <h1>Окно операции как <span>квиз</span></h1>
+  <p>Пошаговый ввод: сумма → кошелёк → тип → статья. Минимум печати, максимум тапов. Первый вариант — рабочий, потыкай прямо здесь.</p>
+</div>
+
+<div class="grid">
+
+  <!-- ============ A — ПОЛНОЭКРАННЫЙ КВИЗ (интерактивный) ============ -->
+  <div class="cell">
+    <div class="phone"><div class="screen"><div class="scr A" id="A">
+      <div class="qhead">
+        <span class="nav" onclick="aBack()">‹</span>
+        <div class="prog">
+          <i class="on" data-p="1"></i><i data-p="2"></i><i data-p="3"></i><i data-p="4"></i><i data-p="5"></i>
+        </div>
+        <span class="nav">✕</span>
+      </div>
+      <div class="body">
+        <!-- шаг 1: сумма -->
+        <div class="step active" data-s="1">
+          <div class="qtitle">Шаг 1 из 5</div>
+          <div class="qsub">Введите сумму</div>
+          <div class="amt empty" id="aAmt">0 <span class="cur">₽</span></div>
+          <div class="keypad">
+            <button class="key" onclick="aKey('1')">1</button><button class="key" onclick="aKey('2')">2</button><button class="key" onclick="aKey('3')">3</button>
+            <button class="key" onclick="aKey('4')">4</button><button class="key" onclick="aKey('5')">5</button><button class="key" onclick="aKey('6')">6</button>
+            <button class="key" onclick="aKey('7')">7</button><button class="key" onclick="aKey('8')">8</button><button class="key" onclick="aKey('9')">9</button>
+            <button class="key" onclick="aKey('000')">000</button><button class="key" onclick="aKey('0')">0</button><button class="key" onclick="aDel()">⌫</button>
+          </div>
+        </div>
+        <!-- шаг 2: кошелёк -->
+        <div class="step" data-s="2">
+          <div class="qtitle">Шаг 2 из 5</div>
+          <div class="qsub">С какого кошелька?</div>
+          <div class="opts">
+            <div class="opt" onclick="aPick(this,'wallet','Сбербанк',3)"><span class="oi" style="background:#E6F4EA">🟢</span>Сбербанк</div>
+            <div class="opt" onclick="aPick(this,'wallet','Т-Банк',3)"><span class="oi" style="background:#FFF7DB">🟡</span>Т-Банк</div>
+            <div class="opt" onclick="aPick(this,'wallet','Наличка',3)"><span class="oi" style="background:#E8F0FF">💵</span>Наличка</div>
+            <div class="opt" onclick="aPick(this,'wallet','ЮMoney',3)"><span class="oi" style="background:#F3E8FF">🟣</span>ЮMoney</div>
+            <div class="opt new" onclick="aPick(this,'wallet','Новый кошелёк',3)">＋ Создать новый кошелёк</div>
+          </div>
+        </div>
+        <!-- шаг 3: тип -->
+        <div class="step" data-s="3">
+          <div class="qtitle">Шаг 3 из 5</div>
+          <div class="qsub">Это расход, доход или перевод?</div>
+          <div class="types">
+            <button class="tbtn" style="background:#FF3B30" onclick="aPick(this,'type','Расход',4)"><span class="ti">↓</span>Расход</button>
+            <button class="tbtn" style="background:#34C759" onclick="aPick(this,'type','Доход',4)"><span class="ti">↑</span>Доход</button>
+            <button class="tbtn" style="background:#0A84FF" onclick="aPick(this,'type','Перевод',4)"><span class="ti">⇄</span>Перевод</button>
+          </div>
+        </div>
+        <!-- шаг 4: статья -->
+        <div class="step" data-s="4">
+          <div class="qtitle">Шаг 4 из 5</div>
+          <div class="qsub">Выберите статью</div>
+          <div class="chips">
+            <span class="chip" onclick="aPick(this,'article','Аренда',5)">🏠 Аренда</span>
+            <span class="chip" onclick="aPick(this,'article','Связь',5)">📱 Связь</span>
+            <span class="chip" onclick="aPick(this,'article','Продукты',5)">🛒 Продукты</span>
+            <span class="chip" onclick="aPick(this,'article','Реклама',5)">📣 Реклама</span>
+            <span class="chip" onclick="aPick(this,'article','Зарплата',5)">👤 Зарплата</span>
+            <span class="chip" onclick="aPick(this,'article','Ремонт',5)">🔧 Ремонт</span>
+            <span class="chip" style="color:#B8860B" onclick="aPick(this,'article','Новая статья',5)">＋ Новая</span>
+          </div>
+        </div>
+        <!-- шаг 5: готово -->
+        <div class="step" data-s="5">
+          <div class="qtitle">Шаг 5 из 5</div>
+          <div class="qsub">Проверьте и сохраните</div>
+          <div class="summary">
+            <div class="srow"><span>Сумма</span><b id="sAmt">—</b></div>
+            <div class="srow"><span>Кошелёк</span><b id="sWallet">—</b></div>
+            <div class="srow"><span>Тип</span><b id="sType">—</b></div>
+            <div class="srow"><span>Статья</span><b id="sArticle">—</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="foot">
+        <button class="next" id="aNext" onclick="aNext()" disabled>Далее →</button>
+        <div class="hint" id="aHint">На телефоне клавиатура откроется сама</div>
+      </div>
+    </div></div></div>
+    <div class="meta">
+      <h3>A. Полноэкранный квиз<span class="tag">интерактив</span></h3>
+      <span class="try">👆 Попробуй прямо здесь</span>
+      <ul>
+        <li><b>Один вопрос — один экран</b>, крупно. Прогресс-полоски сверху</li>
+        <li><b>Сумма:</b> на телефоне клавиатура открывается сама, есть кнопка «Далее»</li>
+        <li><b>Кошелёк:</b> список + «Создать новый» прямо в шаге</li>
+        <li><b>Тип:</b> 3 большие цветные кнопки (после суммы — как ты просил)</li>
+        <li>Тапнул вариант — <b>сразу следующий шаг</b>. В конце — сводка и Сохранить</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============ B — СТЕППЕР-АККОРДЕОН ============ -->
+  <div class="cell">
+    <div class="phone"><div class="screen"><div class="scr B">
+      <div class="sec done"><div class="sechead"><span class="num">✓</span>Сумма<span class="secval">555 ₽</span></div></div>
+      <div class="sec done"><div class="sechead"><span class="num">✓</span>Кошелёк<span class="secval">Сбербанк</span></div></div>
+      <div class="sec act">
+        <div class="sechead"><span class="num">3</span>Тип операции<span class="secval">выберите</span></div>
+        <div class="secbody">
+          <div class="row">
+            <span class="bchip sel">↓ Расход</span><span class="bchip">↑ Доход</span><span class="bchip">⇄ Перевод</span>
+          </div>
+        </div>
+      </div>
+      <div class="sec"><div class="sechead"><span class="num">4</span>Статья<span class="secval">—</span></div></div>
+      <div class="sec"><div class="sechead"><span class="num">5</span>Направление и контрагент<span class="secval">не обяз.</span></div></div>
+      <button class="bsave">Сохранить операцию</button>
+    </div></div></div>
+    <div class="meta">
+      <h3>B. Степпер-аккордеон<span class="tag">видно всё</span></h3>
+      <ul>
+        <li><b>Видны все шаги списком</b> — пользователь понимает, что впереди</li>
+        <li>Активный шаг <b>раскрыт</b>, остальные свёрнуты в строку</li>
+        <li>Заполненные — с галочкой ✓ и значением, можно тапнуть и <b>вернуться/изменить</b></li>
+        <li>Выбрал ответ — <b>авто-переход</b> к следующему, аккордеон сам листает</li>
+        <li>Именно то, что ты описал: «видит всё окно, но ведёт по шагам»</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============ C — ЧАТ-ВИЗАРД ============ -->
+  <div class="cell">
+    <div class="phone"><div class="screen"><div class="scr C">
+      <div class="ask">Сколько денег? 💰</div>
+      <div class="ans">555 ₽</div>
+      <div class="ask">С какого кошелька?</div>
+      <div class="ans">🟢 Сбербанк</div>
+      <div class="ask">Это расход, доход или перевод?</div>
+      <div class="ans">↓ Расход</div>
+      <div class="ask">На что? Выберите статью 👇</div>
+      <div class="opts">
+        <span class="copt">🏠 Аренда</span><span class="copt">📱 Связь</span><span class="copt">🛒 Продукты</span><span class="copt">📣 Реклама</span><span class="copt">＋ Новая</span>
+      </div>
+    </div></div></div>
+    <div class="meta">
+      <h3>C. Чат-визард<span class="tag">диалог</span></h3>
+      <ul>
+        <li>Приложение <b>«разговаривает»</b> — задаёт вопросы по очереди</li>
+        <li>Пользователь отвечает <b>тапами по вариантам</b>, ответы остаются в ленте</li>
+        <li>Ощущение, будто помощник ведёт за руку — дружелюбно и понятно новичку</li>
+        <li>Хорошо ложится на будущий <b>голосовой ввод</b> (ответ голосом → подстановка)</li>
+        <li>Минус: занимает больше экрана, чем A и B</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div style="max-width:720px;margin:50px auto 0;text-align:center;color:#7c8499;font-size:14px;line-height:1.7">
+  Напиши номер — например <b style="color:#cdd3e0">«вариант A»</b>. Можно совместить: «логика A, но видно все шаги как в B».<br>
+  После выбора реализую в приложении (с автооткрытием клавиатуры на шаге суммы).
+</div>
+
+<script>
+// ===== Логика интерактивного варианта A =====
+var aState={step:1, amount:'', wallet:'', type:'', article:''};
+function $A(sel){return document.getElementById('A').querySelector(sel);}
+function aFmt(s){if(!s)return '0';return s.replace(/\B(?=(\d{3})+(?!\d))/g,' ');}
+function aRender(){
+  // шаги
+  document.getElementById('A').querySelectorAll('.step').forEach(function(el){el.classList.toggle('active', +el.dataset.s===aState.step);});
+  // прогресс
+  document.getElementById('A').querySelectorAll('.prog i').forEach(function(el){var p=+el.dataset.p;el.classList.toggle('done',p<aState.step);el.classList.toggle('on',p===aState.step);});
+  // сумма
+  var amtEl=$A('#aAmt');
+  amtEl.innerHTML=aFmt(aState.amount)+' <span class="cur">₽</span>';
+  amtEl.classList.toggle('empty', !aState.amount);
+  // кнопка далее
+  var nx=$A('#aNext'), hint=$A('#aHint');
+  if(aState.step===1){nx.style.display='block';nx.disabled=!aState.amount;nx.textContent='Далее →';hint.style.display='block';}
+  else if(aState.step===5){nx.style.display='block';nx.disabled=false;nx.textContent='💾 Сохранить';hint.style.display='none';
+    $A('#sAmt').textContent=aFmt(aState.amount)+' ₽';$A('#sWallet').textContent=aState.wallet||'—';$A('#sType').textContent=aState.type||'—';$A('#sArticle').textContent=aState.article||'—';}
+  else {nx.style.display='none';hint.style.display='none';}
+}
+function aKey(d){aState.amount=(aState.amount+d).replace(/^0+/,'').slice(0,9);aRender();}
+function aDel(){aState.amount=aState.amount.slice(0,-1);aRender();}
+function aNext(){
+  if(aState.step===1&&!aState.amount)return;
+  if(aState.step===5){var n=$A('#aNext');n.textContent='✓ Сохранено!';n.style.background='#34C759';return;}
+  aState.step=Math.min(5,aState.step+1);aRender();
+}
+function aBack(){if(aState.step>1){aState.step--;aRender();}}
+function aPick(el,field,val,next){
+  var parent=el.parentElement;
+  parent.querySelectorAll('.opt,.chip').forEach(function(x){x.classList.remove('sel');});
+  if(el.classList.contains('opt')||el.classList.contains('chip'))el.classList.add('sel');
+  aState[field]=val;
+  setTimeout(function(){aState.step=next;aRender();},180);
+}
+aRender();
+</script>
+</body>
+</html>
