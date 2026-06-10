@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=113">
+    <link rel="stylesheet" href="style.css?v=114">
 </head>
 <body>
 
@@ -49,8 +49,8 @@
             <div id="headerGreeting" style="font-size:16px;font-weight:700">Здравствуйте! 👋</div>
             <div id="headerDate" style="font-size:12px;color:var(--text2);margin-top:2px"></div>
         </div>
-        <div style="display:flex;align-items:center;gap:7px">
-            <svg width="30" height="30" viewBox="0 0 100 100" aria-label="MyCash">
+        <div style="display:flex;align-items:center;gap:8px">
+            <svg width="32" height="32" viewBox="0 0 100 100" aria-label="MyCash">
                 <defs><linearGradient id="hdrGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs>
                 <g fill="url(#hdrGrad)">
                     <g transform="rotate(0 50 50)"><rect x="47" y="13" width="6" height="13" rx="3"/></g>
@@ -68,7 +68,10 @@
                 </g>
                 <text x="50" y="63" font-size="38" font-weight="800" fill="url(#hdrGrad)" text-anchor="middle" font-family="-apple-system,Segoe UI,sans-serif">₽</text>
             </svg>
-            <span style="font-size:15px;font-weight:800;letter-spacing:-0.3px;color:var(--text);line-height:1">MyCash</span>
+            <div style="display:flex;flex-direction:column;gap:1px">
+                <span style="font-size:15px;font-weight:800;letter-spacing:-0.3px;color:var(--text);line-height:1.05">MyCash</span>
+                <span style="font-size:11px;color:var(--text2);line-height:1">учёт финансов</span>
+            </div>
         </div>
     </div>
 
@@ -631,13 +634,13 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=113"></script>
+    <script src="api.js?v=114"></script>
     <!-- app.js разбит на 6 частей (общая область видимости, порядок подключения важен) -->
-    <script src="app-core.js?v=113"></script>
-    <script src="app-data.js?v=113"></script>
-    <script src="app-operations.js?v=113"></script>
-    <script src="app-dashboard.js?v=113"></script>
-    <script src="app-wallets.js?v=113"></script>
-    <script src="app-main.js?v=113"></script>
+    <script src="app-core.js?v=114"></script>
+    <script src="app-data.js?v=114"></script>
+    <script src="app-operations.js?v=114"></script>
+    <script src="app-dashboard.js?v=114"></script>
+    <script src="app-wallets.js?v=114"></script>
+    <script src="app-main.js?v=114"></script>
 </body>
 </html>
