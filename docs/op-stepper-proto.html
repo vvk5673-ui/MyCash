@@ -31,13 +31,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Ro
 .sec.act .num{background:#007AFF;color:#fff}
 .sectitle{font-size:14.5px;font-weight:600;color:#1C1C1E}
 .secval{margin-left:auto;display:flex;align-items:center;font-size:13px;color:#8E8E93;font-weight:600;white-space:nowrap}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:13px;font-weight:700;color:#fff;background:#1C1C1E;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.18)}
-.pill.green{background:#34C759}.pill.red{background:#FF3B30}.pill.blue{background:#0A84FF}
-.pill img{width:16px;height:16px;border-radius:4px;object-fit:contain;background:#fff}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:13px;font-size:12px;font-weight:700;color:#1C1C1E;background:#EFEFF4;white-space:nowrap}
+.pill.green{color:#1ca64c}.pill.red{color:#FF3B30}.pill.blue{color:#0A84FF}
+.pill img{width:14px;height:14px;border-radius:3px;object-fit:contain;background:#fff}
+.pill .wbadge{width:15px;height:15px;font-size:9px}
 .wlogo{width:18px;height:18px;border-radius:5px;object-fit:contain;vertical-align:middle;margin-right:6px;background:#fff;box-shadow:0 0 0 1px #eee}
+.wbadge{width:18px;height:18px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
 .flabel{font-size:12px;color:#8E8E93;font-weight:600;margin:12px 0 6px}
 .finput{width:100%;border:1.5px solid #E5E5EA;border-radius:12px;padding:11px 12px;font-size:14px;background:#fff;color:#1C1C1E}
 .finput::placeholder{color:#C7C7CC}
+.cgadd{width:46px;border:none;border-radius:12px;background:#007AFF;color:#fff;font-size:22px;font-weight:600;cursor:pointer;flex-shrink:0}
 .secbody{max-height:0;overflow:hidden;transition:max-height .3s ease}
 .sec.act .secbody{max-height:620px}
 .inner{padding:0 14px 14px}
@@ -52,7 +55,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Ro
 .knext:disabled{opacity:.4}
 
 .row{display:flex;flex-wrap:wrap;gap:8px}
-.chip{background:#F2F2F7;border:2px solid transparent;border-radius:14px;padding:11px 14px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.chip{background:#F2F2F7;border:2px solid transparent;border-radius:14px;padding:11px 14px;font-size:14px;font-weight:600;color:#1C1C1E;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
 .chip.sel{border-color:#007AFF;background:#E8F1FF;color:#0061CC}
 .chip.add{background:#fff;border:2px dashed #BCD8FF;color:#007AFF}
 .tbtn{flex:1;min-width:90px;border:none;border-radius:14px;padding:13px 6px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;opacity:.55}
@@ -120,8 +123,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Ro
         <div class="secbody"><div class="inner"><div class="row">
           <span class="chip" data-name="Сбербанк" data-logo="sber.png" onclick="pickWallet(this)"><img src="sber.png" class="wlogo">Сбербанк</span>
           <span class="chip" data-name="Т-Банк" data-logo="tbank.png" onclick="pickWallet(this)"><img src="tbank.png" class="wlogo">Т-Банк</span>
-          <span class="chip" data-name="Наличка" data-emoji="💵" onclick="pickWallet(this)">💵 Наличка</span>
-          <span class="chip" data-name="ЮMoney" data-emoji="🟣" onclick="pickWallet(this)">🟣 ЮMoney</span>
+          <span class="chip" data-name="Наличка" data-badge="#34C759" data-letter="₽" onclick="pickWallet(this)"><span class="wbadge" style="background:#34C759">₽</span>Наличка</span>
+          <span class="chip" data-name="ЮMoney" data-badge="#8B3FFC" data-letter="Ю" onclick="pickWallet(this)"><span class="wbadge" style="background:#8B3FFC">Ю</span>ЮMoney</span>
           <span class="chip add" data-name="Новый кошелёк" data-emoji="＋" onclick="pickWallet(this)">＋ Создать новый</span>
         </div></div></div>
       </div>
@@ -145,15 +148,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Ro
         <div class="secbody"><div class="inner">
           <div class="flabel" style="margin-top:0">Направление</div>
           <div class="row">
-            <span class="chip" onclick="pickDir(this)">🏢 Бизнес</span>
-            <span class="chip" onclick="pickDir(this)">🏠 Личное</span>
+            <span class="chip" onclick="pickChip(this)">🏢 Бизнес</span>
+            <span class="chip" onclick="pickChip(this)">🏠 Личное</span>
           </div>
           <div class="flabel">Контрагент</div>
-          <input class="finput" placeholder="Например: ООО «Ромашка»">
+          <div class="row" id="cgRow" style="margin-bottom:8px">
+            <span class="chip" onclick="pickChip(this)">🏢 ООО «Ромашка»</span>
+            <span class="chip" onclick="pickChip(this)">👤 ИП Иванов</span>
+          </div>
+          <div style="display:flex;gap:8px">
+            <input class="finput" id="cgInput" placeholder="Новый контрагент" style="flex:1">
+            <button class="cgadd" onclick="addCg()">＋</button>
+          </div>
           <div class="flabel">Назначение платежа</div>
           <input class="finput" placeholder="Необязательно">
           <div class="flabel">Дата</div>
-          <input class="finput" type="date">
+          <input class="finput" type="date" id="dateInput">
         </div></div>
       </div>
 
@@ -212,18 +222,29 @@ function amountNext(){if(!st.amount)return;markDone('amount','vAmount','<span cl
 function pickType(val,cls,el){st.type=val;selIn(el);setTimeout(function(){markDone('type','vType','<span class="pill '+cls+'">'+val+'</span>');openSec('wallet');checkSave();},200);}
 function pickWallet(el){
   var name=el.dataset.name;
-  var ic=el.dataset.logo ? '<img src="'+el.dataset.logo+'">' : (el.dataset.emoji||'');
+  var ic = el.dataset.logo ? '<img src="'+el.dataset.logo+'">'
+         : (el.dataset.badge ? '<span class="wbadge" style="background:'+el.dataset.badge+'">'+el.dataset.letter+'</span>' : '');
   st.wallet=name;selIn(el);
-  setTimeout(function(){markDone('wallet','vWallet','<span class="pill">'+ic+' '+name+'</span>');openSec('article');checkSave();},200);
+  setTimeout(function(){markDone('wallet','vWallet','<span class="pill">'+ic+name+'</span>');openSec('article');checkSave();},200);
 }
 function pickArticle(text,el){st.article=text;selIn(el);setTimeout(function(){markDone('article','vArticle','<span class="pill">'+text+'</span>');openSec('extra');checkSave();},200);}
-function pickDir(el){var sec=el.closest('.sec');sec.querySelectorAll('.chip').forEach(function(x){x.classList.remove('sel');});el.classList.add('sel');}
+function pickChip(el){var row=el.closest('.row');row.querySelectorAll('.chip').forEach(function(x){x.classList.remove('sel');});el.classList.add('sel');}
+function addCg(){
+  var inp=document.getElementById('cgInput'); var v=inp.value.trim(); if(!v)return;
+  var row=document.getElementById('cgRow');
+  row.querySelectorAll('.chip').forEach(function(x){x.classList.remove('sel');});
+  var s=document.createElement('span'); s.className='chip sel'; s.textContent='👤 '+v;
+  s.onclick=function(){pickChip(s);};
+  row.appendChild(s); inp.value='';
+}
 function checkSave(){
   var ok=st.amount&&st.wallet&&st.type&&st.article;
   document.getElementById('saveBtn').disabled=!ok;
   document.getElementById('note').textContent= ok ? 'Готово — можно сохранять' : 'Заполните сумму, тип, кошелёк и статью';
 }
 function doSave(){var b=document.getElementById('saveBtn');b.textContent='✓ Сохранено!';b.style.background='#34C759';}
+// дата по умолчанию — сегодня
+(function(){var d=new Date();var iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');var di=document.getElementById('dateInput');if(di)di.value=iso;})();
 renderAmt();
 </script>
 </body>
