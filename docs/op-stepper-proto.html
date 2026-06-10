@@ -30,8 +30,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Ro
 .sec.done .num{background:#34C759;color:#fff}
 .sec.act .num{background:#007AFF;color:#fff}
 .sectitle{font-size:14.5px;font-weight:600;color:#1C1C1E}
-.secval{margin-left:auto;font-size:13.5px;color:#8E8E93;font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sec.done .secval{color:#1C1C1E}
+.secval{margin-left:auto;display:flex;align-items:center;font-size:13px;color:#8E8E93;font-weight:600;white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:13px;font-weight:700;color:#fff;background:#1C1C1E;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.pill.green{background:#34C759}.pill.red{background:#FF3B30}.pill.blue{background:#0A84FF}
+.pill img{width:16px;height:16px;border-radius:4px;object-fit:contain;background:#fff}
+.wlogo{width:18px;height:18px;border-radius:5px;object-fit:contain;vertical-align:middle;margin-right:6px;background:#fff;box-shadow:0 0 0 1px #eee}
+.flabel{font-size:12px;color:#8E8E93;font-weight:600;margin:12px 0 6px}
+.finput{width:100%;border:1.5px solid #E5E5EA;border-radius:12px;padding:11px 12px;font-size:14px;background:#fff;color:#1C1C1E}
+.finput::placeholder{color:#C7C7CC}
 .secbody{max-height:0;overflow:hidden;transition:max-height .3s ease}
 .sec.act .secbody{max-height:620px}
 .inner{padding:0 14px 14px}
@@ -102,9 +108,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Ro
       <div class="sec" data-k="type">
         <div class="sechead" onclick="openSec('type')"><span class="num">2</span><span class="sectitle">Тип операции</span><span class="secval" id="vType"></span></div>
         <div class="secbody"><div class="inner"><div class="row" style="gap:8px">
-          <button class="tbtn" style="background:#FF3B30" onclick="pick('type','Расход',this)"><span class="ic">↓</span>Расход</button>
-          <button class="tbtn" style="background:#34C759" onclick="pick('type','Доход',this)"><span class="ic">↑</span>Доход</button>
-          <button class="tbtn" style="background:#0A84FF" onclick="pick('type','Перевод',this)"><span class="ic">⇄</span>Перевод</button>
+          <button class="tbtn" style="background:#FF3B30" onclick="pickType('Расход','red',this)"><span class="ic">↓</span>Расход</button>
+          <button class="tbtn" style="background:#34C759" onclick="pickType('Доход','green',this)"><span class="ic">↑</span>Доход</button>
+          <button class="tbtn" style="background:#0A84FF" onclick="pickType('Перевод','blue',this)"><span class="ic">⇄</span>Перевод</button>
         </div></div></div>
       </div>
 
@@ -112,11 +118,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Ro
       <div class="sec" data-k="wallet">
         <div class="sechead" onclick="openSec('wallet')"><span class="num">3</span><span class="sectitle">Кошелёк</span><span class="secval" id="vWallet"></span></div>
         <div class="secbody"><div class="inner"><div class="row">
-          <span class="chip" onclick="pick('wallet','🟢 Сбербанк',this)"><span class="opt">🟢 Сбербанк</span></span>
-          <span class="chip" onclick="pick('wallet','🟡 Т-Банк',this)">🟡 Т-Банк</span>
-          <span class="chip" onclick="pick('wallet','💵 Наличка',this)">💵 Наличка</span>
-          <span class="chip" onclick="pick('wallet','🟣 ЮMoney',this)">🟣 ЮMoney</span>
-          <span class="chip add" onclick="pick('wallet','＋ Новый',this)">＋ Создать новый</span>
+          <span class="chip" data-name="Сбербанк" data-logo="sber.png" onclick="pickWallet(this)"><img src="sber.png" class="wlogo">Сбербанк</span>
+          <span class="chip" data-name="Т-Банк" data-logo="tbank.png" onclick="pickWallet(this)"><img src="tbank.png" class="wlogo">Т-Банк</span>
+          <span class="chip" data-name="Наличка" data-emoji="💵" onclick="pickWallet(this)">💵 Наличка</span>
+          <span class="chip" data-name="ЮMoney" data-emoji="🟣" onclick="pickWallet(this)">🟣 ЮMoney</span>
+          <span class="chip add" data-name="Новый кошелёк" data-emoji="＋" onclick="pickWallet(this)">＋ Создать новый</span>
         </div></div></div>
       </div>
 
@@ -124,12 +130,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Ro
       <div class="sec" data-k="article">
         <div class="sechead" onclick="openSec('article')"><span class="num">4</span><span class="sectitle">Статья</span><span class="secval" id="vArticle"></span></div>
         <div class="secbody"><div class="inner"><div class="row">
-          <span class="chip" onclick="pick('article','🏠 Аренда',this)">🏠 Аренда</span>
-          <span class="chip" onclick="pick('article','📱 Связь',this)">📱 Связь</span>
-          <span class="chip" onclick="pick('article','🛒 Продукты',this)">🛒 Продукты</span>
-          <span class="chip" onclick="pick('article','📣 Реклама',this)">📣 Реклама</span>
-          <span class="chip" onclick="pick('article','🔧 Ремонт',this)">🔧 Ремонт</span>
-          <span class="chip add" onclick="pick('article','＋ Новая',this)">＋ Новая</span>
+          <span class="chip" onclick="pickArticle('🏠 Аренда',this)">🏠 Аренда</span>
+          <span class="chip" onclick="pickArticle('📱 Связь',this)">📱 Связь</span>
+          <span class="chip" onclick="pickArticle('🛒 Продукты',this)">🛒 Продукты</span>
+          <span class="chip" onclick="pickArticle('📣 Реклама',this)">📣 Реклама</span>
+          <span class="chip" onclick="pickArticle('🔧 Ремонт',this)">🔧 Ремонт</span>
+          <span class="chip add" onclick="pickArticle('＋ Новая',this)">＋ Новая</span>
         </div></div></div>
       </div>
 
@@ -137,12 +143,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Ro
       <div class="sec" data-k="extra">
         <div class="sechead" onclick="openSec('extra')"><span class="num">5</span><span class="sectitle">Доп. параметры</span><span class="secval">необязательно</span></div>
         <div class="secbody"><div class="inner">
-          <div style="font-size:12px;color:#8E8E93;margin-bottom:8px">Направление</div>
-          <div class="row" style="margin-bottom:12px">
-            <span class="chip" onclick="pick('dir','Бизнес',this)">🏢 Бизнес</span>
-            <span class="chip" onclick="pick('dir','Личное',this)">🏠 Личное</span>
+          <div class="flabel" style="margin-top:0">Направление</div>
+          <div class="row">
+            <span class="chip" onclick="pickDir(this)">🏢 Бизнес</span>
+            <span class="chip" onclick="pickDir(this)">🏠 Личное</span>
           </div>
-          <div style="font-size:12px;color:#8E8E93;margin-bottom:8px">Контрагент · Назначение · Дата — заполняются по желанию</div>
+          <div class="flabel">Контрагент</div>
+          <input class="finput" placeholder="Например: ООО «Ромашка»">
+          <div class="flabel">Назначение платежа</div>
+          <input class="finput" placeholder="Необязательно">
+          <div class="flabel">Дата</div>
+          <input class="finput" type="date">
         </div></div>
       </div>
 
@@ -178,12 +189,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Ro
 </div>
 
 <script>
-var st={amount:'',wallet:'',type:'',article:'',dir:''};
-var order=['amount','type','wallet','article','extra'];
+var st={amount:'',wallet:'',type:'',article:''};
 function fmt(s){return s?s.replace(/\B(?=(\d{3})+(?!\d))/g,' '):'0';}
-function openSec(k){
-  document.querySelectorAll('.sec').forEach(function(s){s.classList.toggle('act', s.dataset.k===k);});
-}
+function openSec(k){document.querySelectorAll('.sec').forEach(function(s){s.classList.toggle('act', s.dataset.k===k);});}
 function key(d){st.amount=(st.amount+d).replace(/^0+/,'').slice(0,9);renderAmt();}
 function del(){st.amount=st.amount.slice(0,-1);renderAmt();}
 function renderAmt(){
@@ -192,31 +200,28 @@ function renderAmt(){
   el.classList.toggle('empty',!st.amount);
   document.getElementById('amtNext').disabled=!st.amount;
 }
-function amountNext(){if(!st.amount)return;markDone('amount','vAmount',fmt(st.amount)+' ₽');openSec('type');}
-function pick(field,val,el){
-  st[field]=val;
-  var sec=el.closest('.sec');
-  sec.querySelectorAll('.chip,.tbtn').forEach(function(x){x.classList.remove('sel');});
-  el.classList.add('sel');
-  var map={wallet:['wallet','vWallet'],type:['type','vType'],article:['article','vArticle'],dir:['extra','vDir']};
-  if(field==='dir'){checkSave();return;}
-  var next={type:'wallet',wallet:'article',article:'extra'}[field];
-  setTimeout(function(){
-    markDone(map[field][0], map[field][1], val);
-    if(next)openSec(next);
-    checkSave();
-  },200);
-}
-function markDone(k,valId,val){
+function markDone(k,valId,pill){
   var sec=document.querySelector('.sec[data-k="'+k+'"]');
   sec.classList.add('done');
   sec.querySelector('.num').textContent='✓';
-  if(valId&&document.getElementById(valId))document.getElementById(valId).textContent=val;
+  if(valId&&document.getElementById(valId))document.getElementById(valId).innerHTML=pill;
 }
+function selIn(el){var sec=el.closest('.sec');sec.querySelectorAll('.chip,.tbtn').forEach(function(x){x.classList.remove('sel');});el.classList.add('sel');}
+
+function amountNext(){if(!st.amount)return;markDone('amount','vAmount','<span class="pill">'+fmt(st.amount)+' ₽</span>');openSec('type');}
+function pickType(val,cls,el){st.type=val;selIn(el);setTimeout(function(){markDone('type','vType','<span class="pill '+cls+'">'+val+'</span>');openSec('wallet');checkSave();},200);}
+function pickWallet(el){
+  var name=el.dataset.name;
+  var ic=el.dataset.logo ? '<img src="'+el.dataset.logo+'">' : (el.dataset.emoji||'');
+  st.wallet=name;selIn(el);
+  setTimeout(function(){markDone('wallet','vWallet','<span class="pill">'+ic+' '+name+'</span>');openSec('article');checkSave();},200);
+}
+function pickArticle(text,el){st.article=text;selIn(el);setTimeout(function(){markDone('article','vArticle','<span class="pill">'+text+'</span>');openSec('extra');checkSave();},200);}
+function pickDir(el){var sec=el.closest('.sec');sec.querySelectorAll('.chip').forEach(function(x){x.classList.remove('sel');});el.classList.add('sel');}
 function checkSave(){
   var ok=st.amount&&st.wallet&&st.type&&st.article;
   document.getElementById('saveBtn').disabled=!ok;
-  document.getElementById('note').textContent= ok ? 'Готово — можно сохранять' : 'Заполните сумму, кошелёк, тип и статью';
+  document.getElementById('note').textContent= ok ? 'Готово — можно сохранять' : 'Заполните сумму, тип, кошелёк и статью';
 }
 function doSave(){var b=document.getElementById('saveBtn');b.textContent='✓ Сохранено!';b.style.background='#34C759';}
 renderAmt();
