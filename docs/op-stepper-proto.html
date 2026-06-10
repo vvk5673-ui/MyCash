@@ -24,38 +24,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Ro
 .top .x{width:30px;height:30px;border-radius:50%;background:#F2F2F7;display:flex;align-items:center;justify-content:center;color:#8E8E93;font-size:15px}
 .body{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
 .sec{background:#fff;border:1.5px solid #ECECEC;border-radius:16px;overflow:hidden;transition:border-color .2s}
-.sec.act{border-color:#E0AE3C;box-shadow:0 6px 18px rgba(184,134,11,.12)}
+.sec.act{border-color:#007AFF;box-shadow:0 6px 18px rgba(0,122,255,.12)}
 .sechead{display:flex;align-items:center;gap:11px;padding:14px;cursor:pointer}
 .num{width:25px;height:25px;border-radius:50%;background:#F2F2F7;color:#8E8E93;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
 .sec.done .num{background:#34C759;color:#fff}
-.sec.act .num{background:linear-gradient(135deg,#E0AE3C,#B8860B);color:#fff}
+.sec.act .num{background:#007AFF;color:#fff}
 .sectitle{font-size:14.5px;font-weight:600;color:#1C1C1E}
 .secval{margin-left:auto;font-size:13.5px;color:#8E8E93;font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sec.done .secval{color:#1C1C1E}
-.secbody{max-height:0;overflow:hidden;transition:max-height .28s ease}
-.sec.act .secbody{max-height:420px}
+.secbody{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.sec.act .secbody{max-height:620px}
 .inner{padding:0 14px 14px}
 
-.amt{font-size:40px;font-weight:800;letter-spacing:-1.5px;text-align:center;color:#1C1C1E;margin:2px 0 10px}
-.amt .cur{color:#C7C7CC;font-size:26px}
+.amt{font-size:36px;font-weight:800;letter-spacing:-1.5px;text-align:center;color:#1C1C1E;margin:2px 0 8px}
+.amt .cur{color:#C7C7CC;font-size:24px}
 .amt.empty{color:#C7C7CC}
-.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.key{background:#F2F2F7;border:none;border-radius:13px;padding:14px 0;font-size:21px;font-weight:600;color:#1C1C1E;cursor:pointer}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.key{background:#F2F2F7;border:none;border-radius:12px;padding:11px 0;font-size:20px;font-weight:600;color:#1C1C1E;cursor:pointer}
 .key:active{background:#E5E5EA}
-.knext{grid-column:1 / -1;background:linear-gradient(135deg,#E0AE3C,#B8860B);color:#fff;font-size:16px;font-weight:700;padding:14px;border-radius:13px;border:none;cursor:pointer;margin-top:2px}
+.knext{grid-column:1 / -1;background:#007AFF;color:#fff;font-size:16px;font-weight:700;padding:14px;border-radius:13px;border:none;cursor:pointer;margin-top:2px}
 .knext:disabled{opacity:.4}
 
 .row{display:flex;flex-wrap:wrap;gap:8px}
 .chip{background:#F2F2F7;border:2px solid transparent;border-radius:14px;padding:11px 14px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
-.chip.sel{border-color:#E0AE3C;background:#FBF3E2;color:#9a6a00}
-.chip.add{background:#fff;border:2px dashed #E5D6B0;color:#B8860B}
+.chip.sel{border-color:#007AFF;background:#E8F1FF;color:#0061CC}
+.chip.add{background:#fff;border:2px dashed #BCD8FF;color:#007AFF}
 .tbtn{flex:1;min-width:90px;border:none;border-radius:14px;padding:13px 6px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;opacity:.55}
 .tbtn .ic{font-size:18px}
 .tbtn.sel{opacity:1}
 .opt{display:flex;align-items:center;gap:6px}
 
 .foot{background:#fff;padding:12px 16px;flex-shrink:0;box-shadow:0 -1px 0 #E5E5EA}
-.save{width:100%;border:none;border-radius:15px;padding:15px;font-size:16px;font-weight:700;color:#fff;background:linear-gradient(135deg,#E0AE3C,#B8860B);cursor:pointer;box-shadow:0 8px 20px rgba(184,134,11,.32)}
+.save{width:100%;border:none;border-radius:15px;padding:15px;font-size:16px;font-weight:700;color:#fff;background:#007AFF;cursor:pointer;box-shadow:0 8px 20px rgba(0,122,255,.32)}
 .save:disabled{opacity:.4;box-shadow:none}
 .note{font-size:11px;color:#8E8E93;text-align:center;margin-top:7px}
 
@@ -98,25 +98,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Ro
         </div></div>
       </div>
 
-      <!-- 2. Кошелёк -->
+      <!-- 2. Тип -->
+      <div class="sec" data-k="type">
+        <div class="sechead" onclick="openSec('type')"><span class="num">2</span><span class="sectitle">Тип операции</span><span class="secval" id="vType"></span></div>
+        <div class="secbody"><div class="inner"><div class="row" style="gap:8px">
+          <button class="tbtn" style="background:#FF3B30" onclick="pick('type','Расход',this)"><span class="ic">↓</span>Расход</button>
+          <button class="tbtn" style="background:#34C759" onclick="pick('type','Доход',this)"><span class="ic">↑</span>Доход</button>
+          <button class="tbtn" style="background:#0A84FF" onclick="pick('type','Перевод',this)"><span class="ic">⇄</span>Перевод</button>
+        </div></div></div>
+      </div>
+
+      <!-- 3. Кошелёк -->
       <div class="sec" data-k="wallet">
-        <div class="sechead" onclick="openSec('wallet')"><span class="num">2</span><span class="sectitle">Кошелёк</span><span class="secval" id="vWallet"></span></div>
+        <div class="sechead" onclick="openSec('wallet')"><span class="num">3</span><span class="sectitle">Кошелёк</span><span class="secval" id="vWallet"></span></div>
         <div class="secbody"><div class="inner"><div class="row">
           <span class="chip" onclick="pick('wallet','🟢 Сбербанк',this)"><span class="opt">🟢 Сбербанк</span></span>
           <span class="chip" onclick="pick('wallet','🟡 Т-Банк',this)">🟡 Т-Банк</span>
           <span class="chip" onclick="pick('wallet','💵 Наличка',this)">💵 Наличка</span>
           <span class="chip" onclick="pick('wallet','🟣 ЮMoney',this)">🟣 ЮMoney</span>
           <span class="chip add" onclick="pick('wallet','＋ Новый',this)">＋ Создать новый</span>
-        </div></div></div>
-      </div>
-
-      <!-- 3. Тип -->
-      <div class="sec" data-k="type">
-        <div class="sechead" onclick="openSec('type')"><span class="num">3</span><span class="sectitle">Тип операции</span><span class="secval" id="vType"></span></div>
-        <div class="secbody"><div class="inner"><div class="row" style="gap:8px">
-          <button class="tbtn" style="background:#FF3B30" onclick="pick('type','Расход',this)"><span class="ic">↓</span>Расход</button>
-          <button class="tbtn" style="background:#34C759" onclick="pick('type','Доход',this)"><span class="ic">↑</span>Доход</button>
-          <button class="tbtn" style="background:#0A84FF" onclick="pick('type','Перевод',this)"><span class="ic">⇄</span>Перевод</button>
         </div></div></div>
       </div>
 
@@ -179,7 +179,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Ro
 
 <script>
 var st={amount:'',wallet:'',type:'',article:'',dir:''};
-var order=['amount','wallet','type','article','extra'];
+var order=['amount','type','wallet','article','extra'];
 function fmt(s){return s?s.replace(/\B(?=(\d{3})+(?!\d))/g,' '):'0';}
 function openSec(k){
   document.querySelectorAll('.sec').forEach(function(s){s.classList.toggle('act', s.dataset.k===k);});
@@ -192,7 +192,7 @@ function renderAmt(){
   el.classList.toggle('empty',!st.amount);
   document.getElementById('amtNext').disabled=!st.amount;
 }
-function amountNext(){if(!st.amount)return;markDone('amount','vAmount',fmt(st.amount)+' ₽');openSec('wallet');}
+function amountNext(){if(!st.amount)return;markDone('amount','vAmount',fmt(st.amount)+' ₽');openSec('type');}
 function pick(field,val,el){
   st[field]=val;
   var sec=el.closest('.sec');
@@ -200,7 +200,7 @@ function pick(field,val,el){
   el.classList.add('sel');
   var map={wallet:['wallet','vWallet'],type:['type','vType'],article:['article','vArticle'],dir:['extra','vDir']};
   if(field==='dir'){checkSave();return;}
-  var next={wallet:'type',type:'article',article:'extra'}[field];
+  var next={type:'wallet',wallet:'article',article:'extra'}[field];
   setTimeout(function(){
     markDone(map[field][0], map[field][1], val);
     if(next)openSec(next);
