@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=122">
+    <link rel="stylesheet" href="style.css?v=123">
 </head>
 <body>
 
@@ -390,77 +390,100 @@
     <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
         <div class="modal" onclick="event.stopPropagation()">
             <div class="modal-handle"></div>
-            <!-- Крестик закрытия окна (в едином стиле с другими окнами приложения) -->
             <button onclick="closeModal()" aria-label="Закрыть" style="position:absolute;top:10px;right:12px;width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);z-index:2">✕</button>
+            <div class="qtitle-bar">Новая операция</div>
 
-            <!-- Поле суммы — крупное, с автофокусом -->
-            <div class="amount-input-wrap" onclick="focusAmount()">
-                <div class="amount-display placeholder" id="amountDisplay">0 <span class="amount-currency">₽</span></div>
-                <input class="amount-real-input" type="number" id="amountInput" inputmode="numeric"
-                       oninput="updateAmountDisplay()" autofocus>
-            </div>
-
-            <!-- Кошелёк-переключатель -->
-            <div class="wallet-switch" id="walletSwitch"></div>
-
-            <!-- Тип операции -->
-            <div class="type-switch">
-                <button class="type-btn expense-btn active" onclick="setType('expense')">Расход</button>
-                <button class="type-btn income-btn" onclick="setType('income')">Доход</button>
-                <button class="type-btn transfer-btn" onclick="setType('transfer')">Перевод</button>
-            </div>
-
-            <!-- Статьи ДДС (для расхода/дохода) — тап по статье = сохранение -->
-            <div id="articlesArea">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin:4px 4px 8px;gap:8px">
-                    <span class="form-label" id="quickArticlesLabel" style="margin:0">Статья — выберите</span>
-                    <button type="button" id="articleEditToggle" onclick="toggleArticleEditMode()" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;padding:2px 4px;white-space:nowrap;flex-shrink:0">✏️ Изменить</button>
-                </div>
-                <div class="quick-cats" id="quickArticles"></div>
-            </div>
-
-            <!-- Перевод между кошельками (для типа «Перевод») -->
-            <div id="transferArea" style="display:none">
-                <div class="form-group">
-                    <label class="form-label">Перевод между кошельками</label>
-                    <div class="transfer-row">
-                        <div class="transfer-wallet" id="transferFrom" onclick="cycleTransfer('from')"></div>
-                        <div class="transfer-arrow">→</div>
-                        <div class="transfer-wallet" id="transferTo" onclick="cycleTransfer('to')"></div>
+            <!-- Шаг 1: Сумма -->
+            <div class="qsec act" data-step="amount">
+                <div class="qsechead" onclick="stepOpen('amount')"><span class="qnum">1</span><span class="qlabel">Сумма</span><span class="qval" id="qvalAmount"></span></div>
+                <div class="qsecbody"><div class="qinner">
+                    <div class="amount-input-wrap" onclick="focusAmount()">
+                        <div class="amount-display placeholder" id="amountDisplay">0 <span class="amount-currency">₽</span></div>
+                        <input class="amount-real-input" type="number" id="amountInput" inputmode="numeric" oninput="updateAmountDisplay()" autofocus>
                     </div>
-                    <button class="more-btn" onclick="swapTransfer()" style="margin:0;padding:8px">↔ Поменять</button>
-                    <div style="font-size:11px;color:var(--text2);text-align:center;margin-top:4px">Нажмите на кошелёк, чтобы выбрать другой</div>
-                </div>
-                <button class="save-btn" onclick="saveTransfer()">Сохранить перевод</button>
+                    <button class="q-next" id="qAmountNext" onclick="amountStepNext()">Далее →</button>
+                </div></div>
             </div>
 
-            <!-- Доп. поля операции (направление, контрагент, назначение, дата) — всегда видимы в едином окне -->
-            <div class="extended-form" id="extendedForm">
-                <div class="form-group">
-                    <label class="form-label">Направление</label>
-                    <select class="form-input" id="directionSelect"></select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Контрагент</label>
-                    <div class="cg-row">
-                        <select class="form-input" id="contragentSelect"></select>
-                        <button type="button" class="cg-add-btn" title="Добавить контрагента"
-                                onclick="toggleContragentAdd('contragentAddRow','contragentAddName')">+</button>
+            <!-- Шаг 2: Тип операции -->
+            <div class="qsec" data-step="type">
+                <div class="qsechead" onclick="stepOpen('type')"><span class="qnum">2</span><span class="qlabel">Тип операции</span><span class="qval" id="qvalType"></span></div>
+                <div class="qsecbody"><div class="qinner">
+                    <div class="type-switch">
+                        <button class="type-btn expense-btn active" onclick="chooseType('expense')">Расход</button>
+                        <button class="type-btn income-btn" onclick="chooseType('income')">Доход</button>
+                        <button class="type-btn transfer-btn" onclick="chooseType('transfer')">Перевод</button>
                     </div>
-                    <div class="cg-add-row" id="contragentAddRow" style="display:none">
-                        <input class="form-input" type="text" id="contragentAddName" placeholder="Имя нового контрагента">
-                        <button type="button" class="cg-add-save"
-                                onclick="quickAddContragent('contragentSelect','contragentAddName','contragentAddRow')">Добавить</button>
+                </div></div>
+            </div>
+
+            <!-- Шаг 3: Кошелёк -->
+            <div class="qsec" data-step="wallet">
+                <div class="qsechead" onclick="stepOpen('wallet')"><span class="qnum">3</span><span class="qlabel">Кошелёк</span><span class="qval" id="qvalWallet"></span></div>
+                <div class="qsecbody"><div class="qinner">
+                    <div class="wallet-switch" id="walletSwitch"></div>
+                </div></div>
+            </div>
+
+            <!-- Шаг 4: Статья / Перевод -->
+            <div class="qsec" data-step="article">
+                <div class="qsechead" onclick="stepOpen('article')"><span class="qnum">4</span><span class="qlabel" id="qsecArticleLabel">Статья</span><span class="qval" id="qvalArticle"></span></div>
+                <div class="qsecbody"><div class="qinner">
+                    <div id="articlesArea">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 8px;gap:8px">
+                            <span class="form-label" id="quickArticlesLabel" style="margin:0">Статья — выберите</span>
+                            <button type="button" id="articleEditToggle" onclick="toggleArticleEditMode()" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;padding:2px 4px;white-space:nowrap;flex-shrink:0">✏️ Изменить</button>
+                        </div>
+                        <div class="quick-cats" id="quickArticles"></div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Назначение платежа</label>
-                    <input class="form-input" type="text" id="purposeInput" placeholder="Необязательно">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Дата</label>
-                    <input class="form-input" type="date" id="dateInput">
-                </div>
+                    <div id="transferArea" style="display:none">
+                        <div class="form-group">
+                            <label class="form-label">Перевод между кошельками</label>
+                            <div class="transfer-row">
+                                <div class="transfer-wallet" id="transferFrom" onclick="cycleTransfer('from')"></div>
+                                <div class="transfer-arrow">→</div>
+                                <div class="transfer-wallet" id="transferTo" onclick="cycleTransfer('to')"></div>
+                            </div>
+                            <button class="more-btn" onclick="swapTransfer()" style="margin:0;padding:8px">↔ Поменять</button>
+                            <div style="font-size:11px;color:var(--text2);text-align:center;margin-top:4px">Нажмите на кошелёк, чтобы выбрать другой</div>
+                        </div>
+                        <button class="save-btn" onclick="saveTransfer()">Сохранить перевод</button>
+                    </div>
+                </div></div>
+            </div>
+
+            <!-- Шаг 5: Доп. параметры (необязательно) -->
+            <div class="qsec" data-step="extra">
+                <div class="qsechead" onclick="stepOpen('extra')"><span class="qnum">5</span><span class="qlabel">Доп. параметры</span><span class="qval" style="color:var(--text2);font-weight:600;font-size:12px">необязательно</span></div>
+                <div class="qsecbody"><div class="qinner">
+                    <div class="extended-form" id="extendedForm">
+                        <div class="form-group">
+                            <label class="form-label">Направление</label>
+                            <select class="form-input" id="directionSelect"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Контрагент</label>
+                            <div class="cg-row">
+                                <select class="form-input" id="contragentSelect"></select>
+                                <button type="button" class="cg-add-btn" title="Добавить контрагента"
+                                        onclick="toggleContragentAdd('contragentAddRow','contragentAddName')">+</button>
+                            </div>
+                            <div class="cg-add-row" id="contragentAddRow" style="display:none">
+                                <input class="form-input" type="text" id="contragentAddName" placeholder="Имя нового контрагента">
+                                <button type="button" class="cg-add-save"
+                                        onclick="quickAddContragent('contragentSelect','contragentAddName','contragentAddRow')">Добавить</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Назначение платежа</label>
+                            <input class="form-input" type="text" id="purposeInput" placeholder="Необязательно">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Дата</label>
+                            <input class="form-input" type="date" id="dateInput">
+                        </div>
+                    </div>
+                </div></div>
             </div>
 
             <!-- Единая кнопка сохранения (расход/доход; у перевода — своя кнопка выше) -->
@@ -614,13 +637,13 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=122"></script>
+    <script src="api.js?v=123"></script>
     <!-- app.js разбит на 6 частей (общая область видимости, порядок подключения важен) -->
-    <script src="app-core.js?v=122"></script>
-    <script src="app-data.js?v=122"></script>
-    <script src="app-operations.js?v=122"></script>
-    <script src="app-dashboard.js?v=122"></script>
-    <script src="app-wallets.js?v=122"></script>
-    <script src="app-main.js?v=122"></script>
+    <script src="app-core.js?v=123"></script>
+    <script src="app-data.js?v=123"></script>
+    <script src="app-operations.js?v=123"></script>
+    <script src="app-dashboard.js?v=123"></script>
+    <script src="app-wallets.js?v=123"></script>
+    <script src="app-main.js?v=123"></script>
 </body>
 </html>

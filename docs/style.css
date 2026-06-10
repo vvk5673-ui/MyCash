@@ -801,6 +801,24 @@ body {
 
 /* === ДОП. ПОЛЯ ОПЕРАЦИИ (всегда видимы, без сворачивания) === */
 .extended-form { display: block; }
+
+/* === СТЕППЕР ОКНА ОПЕРАЦИИ (пошаговый ввод) === */
+.qtitle-bar { font-size: 18px; font-weight: 700; color: var(--text); margin: 2px 0 12px; padding-right: 36px; }
+.qsec { background: #fff; border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 10px; transition: border-color .2s, box-shadow .2s; }
+.qsec.act { border-color: var(--accent); box-shadow: 0 6px 18px rgba(0,122,255,0.10); }
+.qsechead { display: flex; align-items: center; gap: 11px; padding: 14px; cursor: pointer; }
+.qnum { width: 25px; height: 25px; border-radius: 50%; background: var(--bg); color: var(--text2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.qsec.act .qnum { background: var(--accent); color: #fff; }
+.qsec.done .qnum { background: var(--green); color: #fff; }
+.qlabel { font-size: 14.5px; font-weight: 600; color: var(--text); }
+.qval { margin-left: auto; display: flex; align-items: center; }
+.qpill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 13px; font-size: 12px; font-weight: 700; color: var(--text); background: var(--bg); white-space: nowrap; }
+.qpill.green { color: var(--green); } .qpill.red { color: var(--red); } .qpill.blue { color: var(--accent); }
+.qpill img, .qpill svg { width: 14px; height: 14px; border-radius: 3px; object-fit: contain; }
+.qsecbody { max-height: 0; overflow: hidden; transition: max-height .3s ease; }
+.qsec.act .qsecbody { max-height: 2200px; }
+.qinner { padding: 0 14px 14px; }
+.q-next { width: 100%; border: none; border-radius: 13px; padding: 14px; font-size: 16px; font-weight: 700; color: #fff; background: var(--accent); cursor: pointer; margin-top: 10px; }
 /* В окне операции доп-поля компактнее: меньше отступы между ними */
 .extended-form .form-group { margin-bottom: 6px; }
 

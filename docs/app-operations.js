@@ -195,6 +195,7 @@ function openModal() {
     renderWalletSwitch();
     populateFormSelects();
     setType('expense');
+    if (typeof stepReset === 'function') stepReset();   // степпер: открыть с 1-го шага
     setTimeout(() => document.getElementById('amountInput').focus(), 300);
 }
 
@@ -305,6 +306,10 @@ function selectWallet(w) {
     selectedWallet = w;
     haptic('light');
     renderWalletSwitch();
+    // степпер: показать кошелёк в пилюле и перейти к статье
+    var qv = document.getElementById('qvalWallet');
+    if (qv) qv.innerHTML = '<span class="qpill">' + walletIconHtml(w, 14) + esc(w) + '</span>';
+    if (typeof stepMarkDone === 'function') { stepMarkDone('wallet'); if (currentType !== 'transfer') stepOpen('article'); }
 }
 
 // === БЫСТРЫЕ КАТЕГОРИИ (2 тапа!) ===
@@ -414,6 +419,9 @@ function setType(type) {
         if (saveBtn) saveBtn.style.display = '';
         renderQuickArticles();
     }
+    // степпер: подпись 4-го шага — «Перевод» для перевода, иначе «Статья»
+    var artLabel = document.getElementById('qsecArticleLabel');
+    if (artLabel) artLabel.textContent = (type === 'transfer') ? 'Перевод' : 'Статья';
 }
 
 // Рендер статей ДДС (отфильтрованных по типу) — тап = выбор статьи (сохранение кнопкой внизу)
@@ -482,6 +490,11 @@ function selectArticle(articleId) {
     selectedArticleId = articleId;
     haptic('light');
     renderQuickArticles();   // перерисовать с подсветкой выбранной
+    // степпер: показать статью в пилюле и перейти к доп. параметрам
+    var art = getArticleById(articleId);
+    var qv = document.getElementById('qvalArticle');
+    if (qv && art) qv.innerHTML = '<span class="qpill">' + esc(art.name) + '</span>';
+    if (typeof stepMarkDone === 'function') { stepMarkDone('article'); stepOpen('extra'); }
 }
 
 // Сохранение операции (расход/доход) по кнопке «Сохранить» — с выбранной статьёй и полями «Подробнее»
@@ -652,4 +665,54 @@ function saveExtended() {
     // Отправка на сервер в фоне
     sendOperationToServer(newOp);
 }
+
+// === СТЕППЕР ОКНА ОПЕРАЦИИ (пошаговый ввод) ===
+// Открыть конкретный шаг (остальные свернуть)
+function stepOpen(k) {
+    document.querySelectorAll('#modalOverlay .qsec').forEach(function(s) {
+        s.classList.toggle('act', s.dataset.step === k);
+    });
+}
+// Отметить шаг выполненным (зелёная галочка)
+function stepMarkDone(k) {
+    const s = document.querySelector('#modalOverlay .qsec[data-step="' + k + '"]');
+    if (s) s.classList.add('done');
+}
+// Сброс степпера при открытии окна: всё не выполнено, открыт 1-й шаг (сумма)
+function stepReset() {
+    document.querySelectorAll('#modalOverlay .qsec').forEach(function(s) { s.classList.remove('done'); });
+    ['qvalAmount', 'qvalType', 'qvalWallet', 'qvalArticle'].forEach(function(id) {
+        const e = document.getElementById(id); if (e) e.innerHTML = '';
+    });
+    stepOpen('amount');
+}
+// Кнопка «Далее» на шаге суммы → переход к типу
+function amountStepNext() {
+    const v = validateAmount(document.getElementById('amountInput').value);
+    if (!v.ok) {
+        haptic('error');
+        const d = document.getElementById('amountDisplay');
+        d.style.color = 'var(--red)';
+        setTimeout(function() { d.style.color = ''; }, 500);
+        return;
+    }
+    const qv = document.getElementById('qvalAmount');
+    if (qv) qv.innerHTML = '<span class="qpill">' + fmt(v.amount) + ' ₽</span>';
+    stepMarkDone('amount');
+    stepOpen('type');
+}
+// Выбор типа (расход/доход/перевод) → пилюля цветом + переход дальше
+function chooseType(type) {
+    setType(type);
+    const label = { expense: 'Расход', income: 'Доход', transfer: 'Перевод' }[type];
+    const cls = { expense: 'red', income: 'green', transfer: 'blue' }[type];
+    const qv = document.getElementById('qvalType');
+    if (qv) qv.innerHTML = '<span class="qpill ' + cls + '">' + label + '</span>';
+    stepMarkDone('type');
+    stepOpen(type === 'transfer' ? 'article' : 'wallet');
+}
+// Экспорт для onclick в разметке
+window.stepOpen = stepOpen;
+window.amountStepNext = amountStepNext;
+window.chooseType = chooseType;
 
