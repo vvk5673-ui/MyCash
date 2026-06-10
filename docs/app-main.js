@@ -196,13 +196,12 @@ function skipOffer() {
 // === ЭКСПОРТ ФУНКЦИЙ В WINDOW (для onclick в HTML) ===
 Object.assign(window, {
     anCarEnd, anCarMove, anCarStart, applyCustomPeriod, clearAllData,
-    clearDemoData, closeEdit, closeModal, closeUpgrade,
-    closeWalletEdit, deleteFromEdit, deleteOperation, deleteWallet,
+    clearDemoData, closeModal, closeUpgrade,
+    closeWalletEdit, deleteOperation, deleteWallet,
     focusAmount, haptic, openCustomPeriod,
-    openEdit, openModal, openWalletEdit, openNewWallet, walletDragStart, quickSave, renderEditArticles,
-    renderEditWallets, selectEditWallet, selectEditArticle,
-    saveEdit, saveExtended, saveWalletEdit, selectExtCat,
-    selectWallet, selectWalletColor, setDashTab, setDashGroup, setEditType, setPeriod,
+    openEdit, openModal, openWalletEdit, openNewWallet, walletDragStart, quickSave,
+    saveExtended, saveWalletEdit, selectExtCat,
+    selectWallet, selectWalletColor, setDashTab, setDashGroup, setPeriod,
     setTableMode, setType, shareApp, showUpgrade, swapTransfer,
     switchTab, toggleCatOps, toggleExtended, updateAmountDisplay, acceptOffer, skipOffer,
     swipeStart, swipeMove, swipeEnd,

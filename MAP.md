@@ -63,6 +63,7 @@ DEPLOYMENT.md← инструкция по деплою
 | app-operations.js | МОДАЛКА БЫСТРЫЙ ВВОД | `openModal`, `populateFormSelects` |
 | app-operations.js | БЫСТРЫЕ КАТЕГОРИИ | плитки статей в окне операции |
 | app-operations.js | РАСШИРЕННАЯ ФОРМА | полная форма операции |
+| app-operations.js | СТЕППЕР + ЕДИНОЕ СОХРАНЕНИЕ | `stepOpen/stepReset/stepMarkDone`, `stepFillFromState`, `commitOp` (создать/обновить), `deleteFromModal` — окно `modalOverlay` работает в 2 режимах: новая / правка (флаг `editingOpId`) |
 | **app-dashboard.js** | ДАШБОРД | графики аналитики |
 | app-dashboard.js | ОЧИСТКА ДЕМО | clearDemo/clearAll |
 | app-dashboard.js | КАРУСЕЛЬ АНАЛИТИКИ | свайп страниц аналитики |
@@ -70,7 +71,7 @@ DEPLOYMENT.md← инструкция по деплою
 | **app-wallets.js** | РЕДАКТИРОВАНИЕ КОШЕЛЬКА | `openWalletEdit`, `openNewWallet`, `saveWalletEdit`, `populateWalletDirectionSelect` |
 | app-wallets.js | ПЕРЕТАСКИВАНИЕ СЧЕТОВ | drag `walletDragStart/Move/End` |
 | app-wallets.js | МОДАЛКА «ОБНОВИТЬ ТАРИФ» | `showUpgrade`, `closeUpgrade` |
-| app-wallets.js | РЕДАКТИРОВАНИЕ ОПЕРАЦИИ | правка операции |
+| app-wallets.js | РЕДАКТИРОВАНИЕ ОПЕРАЦИИ | `openEdit` — открывает окно-степпер в режиме правки (предзаполняет шаги). Старое окно `editOverlay` и его функции — в `<template>` (index.html) и `/* */` (тут), не используются |
 | **app-main.js** | УТИЛИТЫ / ТАБ-БАР | `esc`, `fmt`, переключение вкладок |
 | app-main.js | СТАРТ / ОФФЕР | первичная загрузка, `init()`, экран-оффер |
 | app-main.js | ЭКСПОРТ ФУНКЦИЙ В WINDOW | `Object.assign(window, {...})` для onclick |

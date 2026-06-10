@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=123">
+    <link rel="stylesheet" href="style.css?v=124">
 </head>
 <body>
 
@@ -391,7 +391,7 @@
         <div class="modal" onclick="event.stopPropagation()">
             <div class="modal-handle"></div>
             <button onclick="closeModal()" aria-label="Закрыть" style="position:absolute;top:10px;right:12px;width:32px;height:32px;border:none;background:var(--bg);border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);z-index:2">✕</button>
-            <div class="qtitle-bar">Новая операция</div>
+            <div class="qtitle-bar" id="modalTitle">Новая операция</div>
 
             <!-- Шаг 1: Сумма -->
             <div class="qsec act" data-step="amount">
@@ -488,10 +488,15 @@
 
             <!-- Единая кнопка сохранения (расход/доход; у перевода — своя кнопка выше) -->
             <button class="save-btn" id="quickSaveBtn" onclick="saveQuickOp()" style="margin-top:8px">💾 Сохранить</button>
+            <!-- Кнопка удаления — видна только в режиме правки -->
+            <button id="modalDeleteBtn" onclick="deleteFromModal()" style="display:none;margin-top:8px;width:100%;padding:12px;border:none;border-radius:12px;font-size:15px;font-weight:600;color:var(--red);background:rgba(255,59,48,0.08);cursor:pointer">🗑 Удалить операцию</button>
         </div>
     </div>
 
-    <!-- Модалка редактирования операции -->
+    <!-- Старая модалка редактирования УБРАНА: правка теперь открывается в том же
+         окне-степпере (modalOverlay) в режиме правки. Вёрстка сохранена в <template>
+         (не рендерится, не активна) на случай отката. -->
+    <template id="oldEditOverlay">
     <div class="edit-overlay" id="editOverlay" onclick="closeEdit(event)">
         <div class="edit-modal" onclick="event.stopPropagation()">
             <div class="modal-handle"></div>
@@ -557,6 +562,7 @@
             </div>
         </div>
     </div>
+    </template>
 
     <!-- Окно списка справочника (статьи / направления / контрагенты) -->
     <div class="edit-overlay" id="refListOverlay" onclick="closeRefList(event)">
@@ -637,13 +643,13 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=123"></script>
+    <script src="api.js?v=124"></script>
     <!-- app.js разбит на 6 частей (общая область видимости, порядок подключения важен) -->
-    <script src="app-core.js?v=123"></script>
-    <script src="app-data.js?v=123"></script>
-    <script src="app-operations.js?v=123"></script>
-    <script src="app-dashboard.js?v=123"></script>
-    <script src="app-wallets.js?v=123"></script>
-    <script src="app-main.js?v=123"></script>
+    <script src="app-core.js?v=124"></script>
+    <script src="app-data.js?v=124"></script>
+    <script src="app-operations.js?v=124"></script>
+    <script src="app-dashboard.js?v=124"></script>
+    <script src="app-wallets.js?v=124"></script>
+    <script src="app-main.js?v=124"></script>
 </body>
 </html>

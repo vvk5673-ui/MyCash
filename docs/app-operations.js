@@ -168,6 +168,12 @@ function deleteOperation(id) {
 // === МОДАЛЬНОЕ ОКНО: БЫСТРЫЙ ВВОД ===
 function openModal() {
     haptic('light');
+    // Режим создания новой операции (не правка)
+    editingOpId = null;
+    const mTitle = document.getElementById('modalTitle');
+    if (mTitle) mTitle.textContent = 'Новая операция';
+    const mDel = document.getElementById('modalDeleteBtn');
+    if (mDel) mDel.style.display = 'none';
     // Сбрасываем режим «Изменить» статьи и выбор статьи при каждом открытии
     articleEditMode = false;
     selectedArticleId = null;
@@ -272,6 +278,7 @@ async function quickAddContragent(selectId, inputId, rowId) {
 function closeModal(e) {
     if (e && e.target !== e.currentTarget) return;
     document.getElementById('modalOverlay').classList.remove('active');
+    editingOpId = null;   // выходим из режима правки
     // Окно закрыто — снимаем подтверждение выхода
     if (typeof setClosingGuard === 'function') setClosingGuard(false);
 }
@@ -507,12 +514,32 @@ function saveQuickOp() {
         setTimeout(function() { disp.style.color = ''; }, 500);
         return;
     }
-    // Статья обязательна — без неё подсказываем выбрать
+    const dateVal = document.getElementById('dateInput').value;
+    const dateStr = dateVal ? (dateVal + 'T12:00:00') : new Date().toISOString();
+
+    // Статья не выбрана
     if (!selectedArticleId) {
+        // В режиме правки старой/демо-операции без статьи — сохраняем сумму и доп.поля,
+        // статью и тип не меняем (берём из самой операции)
+        if (editingOpId) {
+            const cur = operations.find(function(o) { return String(o.id) === String(editingOpId); });
+            commitOp({
+                type: cur ? cur.type : currentType,
+                amount: v.amount,
+                category: cur ? (cur.category || '') : '',
+                article_id: cur ? (cur.article_id || null) : null,
+                direction_id: document.getElementById('directionSelect').value || null,
+                contragent_id: document.getElementById('contragentSelect').value || null,
+                purpose: document.getElementById('purposeInput').value || '',
+                wallet: selectedWallet,
+                date: dateStr
+            });
+            return;
+        }
+        // При создании статья обязательна — подсказываем выбрать
         haptic('error');
         const lbl = document.getElementById('quickArticlesLabel');
         if (lbl) {
-            const prev = lbl.textContent;
             lbl.textContent = 'Сначала выберите статью ↑';
             lbl.style.color = 'var(--red)';
             setTimeout(function() { lbl.style.color = ''; lbl.textContent = 'Статья — выберите'; }, 1600);
@@ -524,10 +551,8 @@ function saveQuickOp() {
     // Тип операции определяется группой статьи (Поступление=доход / Выбытие=расход)
     const grp = Refs.groups.find(function(g) { return g.id === article.group_id; });
     const type = (grp && grp.code === 'inflow') ? 'income' : 'expense';
-    const dateVal = document.getElementById('dateInput').value;
 
-    const op = {
-        id: Date.now(),
+    commitOp({
         type: type,
         amount: v.amount,
         category: article.name,               // для совместимости со старым отображением
@@ -536,17 +561,8 @@ function saveQuickOp() {
         contragent_id: document.getElementById('contragentSelect').value || null,
         purpose: document.getElementById('purposeInput').value || '',
         wallet: selectedWallet,
-        comment: '',
-        date: dateVal ? (dateVal + 'T12:00:00') : new Date().toISOString()
-    };
-    operations.unshift(op);
-    Storage.save('mycash_ops', operations);
-    Storage.save('mycash_last_wallet', selectedWallet);
-    haptic('success');
-    document.getElementById('modalOverlay').classList.remove('active');
-    if (typeof setClosingGuard === 'function') setClosingGuard(false);
-    renderAll();
-    sendOperationToServer(op);
+        date: dateStr
+    });
 }
 
 // Сохранение перевода между кошельками
@@ -555,8 +571,7 @@ function saveTransfer() {
     if (!v.ok) { haptic('error'); return; }
     if (transferFrom === transferTo) { haptic('error'); alert('Выберите разные кошельки для перевода'); return; }
     const dateVal = document.getElementById('dateInput').value;
-    const op = {
-        id: Date.now(),
+    commitOp({
         type: 'transfer',
         amount: v.amount,
         category: 'Перевод',
@@ -564,16 +579,8 @@ function saveTransfer() {
         walletFrom: transferFrom,
         walletTo: transferTo,
         purpose: document.getElementById('purposeInput').value || '',
-        comment: '',
         date: (dateVal || new Date().toISOString().split('T')[0]) + 'T12:00:00'
-    };
-    operations.unshift(op);
-    Storage.save('mycash_ops', operations);
-    haptic('success');
-    document.getElementById('modalOverlay').classList.remove('active');
-    if (typeof setClosingGuard === 'function') setClosingGuard(false);
-    renderAll();
-    sendOperationToServer(op);
+    });
 }
 
 // Общая функция рендера категорий (для ввода и редактирования)
@@ -711,8 +718,122 @@ function chooseType(type) {
     stepMarkDone('type');
     stepOpen(type === 'transfer' ? 'article' : 'wallet');
 }
+// Заполнить пилюли всех шагов из текущего состояния (для режима правки)
+function stepFillFromState() {
+    // Сумма
+    const v = validateAmount(document.getElementById('amountInput').value);
+    if (v.ok) {
+        const qa = document.getElementById('qvalAmount');
+        if (qa) qa.innerHTML = '<span class="qpill">' + fmt(v.amount) + ' ₽</span>';
+        stepMarkDone('amount');
+    }
+    // Тип
+    const label = { expense: 'Расход', income: 'Доход', transfer: 'Перевод' }[currentType];
+    const cls = { expense: 'red', income: 'green', transfer: 'blue' }[currentType];
+    const qt = document.getElementById('qvalType');
+    if (qt && label) qt.innerHTML = '<span class="qpill ' + cls + '">' + label + '</span>';
+    stepMarkDone('type');
+    if (currentType === 'transfer') {
+        // Перевод: шаг «Кошелёк» не используется, в шаге 4 показываем откуда→куда
+        const qar = document.getElementById('qvalArticle');
+        if (qar) qar.innerHTML = '<span class="qpill">' + esc(transferFrom) + ' → ' + esc(transferTo) + '</span>';
+        stepMarkDone('article');
+    } else {
+        // Кошелёк
+        if (selectedWallet) {
+            const qw = document.getElementById('qvalWallet');
+            if (qw) qw.innerHTML = '<span class="qpill">' + walletIconHtml(selectedWallet, 14) + esc(selectedWallet) + '</span>';
+            stepMarkDone('wallet');
+        }
+        // Статья
+        if (selectedArticleId) {
+            const art = getArticleById(selectedArticleId);
+            const qar = document.getElementById('qvalArticle');
+            if (qar && art) qar.innerHTML = '<span class="qpill">' + esc(art.name) + '</span>';
+            stepMarkDone('article');
+        }
+    }
+}
+
+// Закрыть окно операции и снять подтверждение выхода
+function closeModalReset() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    if (typeof setClosingGuard === 'function') setClosingGuard(false);
+}
+
+// Единое сохранение: создать новую операцию (editingOpId пуст) или обновить редактируемую
+function commitOp(fields) {
+    if (editingOpId) {
+        // === РЕЖИМ ПРАВКИ ===
+        const op = operations.find(function(o) { return String(o.id) === String(editingOpId); });
+        if (!op) { editingOpId = null; closeModalReset(); return; }
+        Object.assign(op, fields);
+        // Если операция перестала быть переводом — убрать поля откуда/куда
+        if (fields.type !== 'transfer') { delete op.walletFrom; delete op.walletTo; }
+        Storage.save('mycash_ops', operations);
+        if (selectedWallet) Storage.save('mycash_last_wallet', selectedWallet);
+        haptic('success');
+        closeModalReset();
+        renderAll();
+        // Обновление на сервере (если операция была синхронизирована)
+        if (op._server_id && typeof API !== 'undefined') {
+            const payload = {
+                type: op.type,
+                amount: op.amount,
+                category: op.category || null,
+                wallet_id: window.getWalletId ? window.getWalletId(op.wallet) : null,
+                comment: op.comment || '',
+                date: op.date,
+                article_id: op.article_id || null,
+                direction_id: op.direction_id || null,
+                contragent_id: op.contragent_id || null,
+                purpose: op.purpose || ''
+            };
+            API.updateOperation(op._server_id, payload).then(function() {
+                console.log('Операция обновлена на сервере:', op._server_id);
+            }).catch(function(e) {
+                console.warn('Не удалось обновить операцию на сервере:', e.message);
+            });
+        }
+        editingOpId = null;
+    } else {
+        // === РЕЖИМ СОЗДАНИЯ ===
+        const op = Object.assign({ id: Date.now(), comment: '' }, fields);
+        operations.unshift(op);
+        Storage.save('mycash_ops', operations);
+        if (selectedWallet) Storage.save('mycash_last_wallet', selectedWallet);
+        haptic('success');
+        closeModalReset();
+        renderAll();
+        sendOperationToServer(op);
+    }
+}
+
+// Удалить операцию из режима правки (кнопка «Удалить» в окне-степпере)
+function deleteFromModal() {
+    if (!editingOpId) return;
+    const id = editingOpId;
+    if (!confirm('Удалить эту операцию?')) return;
+    const op = operations.find(function(o) { return String(o.id) === String(id); });
+    const serverId = op && op._server_id;
+    operations = operations.filter(function(o) { return String(o.id) !== String(id); });
+    Storage.save('mycash_ops', operations);
+    haptic('success');
+    editingOpId = null;
+    closeModalReset();
+    renderAll();
+    if (serverId && typeof API !== 'undefined') {
+        API.deleteOperation(serverId).then(function() {
+            console.log('Операция удалена на сервере:', serverId);
+        }).catch(function(e) {
+            console.warn('Не удалось удалить операцию на сервере:', e.message);
+        });
+    }
+}
+
 // Экспорт для onclick в разметке
 window.stepOpen = stepOpen;
 window.amountStepNext = amountStepNext;
 window.chooseType = chooseType;
+window.deleteFromModal = deleteFromModal;
 

@@ -468,6 +468,8 @@ let editWallet = '';
 let editCategory = '';
 let editArticleId = null;
 
+// Открыть операцию на редактирование — в том же окне-степпере (modalOverlay), режим правки.
+// Все шаги предзаполняются из операции и сворачиваются в пилюли (тап по шагу — изменить).
 function openEdit(id) {
     // Не открывать если был свайп
     if (swiped) return;
@@ -475,30 +477,65 @@ function openEdit(id) {
     const op = operations.find(o => String(o.id) === String(id));
     if (!op) return;
 
-    editingOpId = id;
-    editType = op.type === 'transfer' ? 'expense' : op.type;
-    const walletNames = getActiveWallets().map(function(w) { return w.name; });
-    editWallet = (op.wallet && walletNames.indexOf(op.wallet) >= 0) ? op.wallet : (walletNames[0] || '');
-    editArticleId = op.article_id || null;
-    editCategory = op.category || '';
-
     haptic('light');
+    editingOpId = id;   // режим правки
 
-    // Заполняем форму
-    document.getElementById('editAmount').value = op.amount;
-    document.getElementById('editDate').value = op.date ? op.date.split('T')[0] : new Date().toISOString().split('T')[0];
-    document.getElementById('editPurpose').value = op.purpose || '';
+    // Открываем окно-степпер
+    document.getElementById('modalOverlay').classList.add('active');
+    if (typeof setClosingGuard === 'function') setClosingGuard(true);
 
-    // Списки направлений и контрагентов + текущие значения
-    populateEditSelects();
-    document.getElementById('editDirectionSelect').value = op.direction_id || '';
-    document.getElementById('editContragentSelect').value = op.contragent_id || '';
+    // Заголовок и кнопка удаления
+    const mTitle = document.getElementById('modalTitle');
+    if (mTitle) mTitle.textContent = 'Редактирование';
+    const mDel = document.getElementById('modalDeleteBtn');
+    if (mDel) mDel.style.display = '';
 
-    // Тип (рендерит статьи и кошельки)
-    setEditType(editType);
+    // Сброс режима «Изменить» статей
+    articleEditMode = false;
+    const aToggle = document.getElementById('articleEditToggle');
+    if (aToggle) aToggle.textContent = '✏️ Изменить';
+    const aLabel = document.getElementById('quickArticlesLabel');
+    if (aLabel) aLabel.textContent = 'Статья — выберите';
 
-    document.getElementById('editOverlay').classList.add('active');
+    // Сумма
+    document.getElementById('amountInput').value = op.amount;
+    updateAmountDisplay();
+
+    // Доп. поля (направление, контрагент, назначение, дата)
+    populateFormSelects();
+    document.getElementById('directionSelect').value = op.direction_id || '';
+    document.getElementById('contragentSelect').value = op.contragent_id || '';
+    document.getElementById('purposeInput').value = op.purpose || '';
+    document.getElementById('dateInput').value = op.date ? op.date.split('T')[0] : new Date().toISOString().split('T')[0];
+
+    // Кошельки
+    const walletNames = getActiveWallets().map(function(w) { return w.name; });
+    if (op.type === 'transfer') {
+        transferFrom = (op.walletFrom && walletNames.indexOf(op.walletFrom) >= 0) ? op.walletFrom : (walletNames[0] || '');
+        transferTo = (op.walletTo && walletNames.indexOf(op.walletTo) >= 0) ? op.walletTo : (walletNames[1] || walletNames[0] || '');
+    } else {
+        selectedWallet = (op.wallet && walletNames.indexOf(op.wallet) >= 0) ? op.wallet : (walletNames[0] || '');
+    }
+    renderWalletSwitch();
+
+    // Тип (рендерит статьи/перевод и показывает нужную область). Сбрасывает selectedArticleId — задаём ниже.
+    setType(op.type);
+
+    // Статья (после setType, т.к. он обнуляет выбор)
+    selectedArticleId = op.article_id || null;
+    if (op.type !== 'transfer') renderQuickArticles();
+
+    // Заполнить пилюли всех шагов и свернуть их
+    stepReset();            // снять галочки и очистить пилюли
+    stepFillFromState();    // проставить значения из операции
+    stepOpen('');           // свернуть все шаги (видны только пилюли)
+    // Для перевода держим шаг 4 открытым — там кнопка «Сохранить перевод»
+    if (op.type === 'transfer') stepOpen('article');
 }
+
+/* === СТАРОЕ ОКНО РЕДАКТИРОВАНИЯ (editOverlay) — БОЛЬШЕ НЕ ИСПОЛЬЗУЕТСЯ ===
+   Правка теперь идёт через окно-степпер (openEdit выше). Функции ниже оставлены
+   закомментированными на случай отката. Соответствующие имена убраны из экспорта в window.
 
 // Заполнить выпадающие списки в окне редактирования
 function populateEditSelects() {
@@ -637,4 +674,5 @@ function deleteFromEdit() {
     };
     if (confirm('Удалить эту операцию?')) doDelete();
 }
+=== КОНЕЦ СТАРОГО ОКНА РЕДАКТИРОВАНИЯ === */
 
