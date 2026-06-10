@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyCash — варианты иконки для Telegram</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;background:#F2F2F7;color:#1C1C1E;-webkit-font-smoothing:antialiased;padding:40px 18px 60px;min-height:100vh}
+.kicker{font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#B8860B;text-align:center;margin-bottom:10px}
+h1{font-size:26px;font-weight:800;letter-spacing:-.6px;text-align:center;margin-bottom:8px}
+h1 span{background:linear-gradient(90deg,#C99A2E,#3A3A46);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{font-size:14px;color:#8E8E93;text-align:center;max-width:520px;margin:0 auto 30px;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:18px;max-width:880px;margin:0 auto}
+.card{background:#fff;border:1px solid #E5E5EA;border-radius:20px;padding:18px 16px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+.disc{width:128px;height:128px;border-radius:50%;display:block;margin:0 auto 12px;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.cname{font-size:14px;font-weight:700;margin-bottom:2px}
+.cdesc{font-size:11.5px;color:#8E8E93;margin-bottom:12px;min-height:28px}
+.btn{font-size:13.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#E0AE3C,#B8860B);border:none;border-radius:12px;padding:11px 16px;cursor:pointer;width:100%}
+.btn:active{transform:translateY(1px)}
+.steps{margin:34px auto 0;max-width:560px;background:#fff;border:1px solid #E5E5EA;border-radius:16px;padding:20px 22px;font-size:14px;line-height:1.7;color:#3A3A46}
+.steps b{color:#1C1C1E}
+.steps code{background:#F2F2F7;padding:2px 7px;border-radius:6px;font-size:13px;color:#B8860B}
+</style>
+</head>
+<body>
+
+<div class="kicker">MyCash · Иконка бота</div>
+<h1>Варианты <span>иконки</span> для Telegram</h1>
+<p class="sub">Все варианты — на основе нового бренда (волна&nbsp;+&nbsp;₽, золото→графит), 512×512&nbsp;PX. Показаны кругом — именно так Telegram отображает аватар бота. Выбери понравившийся и нажми «Скачать».</p>
+
+<div class="grid" id="grid"></div>
+
+<div class="steps">
+  <b>Как поставить боту (1 минута):</b><br>
+  1. Скачай понравившийся вариант кнопкой.<br>
+  2. Открой в Telegram <b>@BotFather</b>.<br>
+  3. Отправь команду <code>/setuserpic</code>.<br>
+  4. Выбери своего бота <b>MyCash</b> из списка.<br>
+  5. Отправь скачанный файл как фото.<br>
+  Готово — новая иконка появится у бота.
+</div>
+
+<script>
+// Общие градиенты (вставляются в каждый SVG)
+var GRADS='<defs>'
+ +'<linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E0AE3C"/><stop offset="1" stop-color="#B8860B"/></linearGradient>'
+ +'<linearGradient id="goldBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E8B940"/><stop offset="1" stop-color="#B8860B"/></linearGradient>'
+ +'<linearGradient id="graphiteBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2A2A32"/><stop offset="1" stop-color="#121214"/></linearGradient>'
+ +'<linearGradient id="champagneBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F8EDD0"/><stop offset="1" stop-color="#E6CF95"/></linearGradient>'
+ +'<linearGradient id="nameGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C99A2E"/><stop offset="1" stop-color="#3A3A46"/></linearGradient>'
+ +'</defs>';
+
+// 16 палочек волны по кругу
+function bars(){
+  var s='';
+  for(var a=0;a<360;a+=22.5){
+    s+='<g transform="rotate('+a+' 50 50)"><rect x="47.2" y="12" width="5.6" height="13" rx="2.8"/></g>';
+  }
+  return s;
+}
+
+// Сборка SVG одного варианта
+function svgMarkup(v){
+  var inner='<rect width="100" height="100" fill="'+v.bg+'"/>';
+  if(v.ring) inner+='<circle cx="50" cy="50" r="45" fill="none" stroke="'+v.ring+'" stroke-width="1.5" opacity="0.85"/>';
+  if(v.wave!==false) inner+='<g fill="'+v.mark+'">'+bars()+'</g>';
+  var fs=v.big?66:38, fy=v.big?72:63;
+  inner+='<text x="50" y="'+fy+'" font-size="'+fs+'" font-weight="800" fill="'+v.mark+'" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif">&#8381;</text>';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">'+GRADS+inner+'</svg>';
+}
+
+var VARIANTS=[
+  {name:'Графит + золото',        desc:'Тёмный премиум, золотой знак',        bg:'url(#graphiteBg)', mark:'url(#goldGrad)'},
+  {name:'Белый + золото',         desc:'Светлый Apple-минимализм',            bg:'#FFFFFF',          mark:'url(#goldGrad)'},
+  {name:'Золото + белый знак',    desc:'Золотая заливка, белый знак',         bg:'url(#goldBg)',     mark:'#FFFFFF'},
+  {name:'Золото + графит знак',   desc:'Золотая заливка, тёмный знак',        bg:'url(#goldBg)',     mark:'#1C1C1E'},
+  {name:'Шампань + золото',       desc:'Мягкий светлый фон',                  bg:'url(#champagneBg)',mark:'url(#nameGrad)'},
+  {name:'Графит + кольцо',        desc:'Графит с золотым ободком',            bg:'url(#graphiteBg)', mark:'url(#goldGrad)', ring:'#C99A2E'},
+  {name:'Минимал ₽',             desc:'Крупный ₽ без волны, графит',         bg:'url(#graphiteBg)', mark:'url(#goldGrad)', wave:false, big:true},
+  {name:'Бренд-градиент',         desc:'Знак золото→графит, как в названии',  bg:'#FFFFFF',          mark:'url(#nameGrad)'}
+];
+
+// Построить карточки
+var grid=document.getElementById('grid');
+VARIANTS.forEach(function(v,i){
+  var card=document.createElement('div');
+  card.className='card';
+  card.innerHTML='<img class="disc" id="img'+i+'" alt="'+v.name+'">'
+    +'<div class="cname">'+v.name+'</div>'
+    +'<div class="cdesc">'+v.desc+'</div>'
+    +'<button class="btn" onclick="dl('+i+')">⬇ Скачать</button>';
+  grid.appendChild(card);
+});
+
+// Отрисовать все варианты в PNG
+VARIANTS.forEach(function(v,i){
+  var svg=svgMarkup(v);
+  var img=new Image();
+  var blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  img.onload=function(){
+    var cv=document.createElement('canvas'); cv.width=512; cv.height=512;
+    var ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,512,512);
+    URL.revokeObjectURL(url);
+    v._data=cv.toDataURL('image/png');
+    document.getElementById('img'+i).src=v._data;
+  };
+  img.src=url;
+});
+
+function dl(i){
+  var v=VARIANTS[i];
+  if(!v._data){ setTimeout(function(){dl(i)},200); return; }
+  var a=document.createElement('a');
+  a.href=v._data; a.download='mycash-icon-'+(i+1)+'.png';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+</script>
+</body>
+</html>
