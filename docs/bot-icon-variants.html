@@ -27,7 +27,7 @@ h1 span{background:linear-gradient(90deg,#C99A2E,#3A3A46);-webkit-background-cli
 
 <div class="kicker">MyCash · Иконка бота</div>
 <h1>Варианты <span>иконки</span> для Telegram</h1>
-<p class="sub">Все варианты — на основе нового бренда (волна&nbsp;+&nbsp;₽, золото→графит), 512×512&nbsp;PX. Показаны кругом — именно так Telegram отображает аватар бота. Выбери понравившийся и нажми «Скачать».</p>
+<p class="sub">Все варианты — на основе нового бренда (волна&nbsp;+&nbsp;₽, золото→графит) с синим акцентом на ₽ (цвет кнопки «Открыть» в Telegram), 512×512&nbsp;PX. Показаны кругом — именно так Telegram отображает аватар бота. Выбери понравившийся и нажми «Скачать».</p>
 
 <div class="grid" id="grid"></div>
 
@@ -49,6 +49,7 @@ var GRADS='<defs>'
  +'<linearGradient id="graphiteBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2A2A32"/><stop offset="1" stop-color="#121214"/></linearGradient>'
  +'<linearGradient id="champagneBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F8EDD0"/><stop offset="1" stop-color="#E6CF95"/></linearGradient>'
  +'<linearGradient id="nameGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C99A2E"/><stop offset="1" stop-color="#3A3A46"/></linearGradient>'
+ +'<linearGradient id="goldBlue" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E0AE3C"/><stop offset="1" stop-color="#2E9BF0"/></linearGradient>'
  +'</defs>';
 
 // 16 палочек волны по кругу
@@ -66,19 +67,22 @@ function svgMarkup(v){
   if(v.ring) inner+='<circle cx="50" cy="50" r="45" fill="none" stroke="'+v.ring+'" stroke-width="1.5" opacity="0.85"/>';
   if(v.wave!==false) inner+='<g fill="'+v.mark+'">'+bars()+'</g>';
   var fs=v.big?66:38, fy=v.big?72:63;
-  inner+='<text x="50" y="'+fy+'" font-size="'+fs+'" font-weight="800" fill="'+v.mark+'" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif">&#8381;</text>';
+  var pColor=v.acc||v.mark;   // ₽ — синий акцент (цвет кнопки «Открыть» в Telegram)
+  inner+='<text x="50" y="'+fy+'" font-size="'+fs+'" font-weight="800" fill="'+pColor+'" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif">&#8381;</text>';
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">'+GRADS+inner+'</svg>';
 }
 
+// acc — цвет символа ₽ (синий акцент, как кнопка «Открыть» в Telegram)
+var BLUE='#2E9BF0';
 var VARIANTS=[
-  {name:'Графит + золото',        desc:'Тёмный премиум, золотой знак',        bg:'url(#graphiteBg)', mark:'url(#goldGrad)'},
-  {name:'Белый + золото',         desc:'Светлый Apple-минимализм',            bg:'#FFFFFF',          mark:'url(#goldGrad)'},
-  {name:'Золото + белый знак',    desc:'Золотая заливка, белый знак',         bg:'url(#goldBg)',     mark:'#FFFFFF'},
-  {name:'Золото + графит знак',   desc:'Золотая заливка, тёмный знак',        bg:'url(#goldBg)',     mark:'#1C1C1E'},
-  {name:'Шампань + золото',       desc:'Мягкий светлый фон',                  bg:'url(#champagneBg)',mark:'url(#nameGrad)'},
-  {name:'Графит + кольцо',        desc:'Графит с золотым ободком',            bg:'url(#graphiteBg)', mark:'url(#goldGrad)', ring:'#C99A2E'},
-  {name:'Минимал ₽',             desc:'Крупный ₽ без волны, графит',         bg:'url(#graphiteBg)', mark:'url(#goldGrad)', wave:false, big:true},
-  {name:'Бренд-градиент',         desc:'Знак золото→графит, как в названии',  bg:'#FFFFFF',          mark:'url(#nameGrad)'}
+  {name:'Графит + золото',        desc:'Тёмный премиум, синий ₽',             bg:'url(#graphiteBg)', mark:'url(#goldGrad)', acc:BLUE},
+  {name:'Белый + золото',         desc:'Светлый Apple, синий ₽',              bg:'#FFFFFF',          mark:'url(#goldGrad)', acc:BLUE},
+  {name:'Золото + белый знак',    desc:'Золотая заливка, синий ₽',            bg:'url(#goldBg)',     mark:'#FFFFFF',        acc:BLUE},
+  {name:'Золото + графит знак',   desc:'Золотая заливка, синий ₽',            bg:'url(#goldBg)',     mark:'#1C1C1E',        acc:BLUE},
+  {name:'Шампань + золото',       desc:'Мягкий светлый фон, синий ₽',         bg:'url(#champagneBg)',mark:'url(#nameGrad)', acc:BLUE},
+  {name:'Графит + кольцо',        desc:'Графит, золотой ободок, синий ₽',     bg:'url(#graphiteBg)', mark:'url(#goldGrad)', acc:BLUE, ring:'#C99A2E'},
+  {name:'Минимал ₽ золото→синий', desc:'Крупный ₽ с переходом в синий',       bg:'url(#graphiteBg)', mark:'url(#goldGrad)', acc:'url(#goldBlue)', wave:false, big:true},
+  {name:'Бренд-градиент',         desc:'Волна золото→графит, синий ₽',        bg:'#FFFFFF',          mark:'url(#nameGrad)', acc:BLUE}
 ];
 
 // Построить карточки
