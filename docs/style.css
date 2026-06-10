@@ -1050,14 +1050,13 @@ body {
 @keyframes splashIconPop { 0% { opacity: 0; transform: scale(0.4); } 70% { transform: scale(1.08); } 100% { opacity: 1; transform: scale(1); } }
 .splash-bars .sb { transform-box: fill-box; transform-origin: 50% 100%; animation: splashEq 1.15s ease-in-out infinite; }
 @keyframes splashEq { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
-.splash-name2 { font-size: 36px; font-weight: 800; letter-spacing: -1.4px; line-height: 1; background: linear-gradient(90deg,#C99A2E,#3A3A46); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.splash-name2 span { display: inline-block; opacity: 0; animation: splashLetterIn 0.55s cubic-bezier(0.3,1.1,0.4,1) forwards; }
-@keyframes splashLetterIn { 0% { opacity: 0; transform: translateY(16px); filter: blur(4px); } 100% { opacity: 1; transform: translateY(0); filter: blur(0); } }
+.splash-name2 { font-size: 36px; font-weight: 800; letter-spacing: -1.4px; line-height: 1; background: linear-gradient(90deg,#C99A2E,#3A3A46); -webkit-background-clip: text; background-clip: text; color: transparent; opacity: 0; animation: splashNameIn 0.6s cubic-bezier(0.3,1.1,0.4,1) 0.35s forwards; }
+@keyframes splashNameIn { 0% { opacity: 0; transform: translateY(14px); } 100% { opacity: 1; transform: translateY(0); } }
 /* Подпись заставки — в стиле шапки: две золотые строки (AI SERVICE / УЧЁТ ФИНАНСОВ) */
 .splash-sub { display: flex; flex-direction: column; align-items: center; gap: 3px; text-transform: uppercase; opacity: 0; animation: splashSpaceIn 0.9s ease 1s forwards; }
 @keyframes splashSpaceIn { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
-.splash-sub .l1 { font-size: 11px; font-weight: 700; letter-spacing: 0.22em; color: #B8860B; }
-.splash-sub .l2 { font-size: 9.5px; font-weight: 700; letter-spacing: 0.14em; color: #B8860B; }
+.splash-sub .l1 { font-size: 11px; font-weight: 700; letter-spacing: 0.22em; background: linear-gradient(90deg,#C99A2E,#3A3A46); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.splash-sub .l2 { font-size: 9.5px; font-weight: 700; letter-spacing: 0.14em; background: linear-gradient(90deg,#C99A2E,#3A3A46); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
 /* === ОТЧЁТ ДДС === */
 .dds-report-nav {
