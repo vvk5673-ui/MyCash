@@ -812,7 +812,8 @@ body {
 .qsec.done .qnum { background: var(--green); color: #fff; }
 .qlabel { font-size: 14.5px; font-weight: 600; color: var(--text); }
 .qval { margin-left: auto; display: flex; align-items: center; }
-.qpill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 13px; font-size: 12px; font-weight: 700; color: var(--text); background: var(--bg); white-space: nowrap; }
+/* Чип значения шага — в одном формате с датой операции (.op-date) на главном экране */
+.qpill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 7px; font-size: 12px; font-weight: 600; color: var(--text); background: var(--bg); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .qpill.green { color: var(--green); } .qpill.red { color: var(--red); } .qpill.blue { color: var(--accent); }
 .qpill img, .qpill svg { width: 14px; height: 14px; border-radius: 3px; object-fit: contain; }
 .qsecbody { max-height: 0; overflow: hidden; transition: max-height .3s ease; }
