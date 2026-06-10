@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyCash — цвет надписи в шапке</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;background:#0b0d12;color:#e7e9ee;-webkit-font-smoothing:antialiased;padding:48px 20px 80px}
+.head{max-width:760px;margin:0 auto 30px;text-align:center}
+.head .kicker{font-size:13px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#7c8499;margin-bottom:12px}
+.head h1{font-size:32px;font-weight:800;letter-spacing:-1px;margin-bottom:12px}
+.head h1 span{background:linear-gradient(90deg,#6c5ce7,#2bd9a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.head p{font-size:15px;color:#aab1c2;line-height:1.6;max-width:560px;margin:0 auto}
+
+.list{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.row{border:1px solid #1e2230;border-radius:18px;overflow:hidden;background:#13161f}
+.bar{font-size:12px;font-weight:600;color:#9aa2b4;padding:10px 16px;border-top:1px solid #1e2230;display:flex;justify-content:space-between}
+.bar b{color:#cdd3e0}
+.tag{font-size:11px;color:#8a93a8;background:#161a26;border-radius:20px;padding:2px 9px}
+
+/* имитация реальной шапки приложения (светлая) */
+.hdr{background:#fff;display:flex;align-items:center;justify-content:space-between;padding:14px 20px}
+.hi{font-size:16px;font-weight:700;color:#1C1C1E}
+.dt{font-size:12px;color:#8E8E93;margin-top:2px}
+.logo{display:flex;flex-direction:column;align-items:center;gap:2px}
+.logo svg{display:block}
+.nm{font-size:13px;font-weight:800;letter-spacing:-.3px;line-height:1}
+svg{overflow:visible}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">MyCash · Цвет надписи</div>
+  <h1>Цвет <span>MyCash</span> в шапке</h1>
+  <p>Одна и та же шапка приложения, меняется только цвет надписи MyCash. Выбери, какой нравится — поставлю в приложение.</p>
+</div>
+
+<div class="list" id="list"></div>
+
+<div style="max-width:640px;margin:34px auto 0;text-align:center;color:#7c8499;font-size:14px;line-height:1.6">
+  Напиши номер — например <b style="color:#cdd3e0">«вариант 1»</b>. Поставлю выбранный цвет в шапку приложения.
+</div>
+
+<script>
+// иконка-волна (как в приложении), цвет градиента бренда
+function icon(id){
+  var bars='';
+  for(var a=0;a<360;a+=30){bars+='<g transform="rotate('+a+' 50 50)"><rect x="47" y="13" width="6" height="13" rx="3"/></g>';}
+  return '<svg width="28" height="28" viewBox="0 0 100 100">'
+    +'<defs><linearGradient id="'+id+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6c5ce7"/><stop offset="1" stop-color="#2bd9a0"/></linearGradient></defs>'
+    +'<g fill="url(#'+id+')">'+bars+'</g>'
+    +'<text x="50" y="63" font-size="38" font-weight="800" fill="url(#'+id+')" text-anchor="middle" font-family="Segoe UI,sans-serif">&#8381;</text>'
+    +'</svg>';
+}
+
+var variants=[
+  {name:'Градиент индиго → мята', tag:'в цвет логотипа', css:'background:linear-gradient(90deg,#6c5ce7,#2bd9a0);-webkit-background-clip:text;background-clip:text;color:transparent'},
+  {name:'Индиго', tag:'#6C5CE7', css:'color:#6c5ce7'},
+  {name:'Глубокая бирюза', tag:'#0D9488', css:'color:#0d9488'},
+  {name:'Графитово-синий', tag:'#334155 — мягче чёрного', css:'color:#334155'},
+  {name:'Сине-серый (slate)', tag:'#475569', css:'color:#475569'},
+  {name:'Тёмно-фиолетовый', tag:'#4C3B9E', css:'color:#4c3b9e'},
+  {name:'Градиент фиолет → синий', tag:'насыщенный', css:'background:linear-gradient(90deg,#5b4bdb,#2b8fd9);-webkit-background-clip:text;background-clip:text;color:transparent'}
+];
+
+var html='';
+variants.forEach(function(v,i){
+  html+='<div class="row">'
+    +'<div class="hdr">'
+      +'<div><div class="hi">Здравствуйте, Виктор! 👋</div><div class="dt">Среда, 10 июня 2026 г.</div></div>'
+      +'<div class="logo">'+icon('g'+i)+'<span class="nm" style="'+v.css+'">MyCash</span></div>'
+    +'</div>'
+    +'<div class="bar"><span><b>'+(i+1)+'. '+v.name+'</b></span><span class="tag">'+v.tag+'</span></div>'
+  +'</div>';
+});
+document.getElementById('list').innerHTML=html;
+</script>
+</body>
+</html>
