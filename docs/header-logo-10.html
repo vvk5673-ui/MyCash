@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyCash — логотипы и гаммы в шапке</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;background:#0b0d12;color:#e7e9ee;-webkit-font-smoothing:antialiased;padding:44px 20px 80px}
+.head{max-width:760px;margin:0 auto 26px;text-align:center}
+.head .kicker{font-size:13px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#7c8499;margin-bottom:12px}
+.head h1{font-size:30px;font-weight:800;letter-spacing:-1px;margin-bottom:12px}
+.head h1 span{background:linear-gradient(90deg,#6c5ce7,#3b82f6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.head p{font-size:15px;color:#aab1c2;line-height:1.6;max-width:560px;margin:0 auto}
+
+.sect{max-width:480px;margin:34px auto 14px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7c8499;display:flex;align-items:center;gap:10px}
+.sect::before,.sect::after{content:"";flex:1;height:1px;background:#1e2230}
+
+.list{max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.row{border:1px solid #1e2230;border-radius:16px;overflow:hidden;background:#13161f}
+.bar{font-size:12px;font-weight:600;color:#9aa2b4;padding:9px 15px;border-top:1px solid #1e2230;display:flex;justify-content:space-between;gap:10px}
+.bar b{color:#cdd3e0}
+.tag{font-size:10.5px;color:#8a93a8;background:#161a26;border-radius:20px;padding:2px 9px;white-space:nowrap}
+
+.hdr{background:#fff;display:flex;align-items:center;justify-content:space-between;padding:14px 20px}
+.left{min-width:0;overflow:hidden}
+.hi{font-size:16px;font-weight:700;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dt{font-size:12px;color:#94a3b8;margin-top:2px;white-space:nowrap}
+.logo{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.txt{display:flex;flex-direction:column;gap:2px;line-height:1}
+.nm{font-size:15px;font-weight:800;letter-spacing:-.4px;color:#1f2937}
+.ai{font-size:8.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#6c5ce7}
+svg{display:block;overflow:visible}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">MyCash · Логотипы и гаммы</div>
+  <h1>10 иконок + <span>новые гаммы</span></h1>
+  <p>Сверху — 10 новых иконок (форма) в шапке профиля. Снизу — цветовые гаммы. Можно выбрать отдельно форму и отдельно цвет.</p>
+</div>
+
+<div class="sect">Блок 1 · Форма иконки</div>
+<div class="list" id="icons"></div>
+
+<div class="sect">Блок 2 · Цветовая гамма</div>
+<div class="list" id="palettes"></div>
+
+<div style="max-width:480px;margin:32px auto 0;text-align:center;color:#7c8499;font-size:14px;line-height:1.6">
+  Напиши так: <b style="color:#cdd3e0">«иконка 3 + гамма Б»</b> (форма из блока 1, цвет из блока 2). Соберу финальный логотип и поставлю в шапку.
+</div>
+
+<script>
+function S(id,c1,c2,inner){
+  return '<svg width="30" height="30" viewBox="0 0 100 100"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+c1+'"/><stop offset="1" stop-color="'+c2+'"/></linearGradient></defs>'+inner.replace(/GID/g,id)+'</svg>';
+}
+var ICONFN=[
+  function(id,c1,c2){return S(id,c1,c2,'<rect x="12" y="12" width="76" height="76" rx="20" fill="url(#GID)"/><text x="50" y="68" font-size="50" font-weight="800" fill="#fff" text-anchor="middle" font-family="Segoe UI,sans-serif">&#8381;</text>');},
+  function(id,c1,c2){return S(id,c1,c2,'<rect x="12" y="12" width="76" height="76" rx="20" fill="url(#GID)"/><path d="M30,70 L30,34 L50,56 L70,34 L70,70" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>');},
+  function(id,c1,c2){return S(id,c1,c2,'<text x="44" y="70" font-size="56" font-weight="800" fill="url(#GID)" text-anchor="middle" font-family="Segoe UI,sans-serif">&#8381;</text><path d="M80,16 L84,28 L96,32 L84,36 L80,48 L76,36 L64,32 L76,28 Z" fill="url(#GID)"/>');},
+  function(id,c1,c2){return S(id,c1,c2,'<path d="M50,10 C74,10 90,26 90,50 C90,74 74,90 50,90 C26,90 10,74 10,50 C10,26 26,10 50,10 Z" fill="url(#GID)"/><text x="50" y="67" font-size="44" font-weight="800" fill="#fff" text-anchor="middle" font-family="Segoe UI,sans-serif">&#8381;</text>');},
+  function(id,c1,c2){return S(id,c1,c2,'<path d="M24,18 H76 a14,14 0 0 1 14,14 V58 a14,14 0 0 1 -14,14 H48 L34,86 V72 H24 a14,14 0 0 1 -14,-14 V32 a14,14 0 0 1 14,-14 Z" fill="url(#GID)"/><text x="50" y="58" font-size="36" font-weight="800" fill="#fff" text-anchor="middle" font-family="Segoe UI,sans-serif">&#8381;</text>');},
+  function(id,c1,c2){return S(id,c1,c2,'<circle cx="50" cy="50" r="38" fill="none" stroke="url(#GID)" stroke-width="9"/><text x="50" y="67" font-size="46" font-weight="800" fill="url(#GID)" text-anchor="middle" font-family="Segoe UI,sans-serif">&#8381;</text>');},
+  function(id,c1,c2){return S(id,c1,c2,'<g fill="url(#GID)"><rect x="16" y="56" width="13" height="28" rx="4"/><rect x="35" y="44" width="13" height="40" rx="4"/><rect x="54" y="30" width="13" height="54" rx="4"/><rect x="73" y="16" width="13" height="68" rx="4"/></g>');},
+  function(id,c1,c2){return S(id,c1,c2,'<g fill="none" stroke="url(#GID)" stroke-width="8" stroke-linecap="round"><path d="M30,60 a28,28 0 0 1 40,0"/><path d="M18,48 a45,45 0 0 1 64,0"/></g><circle cx="50" cy="74" r="8" fill="url(#GID)"/>');},
+  function(id,c1,c2){return S(id,c1,c2,'<g stroke="url(#GID)" stroke-width="5"><line x1="50" y1="50" x2="24" y2="26"/><line x1="50" y1="50" x2="80" y2="30"/><line x1="50" y1="50" x2="62" y2="80"/></g><g fill="url(#GID)"><circle cx="50" cy="50" r="12"/><circle cx="24" cy="26" r="7"/><circle cx="80" cy="30" r="7"/><circle cx="62" cy="80" r="7"/></g>');},
+  function(id,c1,c2){var b='';for(var a=0;a<360;a+=30){b+='<g transform="rotate('+a+' 50 50)"><rect x="47" y="13" width="6" height="13" rx="3"/></g>';}return S(id,c1,c2,'<g fill="url(#GID)">'+b+'</g><text x="50" y="63" font-size="38" font-weight="800" fill="url(#GID)" text-anchor="middle" font-family="Segoe UI,sans-serif">&#8381;</text>');}
+];
+var INAMES=[['₽ в квадрате','бейдж'],['Монограмма M','классика'],['Искра + ₽','AI-акцент'],['Капля-орб','мягкая'],['Чат-пузырёк','AI-ассистент'],['Кольцо + ₽','минимал'],['Столбики роста','аналитика'],['Сигнал-дуги','сонар/голос'],['Нейро-узел','нейросеть'],['Круговая волна','текущая']];
+
+function hdrRow(num,label,tag,iconSvg,nmCss,aiColor){
+  return '<div class="row"><div class="hdr">'
+    +'<div class="left"><div class="hi">Здравствуйте, Виктор! 👋</div><div class="dt">Среда, 10 июня 2026 г.</div></div>'
+    +'<div class="logo">'+iconSvg+'<div class="txt"><span class="nm" style="'+(nmCss||'')+'">MyCash</span><span class="ai" style="color:'+aiColor+'">AI Service</span></div></div>'
+    +'</div><div class="bar"><span><b>'+num+'. '+label+'</b></span><span class="tag">'+tag+'</span></div></div>';
+}
+
+// Блок 1 — формы (единая гамма индиго→синий)
+var IC='#6c5ce7', ICB='#3b82f6';
+var h1='';
+ICONFN.forEach(function(fn,i){ h1+=hdrRow((i+1),INAMES[i][0],INAMES[i][1],fn('ic'+i,IC,ICB),'color:#1f2937','#6c5ce7'); });
+document.getElementById('icons').innerHTML=h1;
+
+// Блок 2 — гаммы (на иконке «кольцо + ₽», MyCash в цвет гаммы)
+var PAL=[
+  ['А','Индиго → синий','#6c5ce7','#3b82f6'],
+  ['Б','Индиго → фиолет','#6366f1','#a855f7'],
+  ['В','Фиолет → розовый','#7c3aed','#ec4899'],
+  ['Г','Синий → циан','#2563eb','#06b6d4'],
+  ['Д','Изумруд → бирюза','#10b981','#06b6d4'],
+  ['Е','Закат: оранж → розовый','#f97316','#ec4899'],
+  ['Ж','Тёмно-синий → индиго','#1e3a8a','#6366f1'],
+  ['З','Премиум: графит → золото','#334155','#d4a017']
+];
+var ringIcon=ICONFN[5];
+function gradCss(c1,c2){return 'background:linear-gradient(90deg,'+c1+','+c2+');-webkit-background-clip:text;background-clip:text;color:transparent';}
+var h2='';
+PAL.forEach(function(p,i){
+  h2+=hdrRow(p[0],p[1],'',ringIcon('pal'+i,p[2],p[3]),gradCss(p[2],p[3]),p[2]);
+});
+document.getElementById('palettes').innerHTML=h2;
+</script>
+</body>
+</html>
