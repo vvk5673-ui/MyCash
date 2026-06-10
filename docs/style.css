@@ -1031,12 +1031,12 @@ body {
 @keyframes splashIconPop { 0% { opacity: 0; transform: scale(0.4); } 70% { transform: scale(1.08); } 100% { opacity: 1; transform: scale(1); } }
 .splash-bars .sb { transform-box: fill-box; transform-origin: 50% 100%; animation: splashEq 1.15s ease-in-out infinite; }
 @keyframes splashEq { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
-.splash-name2 { font-size: 36px; font-weight: 800; letter-spacing: -1.4px; line-height: 1; color: var(--text, #14182a); }
+.splash-name2 { font-size: 36px; font-weight: 800; letter-spacing: -1.4px; line-height: 1; background: linear-gradient(90deg,#C99A2E,#3A3A46); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .splash-name2 span { display: inline-block; opacity: 0; animation: splashLetterIn 0.55s cubic-bezier(0.3,1.1,0.4,1) forwards; }
 @keyframes splashLetterIn { 0% { opacity: 0; transform: translateY(16px); filter: blur(4px); } 100% { opacity: 1; transform: translateY(0); filter: blur(0); } }
 .splash-sub { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #9aa2b4; opacity: 0; animation: splashSpaceIn 0.9s ease 1s forwards; }
 @keyframes splashSpaceIn { 0% { opacity: 0; letter-spacing: 0.6em; } 100% { opacity: 1; letter-spacing: 0.2em; } }
-.splash-sub .g { background: linear-gradient(90deg, #7d6cf0, #2bd9a0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.splash-sub .g { background: linear-gradient(90deg, #E0AE3C, #B8860B); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .splash-sub .sep { margin: 0 5px; color: #c2c8d2; }
 
 /* === ОТЧЁТ ДДС === */
