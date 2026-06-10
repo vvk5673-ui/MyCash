@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyCash — варианты шапки</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,sans-serif;background:#0b0d12;color:#e7e9ee;-webkit-font-smoothing:antialiased;padding:44px 20px 80px}
+.head{max-width:760px;margin:0 auto 30px;text-align:center}
+.head .kicker{font-size:13px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#7c8499;margin-bottom:12px}
+.head h1{font-size:30px;font-weight:800;letter-spacing:-1px;margin-bottom:12px}
+.head h1 span{background:linear-gradient(90deg,#6c5ce7,#2bd9a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.head p{font-size:15px;color:#aab1c2;line-height:1.6;max-width:560px;margin:0 auto}
+
+.list{max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.row{border:1px solid #1e2230;border-radius:16px;overflow:hidden;background:#13161f}
+.bar{font-size:12px;font-weight:600;color:#9aa2b4;padding:9px 15px;border-top:1px solid #1e2230;display:flex;justify-content:space-between;gap:10px}
+.bar b{color:#cdd3e0}
+.tag{font-size:10.5px;color:#8a93a8;background:#161a26;border-radius:20px;padding:2px 9px;white-space:nowrap}
+
+/* === ТОЧНАЯ ИМИТАЦИЯ ШАПКИ ПРИЛОЖЕНИЯ === */
+.hdr{background:#fff;display:flex;align-items:center;justify-content:space-between;padding:14px 20px}
+.left{min-width:0;overflow:hidden}
+.hi{font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dt{font-size:12px;color:#94a3b8;margin-top:2px;white-space:nowrap}
+.logo-h{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.logo-v{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0}
+.nm-h{font-size:15px;font-weight:800;letter-spacing:-.4px;line-height:1;white-space:nowrap}
+.nm-v{font-size:13px;font-weight:800;letter-spacing:-.3px;line-height:1;white-space:nowrap}
+svg{display:block;overflow:visible}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">MyCash · Варианты шапки</div>
+  <h1>Шапка — <span>6 вариантов</span></h1>
+  <p>Все в точном размере шапки приложения. Меняются выравнивание, цвет приветствия и гамма логотипа. Выбери, что нравится.</p>
+</div>
+
+<div class="list" id="list"></div>
+
+<div style="max-width:480px;margin:32px auto 0;text-align:center;color:#7c8499;font-size:14px;line-height:1.6">
+  Напиши номер — например <b style="color:#cdd3e0">«вариант 3»</b>. Можно и комбинировать: «выравнивание из 1, гамма из 4».
+</div>
+
+<script>
+function icon(id,c1,c2,size){
+  size=size||28;
+  var bars='';
+  for(var a=0;a<360;a+=30){bars+='<g transform="rotate('+a+' 50 50)"><rect x="47" y="13" width="6" height="13" rx="3"/></g>';}
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 100 100">'
+    +'<defs><linearGradient id="'+id+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+c1+'"/><stop offset="1" stop-color="'+c2+'"/></linearGradient></defs>'
+    +'<g fill="url(#'+id+')">'+bars+'</g>'
+    +'<text x="50" y="63" font-size="38" font-weight="800" fill="url(#'+id+')" text-anchor="middle" font-family="Segoe UI,sans-serif">&#8381;</text>'
+    +'</svg>';
+}
+function grad(c1,c2){return 'background:linear-gradient(90deg,'+c1+','+c2+');-webkit-background-clip:text;background-clip:text;color:transparent';}
+
+var V=[
+  {t:'Горизонт. · индиго→мята', tag:'лого на одной линии', greet:'#334155', layout:'h', c1:'#6c5ce7', c2:'#2bd9a0', nm:grad('#6c5ce7','#2bd9a0')},
+  {t:'Горизонт. · моно-индиго', tag:'одна гамма, спокойно', greet:'#334155', layout:'h', c1:'#6c5ce7', c2:'#7b6ef0', nm:'color:#6c5ce7'},
+  {t:'Горизонт. · индиго→синий', tag:'холодная гамма', greet:'#1f2937', layout:'h', c1:'#6c5ce7', c2:'#3b82f6', nm:grad('#6c5ce7','#3b82f6')},
+  {t:'Горизонт. · фиолетовая', tag:'тёплый фиолет', greet:'#2e2a45', layout:'h', c1:'#7c3aed', c2:'#a855f7', nm:grad('#7c3aed','#a855f7')},
+  {t:'Иконка над MyCash · индиго→мята', tag:'вертикально', greet:'#334155', layout:'v', c1:'#6c5ce7', c2:'#2bd9a0', nm:grad('#6c5ce7','#2bd9a0')},
+  {t:'Только иконка · без надписи', tag:'минимализм, идеально ровно', greet:'#334155', layout:'icon', c1:'#6c5ce7', c2:'#2bd9a0', nm:''}
+];
+
+var html='';
+V.forEach(function(v,i){
+  var logo;
+  if(v.layout==='h'){logo='<div class="logo-h">'+icon('g'+i,v.c1,v.c2,26)+'<span class="nm-h" style="'+v.nm+'">MyCash</span></div>';}
+  else if(v.layout==='v'){logo='<div class="logo-v">'+icon('g'+i,v.c1,v.c2,28)+'<span class="nm-v" style="'+v.nm+'">MyCash</span></div>';}
+  else {logo='<div class="logo-h">'+icon('g'+i,v.c1,v.c2,34)+'</div>';}
+  html+='<div class="row">'
+    +'<div class="hdr">'
+      +'<div class="left"><div class="hi" style="color:'+v.greet+'">Здравствуйте, Виктор! 👋</div><div class="dt">Среда, 10 июня 2026 г.</div></div>'
+      +logo
+    +'</div>'
+    +'<div class="bar"><span><b>'+(i+1)+'. '+v.t+'</b></span><span class="tag">'+v.tag+'</span></div>'
+  +'</div>';
+});
+document.getElementById('list').innerHTML=html;
+</script>
+</body>
+</html>
