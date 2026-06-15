@@ -77,19 +77,22 @@
 
 ---
 
-## Таблица конкурентов: цены и ссылки на приложения/ресурсы
+## Таблица конкурентов: цены, веб, приложения, Telegram
 
-| Сервис | Цена/мес | Сайт | App Store (iOS) | Android | Доп. ресурсы |
-|--------|----------|------|-----------------|---------|--------------|
-| ПланФакт | от 1 650 ₽ | planfact.io | id1635100721 | Google Play `io.planfact.app`, RuStore | Startpack, help.planfact.io |
-| Финолог | от 2 490 ₽ | finolog.ru | id1299798325 | Google Play `one.stride.finolog` | Startpack |
-| ФинТабло | от 1 790 ₽ | fintablo.ru | веб-приложение (адаптив) | веб-приложение | Startpack, a2is.ru |
-| Adesk | от 1 990 ₽ | adesk.ru | id1564056817 | Google Play `ru.adesk` | Telegram-бот, бот в Max |
-| Seeneco | от 8 325 ₽ | seeneco.com | id1240824096 («Финансы бизнеса») | веб | vksaas обзор |
-| Аспро.Финансы | от 1 790 ₽ | aspro.finance | веб | веб | — |
-| КУБ24 | от 1 200 ₽ | kub-24.ru | веб | веб | Startpack |
-| 1С:БизнесСтарт | от 500 ₽ | 1cbiz.ru | есть | Google Play / RuStore `com.e1c.mcstartbusiness` | v8.1c.ru |
-| Дзен-мани | ~0–1 490 ₽/год | zenmoney.ru | id905934786 | Google Play / RuStore `ru.zenmoney.androidsub` | support.zenmoney.ru |
-| Google Таблицы | 0 ₽ | sheets.google.com | есть | есть | шаблоны ДДС |
+| Сервис | Цена/мес | Веб-версия | iOS | Android | Telegram | Доп. ресурсы |
+|--------|----------|-----------|-----|---------|----------|--------------|
+| ПланФакт | от 1 650 ₽ | planfact.io | App Store id1635100721 | Google Play `io.planfact.app` + RuStore | Бот (добавляет платежи) | Startpack |
+| Финолог | от 2 490 ₽ | finolog.ru | App Store id1299798325 | Google Play `one.stride.finolog` | Бот | Startpack |
+| ФинТабло | от 1 790 ₽ | fintablo.ru | — (только веб) | — (только веб) | — | Startpack, a2is.ru |
+| Adesk | от 1 990 ₽ | adesk.ru | App Store id1564056817 | Google Play `ru.adesk` | Бот (+ бот в Max) | — |
+| Seeneco | от 8 325 ₽ | seeneco.com | App Store id1240824096 | — (только веб) | Бот (уведомления) | vksaas |
+| Аспро.Финансы | от 1 790 ₽ | aspro.finance | — (только веб) | — (только веб) | — | — |
+| КУБ24 | от 1 200 ₽ | kub-24.ru | — (только веб) | — (только веб) | Бот (приход/расход по кассам) | Startpack |
+| 1С:БизнесСтарт | от 500 ₽ | 1cbiz.ru | есть | Google Play / RuStore `com.e1c.mcstartbusiness` | — | v8.1c.ru |
+| Дзен-мани | ~0–1 490 ₽/год | web.zenmoney.ru | App Store id905934786 | Google Play / RuStore `ru.zenmoney.androidsub` | @zenmoneybot | support.zenmoney.ru |
+| Google Таблицы | 0 ₽ | sheets.google.com | есть | есть | — | шаблоны ДДС |
+| **MyCash (мы)** | — | vvk5673-ui.github.io/MyCash | — | — | **полноценный Mini App** (t.me/mycash1233333_bot/app) | @mycash1233333_bot |
+
+**Ключевой вывод:** у конкурентов в Telegram только БОТЫ (быстрый ввод/уведомления), полноценного Telegram Mini App — нет ни у кого. Есть только у MyCash. Сильное преимущество: ЦА живёт в Telegram, конкуренты гонят её в App Store/браузер.
 
 Полные кликабельные ссылки — в чате сессии от 15.06.2026.
