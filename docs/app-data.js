@@ -470,6 +470,7 @@ function setDashTab(tab) {
 
 function filterByPeriod(ops) {
     const now = new Date();
+    if (currentPeriod === 'all') return ops;   // «Всё» — без фильтра по дате
     return ops.filter(op => {
         const d = new Date(op.date);
         if (currentPeriod === 'custom' && customFrom && customTo) {

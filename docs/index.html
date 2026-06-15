@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>MyCash</title>
     <link rel="icon" href="logo.png" type="image/png">
-    <link rel="stylesheet" href="style.css?v=130">
+    <link rel="stylesheet" href="style.css?v=131">
 </head>
 <body>
 
@@ -113,9 +113,10 @@
                     <!-- Страница 1: период + категории -->
                     <div class="analytics-page">
                         <div class="period-tabs">
+                            <button class="period-btn active" onclick="setPeriod('all', this)">Всё</button>
                             <button class="period-btn" onclick="setPeriod('today', this)">Сегодня</button>
                             <button class="period-btn" onclick="setPeriod('week', this)">Неделя</button>
-                            <button class="period-btn active" onclick="setPeriod('month', this)">Месяц</button>
+                            <button class="period-btn" onclick="setPeriod('month', this)">Месяц</button>
                             <button class="period-btn" onclick="setPeriod('year', this)">Год</button>
                             <button class="period-btn" onclick="openCustomPeriod()" style="border-style:dashed;flex:none;padding:6px 12px">📅</button>
                         </div>
@@ -644,13 +645,13 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
-    <script src="api.js?v=130"></script>
+    <script src="api.js?v=131"></script>
     <!-- app.js разбит на 6 частей (общая область видимости, порядок подключения важен) -->
-    <script src="app-core.js?v=130"></script>
-    <script src="app-data.js?v=130"></script>
-    <script src="app-operations.js?v=130"></script>
-    <script src="app-dashboard.js?v=130"></script>
-    <script src="app-wallets.js?v=130"></script>
-    <script src="app-main.js?v=130"></script>
+    <script src="app-core.js?v=131"></script>
+    <script src="app-data.js?v=131"></script>
+    <script src="app-operations.js?v=131"></script>
+    <script src="app-dashboard.js?v=131"></script>
+    <script src="app-wallets.js?v=131"></script>
+    <script src="app-main.js?v=131"></script>
 </body>
 </html>
